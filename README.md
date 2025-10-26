@@ -4,8 +4,10 @@
 
 ## 🔧 Project Overview
 
-The Book Manager project is structured into three main layers:
+The Book Manager project structure:
 - **Data Layer**
+- **Business Layer**
+- **Testing Layer**
 - **Service Layer**
 - **Presentation Layer**
 
@@ -19,15 +21,16 @@ The application is intended for users who want to monitor their reading progress
 
 After logging in, each user has access to the following features:
 
-- Possesses a username, password, and email
+- Possesses a username, password and email
 - Can search for books by:
   - Genre
   - Author
   - Publisher
   - Other criteria
-- Publishes comments on books
+- Publishes comments on books or rates them
 - Enters and marks the number of pages read
-- Adds books to a wish list
+- Adds books to a wishlist
+- Submits requests for new books to be added to the system
 
 ### 2. Administrator
 
@@ -56,18 +59,9 @@ Statistics are displayed for the following time periods:
 
 ---
 
-## 🛠️ Project Structure
-
-- `data-layer/` – handles data management and storage
-- `service-layer/` – contains business logic and request handling
-- `presentation-layer/` – manages the user interface
-
----
-
 ## 🖥 Technologies
 
 - MAUI
 - EntityFramework
-- Jira
 
 ---
