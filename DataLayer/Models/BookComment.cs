@@ -14,6 +14,7 @@
         public User User { get; set; }
 
         [Length(1, 500)]
+        [Required]
         public string Comment { get; set; }
 
         [Range(1, int.MaxValue)]

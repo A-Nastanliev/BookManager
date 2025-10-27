@@ -10,9 +10,12 @@
         [Required]
         public string ISBN { get; set; }
         [Required]
+        [MaxLength(200)]
         public string Title { get; set; }
         [Required]
         public string Cover { get; set; }
+
+        [Range(1, int.MaxValue)]
         public int TotalPages { get; set; }
 
         [MaxLength(500)]
@@ -22,11 +25,11 @@
         [ForeignKey(nameof(AuthorId))]
         public Author Author { get; set; }
 
-        public int GenreId { get; set; }
+        public int? GenreId { get; set; }
         [ForeignKey(nameof(GenreId))]
         public Genre Genre { get; set; }
 
-        public int PublisherId { get; set; }
+        public int? PublisherId { get; set; }
         [ForeignKey(nameof(PublisherId))]
         public Publisher Publisher { get; set; }
 

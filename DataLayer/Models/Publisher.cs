@@ -7,15 +7,16 @@
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(200)]
+        [MaxLength(70)]
         public string Name { get; set; }
 
         [MaxLength(500)]
         public string Description { get; set; }
 
         [MaxLength(200)]
-        public string Website { get; set; } 
-
+        public string Website { get; set; }
+        
+        [Required] 
         public List<Book> Books { get; set; } = new();
     }
 }

@@ -10,7 +10,7 @@
         public DateTime Date { get; set; }
 
         public int UserBookId { get; set; }
-        [ForeignKey(nameof(UserBook))]
+        [ForeignKey(nameof(UserBookId))]
         public UserBook UserBook { get; set; }
     }
 }

@@ -8,11 +8,11 @@
         public UserBookStatus Status { get; set; }
 
         public int UserId { get; set; }
-        [ForeignKey(nameof(User))]
+        [ForeignKey(nameof(UserId))]
         public User User { get; set; }
 
         public int BookId { get; set; }
-        [ForeignKey(nameof(Book))]
+        [ForeignKey(nameof(BookId))]
         public Book Book { get; set; }
 
         [Required]

@@ -5,8 +5,8 @@
         [Key]
         public int Id { get; set; }
 
-        public int SenderId { get; set; }
-        [ForeignKey(nameof(Sender))]
+        public int? SenderId { get; set; }
+        [ForeignKey(nameof(SenderId))]
         public User Sender { get; set; }
 
         [Required]
@@ -14,6 +14,7 @@
         public string ISBN { get; set; }
 
         [Required]
+        [MaxLength(200)]
         public string Title { get; set; }
 
         [Required]
