@@ -17,6 +17,9 @@
         [Required]
         public string PasswordHash { get; set; }
 
+        [Required]
+        public string ProfilePicture { get; set; } 
+
         public UserRole Role { get; set; }
 
         [Required]
