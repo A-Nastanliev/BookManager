@@ -1,10 +1,10 @@
 ﻿namespace BusinessLayer
 {
-	public abstract class GenericDbService<T, K> : IRepository<T, K> where T : class
+	public abstract class AbstractRepository<T, K> : IRepository<T, K> where T : class
 	{
         protected readonly BookManagerContext _context;
 
-		public GenericDbService(BookManagerContext context)
+		public AbstractRepository(BookManagerContext context)
         {
             _context = context;
         }

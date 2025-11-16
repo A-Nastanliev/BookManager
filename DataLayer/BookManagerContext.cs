@@ -111,6 +111,8 @@
                       .WithMany(u => u.BookRatings)
                       .HasForeignKey(r => r.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
+                entity.HasIndex(r => new { r.UserId, r.BookId })
+                      .IsUnique();
             });
 
 
