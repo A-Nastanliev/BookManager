@@ -6,7 +6,7 @@ namespace ServiceLayer.Controllers
 {
     public abstract class BaseController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
+        protected readonly IConfiguration _configuration;
 
         public BaseController(IConfiguration configuration)
         {

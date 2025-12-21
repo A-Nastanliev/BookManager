@@ -13,6 +13,15 @@ namespace BusinessLayer.Repositories
 				.FirstOrDefaultAsync(g => g.Id == id);
 		}
 
+        public override async Task<List<User>> ReadNextAsync(int count, int loaded)
+        {
+            return await _context.Users
+               .OrderByDescending(u => u.CreatedAt)
+               .Skip(loaded)
+               .Take(count)
+               .ToListAsync();
+        }
+
         public async Task<bool> SignUpAsync(User user)
         {
             user.PasswordHash = HashPassword(user.PasswordHash);
@@ -30,6 +39,30 @@ namespace BusinessLayer.Repositories
                 return null;
 
             return await ReadAsync(user.Id);
+        }
+
+        public async override Task<bool> UpdateAsync(User obj)
+        {
+            var user = await _context.Users.FindAsync(obj.Id);
+            if (user == null)
+                return false;
+
+            user.Username = obj.Username;
+            user.EmailAddress = obj.EmailAddress;
+            user.ProfilePicture = obj.ProfilePicture;
+
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> UpdatePasswordAsync(int userToUpdateId, string newPassword, string currentPassword)
+        {
+            var user = await _context.Users.FindAsync(userToUpdateId);
+            if (user == null || !VerifyPassword(currentPassword, user.PasswordHash))
+                return false;
+
+            user.PasswordHash = HashPassword(newPassword);
+
+            return await _context.SaveChangesAsync() > 0;
         }
 
         private string HashPassword(string password)

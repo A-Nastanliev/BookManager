@@ -9,10 +9,10 @@
             _context = context;
         }
 
-        public virtual async Task CreateAsync(T obj)
+        public virtual async Task<bool> CreateAsync(T obj)
         {
             _context.Set<T>().Add(obj);
-            await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync()>0;
         }
 
         public virtual async Task<List<T>> ReadAllAsync()
@@ -25,7 +25,7 @@
             return await _context.Set<T>().FindAsync(id);
         }
 
-        public virtual async Task UpdateAsync(T obj)
+        public virtual async Task<bool> UpdateAsync(T obj)
         {
             var keyProperty = _context.Model.FindEntityType(typeof(T))
                                   .FindPrimaryKey()
@@ -38,18 +38,32 @@
 
             _context.Entry(existingEntity).CurrentValues.SetValues(obj);
 
-            await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync() >0;
         }
 
-        public virtual async Task DeleteAsync(K id)
+        public virtual async Task<bool> DeleteAsync(K id)
         {
             var entity = await ReadAsync(id);
             if (entity != null)
             {
                 _context.Set<T>().Remove(entity);
                 await _context.SaveChangesAsync();
+                return true;
             }
+            return false;
         }
 
+        public virtual async Task<List<T>> ReadNextAsync(int count, int loaded)
+        {
+            var entityType = _context.Model.FindEntityType(typeof(T));
+            var keyProperty = entityType.FindPrimaryKey().Properties.First();
+
+            return await _context.Set<T>()
+                .AsNoTracking()
+                .OrderBy(e => EF.Property<object>(e, keyProperty.Name))
+                .Skip(loaded)
+                .Take(count)
+                .ToListAsync();
+        }
     }
 }
