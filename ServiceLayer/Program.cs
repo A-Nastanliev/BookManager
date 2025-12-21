@@ -1,3 +1,4 @@
+using BusinessLayer.Repositories;
 using DataLayer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,17 @@ builder.Services.AddDbContext<BookManagerContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
 );
+builder.Services.AddScoped<AuthorRepository>();
+builder.Services.AddScoped<BookCommentRepository>();
+builder.Services.AddScoped<BookRatingRepository>();
+builder.Services.AddScoped<BookRepository>();
+builder.Services.AddScoped<BookRequestRepository>();
+builder.Services.AddScoped<GenreRepository>();
+builder.Services.AddScoped<PublisherRepository>();
+builder.Services.AddScoped<ReadingLogRepository>();
+builder.Services.AddScoped<UserBookRepository>();
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<UserRestrictionRepository>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var app = builder.Build();

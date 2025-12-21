@@ -20,6 +20,8 @@
         [Required]
         public string ProfilePicture { get; set; } 
 
+        public DateTime CreatedAt { get; set; }
+
         public UserRole Role { get; set; }
 
         [Required]

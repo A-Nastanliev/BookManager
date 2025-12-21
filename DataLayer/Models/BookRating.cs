@@ -1,10 +1,8 @@
 ﻿namespace DataLayer.Models
 {
+    [PrimaryKey(nameof(UserId), nameof(BookId))]
     public class BookRating
     {
-        [Key]
-        public int Id { get; set; }
-
         public int BookId { get; set; }
         [ForeignKey(nameof(BookId))]
         public Book Book { get; set; }
