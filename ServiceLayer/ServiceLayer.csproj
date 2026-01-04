@@ -16,9 +16,4 @@
     <ProjectReference Include="..\BusinessLayer\BusinessLayer.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Dto\User\" />
-    <Folder Include="Mappers\" />
-  </ItemGroup>
-
 </Project>

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ServiceLayer.Controllers
 {
-    [ApiController]
     [Route("api/reading")]
     public class ReadingController : BaseController
     {
@@ -12,9 +11,8 @@ namespace ServiceLayer.Controllers
         private readonly BookCommentRepository _bookCommentRepository;
         private readonly BookRatingRepository _bookRatingRepository;
         private readonly BookRequestRepository _bookRequestRepository;
-        public ReadingController(IConfiguration configuration, UserBookRepository userBookRepository, ReadingLogRepository readingLogRepository,
+        public ReadingController( UserBookRepository userBookRepository, ReadingLogRepository readingLogRepository,
             BookCommentRepository bookCommentRepository, BookRatingRepository bookRatingRepository, BookRequestRepository bookRequestRepository) 
-            : base(configuration)
         {
             _userBookRepository = userBookRepository;
             _readingLogRepository = readingLogRepository;
