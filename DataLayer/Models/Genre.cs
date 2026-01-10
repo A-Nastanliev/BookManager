@@ -15,5 +15,13 @@
 
         [Required]
         public List<Book> Books { get; set; } = new();
+
+        public Genre() { }
+
+        public Genre(string name, string description)
+        {
+            Name = name;
+            Description = description;
+        }
     }
 }

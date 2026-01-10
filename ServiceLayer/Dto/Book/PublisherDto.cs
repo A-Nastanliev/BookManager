@@ -1,7 +1,8 @@
-﻿namespace DataLayer.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ServiceLayer.Dto.Book
 {
-    [Index(nameof(Name), IsUnique = true)]
-    public class Publisher
+    public class PublisherDto
     {
         [Key]
         public int Id { get; set; }
@@ -16,13 +17,11 @@
         [MaxLength(200)]
         public string Website { get; set; }
 
-        [Required]
-        public List<Book> Books { get; set; } = new();
+        public PublisherDto() { }
 
-        public Publisher() { }
-
-        public Publisher(string name, string description, string website)
+        public PublisherDto(int id, string name, string description, string website)
         {
+            Id = id;
             Name = name;
             Description = description;
             Website = website;

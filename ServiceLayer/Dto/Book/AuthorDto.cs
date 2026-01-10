@@ -1,8 +1,9 @@
-﻿namespace DataLayer.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ServiceLayer.Dto.Book
 {
-    public class Author
+    public class AuthorDto
     {
-        [Key]
         public int Id { get; set; }
 
         [Required]
@@ -13,13 +14,11 @@
         public string Biography { get; set; }
         public DateTime? BirthDate { get; set; }
 
-        [Required]
-        public List<Book> Books { get; set; } = new();
+        public AuthorDto() { }
 
-        public Author() { }
-
-        public Author(string name, string biography, DateTime? birthDate)
+        public AuthorDto(int id, string name, string biography, DateTime? birthDate)
         {
+            Id = id;
             Name = name;
             Biography = biography;
             BirthDate = birthDate;

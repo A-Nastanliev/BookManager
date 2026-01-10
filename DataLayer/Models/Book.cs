@@ -6,7 +6,9 @@
         [Key]
         public int Id { get; set; }
 
-        [Length(13,13)]
+        public DateTime CreatedAt { get; set; }
+
+        [Length(13, 13)]
         [Required]
         public string ISBN { get; set; }
         [Required]
@@ -41,5 +43,29 @@
 
         [Required]
         public List<BookComment> Comments { get; set; } = new();
+
+        public Book() { }
+
+        public Book(string isbn, string title, string cover, int totalPages, string description, int authorId, int? genreId, int? publisherId)
+        {
+            ISBN = isbn;
+            Title = title;
+            Cover = cover;
+            TotalPages = totalPages;
+            Description = description;
+            AuthorId = authorId;
+            GenreId = genreId;
+            PublisherId = publisherId;
+        }
+
+        public Book(int id, string isbn, string title, string cover, int totalPages, string description)
+        {
+            Id = id;
+            ISBN = isbn;
+            Title = title;
+            Cover = cover;
+            TotalPages = totalPages;
+            Description = description;
+        }
     }
 }
