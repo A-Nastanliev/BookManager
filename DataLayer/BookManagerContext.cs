@@ -163,11 +163,11 @@
 
             modelBuilder.Entity<ReadingLog>(entity =>
             {
-                entity.HasOne(r => r.UserBook)
-                      .WithMany(ub => ub.ReadingLogs)
-                      .HasForeignKey(r => r.UserBookId)
-                      .OnDelete(DeleteBehavior.Cascade);
-            });
+				entity.HasOne(r => r.UserBook)
+	              .WithMany(ub => ub.ReadingLogs)
+	              .HasForeignKey(r => new { r.UserId, r.BookId })
+	              .OnDelete(DeleteBehavior.Cascade);
+			});
 
             modelBuilder.Entity<User>(entity =>
             {

@@ -7,7 +7,7 @@
 		Task<T> ReadAsync(K obj);
 		Task<List<T>> ReadNextAsync(int count, int loaded);
 		Task<bool> UpdateAsync(T OBJ);
-		Task<bool> DeleteAsync(K obj);
+		Task<bool> DeleteAsync(T obj);
 
 	}
 }
