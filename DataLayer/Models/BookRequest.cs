@@ -28,5 +28,28 @@
         public int? ActionedById { get; set; }
         [ForeignKey(nameof(ActionedById))]
         public User ActionedBy { get; set; }
-    }
+
+		public BookRequest(int? senderId, string isbn, string title, string requestDescription)
+		{
+			SenderId = senderId;
+			ISBN = isbn;
+			Title = title;
+			RequestDescription = requestDescription;
+		}
+
+		public BookRequest(int id, int? senderId, string isbn, string title, string requestDescription)
+		{
+			Id = id;
+			SenderId = senderId;
+			ISBN = isbn;
+			Title = title;
+			RequestDescription = requestDescription;
+		}
+
+		public BookRequest(int id, BookRequestStatus status)
+		{
+			Id = id;
+			Status = status;
+		}
+	}
 }
