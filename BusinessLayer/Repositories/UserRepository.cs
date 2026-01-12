@@ -49,6 +49,16 @@ namespace BusinessLayer.Repositories
 
             user.Username = obj.Username;
             user.EmailAddress = obj.EmailAddress;
+
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> UpdateProfilePictureAsync(User obj)
+        {
+            var user = await _context.Users.FindAsync(obj.Id);
+            if (user == null)
+                return false;
+
             user.ProfilePicture = obj.ProfilePicture;
 
             return await _context.SaveChangesAsync() > 0;

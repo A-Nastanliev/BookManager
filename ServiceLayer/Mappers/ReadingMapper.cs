@@ -16,15 +16,16 @@ namespace ServiceLayer.Mappers
 			return new ReadingLogDto(log.Id, log.StartingPage, log.EndingPage, log.Date);
 		}
 
-		public static BookRequestDto ToDto(this BookRequest bookRequest)
+		public static BookRequestDto ToDto(this BookRequest bookRequest, string baseUrl)
 		{
 			return new BookRequestDto(bookRequest.SenderId, bookRequest.ISBN, bookRequest.Title, bookRequest.RequestDescription, bookRequest.Id,
-				bookRequest.ActionedById, bookRequest.DateSent, bookRequest.DateActioned, bookRequest.Status, bookRequest.Sender?.ToDto(), bookRequest.ActionedBy?.ToDto());
+				bookRequest.ActionedById, bookRequest.DateSent, bookRequest.DateActioned, bookRequest.Status, 
+				bookRequest.Sender?.ToDto(baseUrl), bookRequest.ActionedBy?.ToDto(baseUrl));
 		}
 
-		public static BookRatingDto ToDto(this BookRating bookRating)
+		public static BookRatingDto ToDto(this BookRating bookRating, string baseUrl)
 		{
-			return new BookRatingDto(bookRating.BookId, bookRating?.Book.ToDto(), bookRating.UserId, bookRating?.User.ToDto(), bookRating.Rating);
+			return new BookRatingDto(bookRating.BookId, bookRating?.Book.ToDto(), bookRating.UserId, bookRating?.User.ToDto(baseUrl), bookRating.Rating);
 		}
 
 		public static BookCommentDto ToDto(this BookComment bookComment)

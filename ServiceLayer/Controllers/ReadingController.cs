@@ -17,14 +17,18 @@ namespace ServiceLayer.Controllers
 		private readonly BookCommentRepository _bookCommentRepository;
 		private readonly BookRatingRepository _bookRatingRepository;
 		private readonly BookRequestRepository _bookRequestRepository;
+
+		private readonly IConfiguration _configuration;
+
 		public ReadingController(UserBookRepository userBookRepository, ReadingLogRepository readingLogRepository,
-			BookCommentRepository bookCommentRepository, BookRatingRepository bookRatingRepository, BookRequestRepository bookRequestRepository)
+			BookCommentRepository bookCommentRepository, BookRatingRepository bookRatingRepository, BookRequestRepository bookRequestRepository, IConfiguration configuration)
 		{
 			_userBookRepository = userBookRepository;
 			_readingLogRepository = readingLogRepository;
 			_bookCommentRepository = bookCommentRepository;
 			_bookRatingRepository = bookRatingRepository;
 			_bookRequestRepository = bookRequestRepository;
+			_configuration = configuration;
 		}
 
 		[Authorize(Roles = "Admin")]
@@ -156,7 +160,8 @@ namespace ServiceLayer.Controllers
 			if (bookRequests == null)
 				return NotFound();
 
-			return Ok(bookRequests.Select(br => br.ToDto()));
+            var baseUrl = _configuration["App:BaseUrl"];
+            return Ok(bookRequests.Select(br => br.ToDto(baseUrl)));
 		}
 
 		[HttpGet("book-requests")]
@@ -166,8 +171,8 @@ namespace ServiceLayer.Controllers
 			List<BookRequest> bookRequests = await _bookRequestRepository.ReadNextAsync(dto.Count, dto.AlreadyLoaded);
 			if (bookRequests == null)
 				return NotFound();
-
-			return Ok(bookRequests.Select(br => br.ToDto()));
+            var baseUrl = _configuration["App:BaseUrl"];
+            return Ok(bookRequests.Select(br => br.ToDto(baseUrl)));
 		}
 
 		[HttpPut("book-requests/{id}/action")]
@@ -242,7 +247,8 @@ namespace ServiceLayer.Controllers
 			if (rating == null)
 				return NotFound();
 
-			return Ok(rating.ToDto());
+            var baseUrl = _configuration["App:BaseUrl"];
+            return Ok(rating.ToDto(baseUrl));
 		}
 
 		[HttpGet("books/{bookId}/ratings/summary")]

@@ -7,6 +7,7 @@ namespace ServiceLayer.Dto.User
 {
     public class UserDto
     {
+        public int Id { get; set; }
         [EmailAddress]
         public string EmailAddress { get; set; }
         [Required]
@@ -28,9 +29,10 @@ namespace ServiceLayer.Dto.User
             CurrentRestriction = restriction;
         }
 
-        public UserDto(string username, string pfp, RestrictionDto restriction)
+        public UserDto(string username, string pfp, int id, RestrictionDto restriction)
         {
             Username = username;
+            Id = id;
             ProfilePicture = pfp; ;
             CurrentRestriction = restriction;
         }

@@ -27,21 +27,45 @@ namespace ServiceLayer.Controllers
 
 		[AllowAnonymous]
 		[HttpPost("signup")]
-		public async Task<IActionResult> SignUp([FromBody] SignUpRequest req)
+		public async Task<IActionResult> SignUp([FromForm] SignUpRequest req)
 		{
-			var newUser = new User
-			{
-				Username = req.Username,
-				EmailAddress = req.EmailAddress,
-				PasswordHash = req.Password,
-				ProfilePicture = req.ProfilePicture,
-			};
+            string profilePicturePath = null;
 
-			var created = await _userRepository.SignUpAsync(newUser);
-			if (!created) return BadRequest("Could not create user.");
+            if (req.ProfilePicture != null && req.ProfilePicture.Length > 0)
+            {
+                var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+                if (!allowedTypes.Contains(req.ProfilePicture.ContentType))
+                    return BadRequest("Invalid image type.");
 
-			return StatusCode(201);
-		}
+                var root = Path.Combine("wwwroot", "profile-pictures");
+                Directory.CreateDirectory(root);
+
+                var ext = Path.GetExtension(req.ProfilePicture.FileName);
+                var fileName = $"{Guid.NewGuid()}{ext}";
+                var fullPath = Path.Combine(root, fileName);
+
+                using (var stream = new FileStream(fullPath, FileMode.Create))
+                {
+                    await req.ProfilePicture.CopyToAsync(stream);
+                }
+
+                profilePicturePath = $"profile-pictures/{fileName}";
+            }
+
+            var newUser = new User
+            {
+                Username = req.Username,
+                EmailAddress = req.EmailAddress,
+                PasswordHash = req.Password,
+                ProfilePicture = profilePicturePath
+            };
+
+            var created = await _userRepository.SignUpAsync(newUser);
+            if (!created)
+                return BadRequest("Could not create user.");
+
+            return StatusCode(201);
+        }
 
 		[AllowAnonymous]
 		[HttpPost("email_login")]
@@ -53,12 +77,13 @@ namespace ServiceLayer.Controllers
 			var secret = _configuration["Jwt:Secret"];
 			var issuer = _configuration["Jwt:Issuer"];
 			var audience = _configuration["Jwt:Audience"];
-			var token = JwtTokenHelper.GenerateToken(user.Id, user.Role, secret, issuer, audience);
+            var baseUrl = _configuration["App:BaseUrl"];
+            var token = JwtTokenHelper.GenerateToken(user.Id, user.Role, secret, issuer, audience);
 
 			return Ok(new
 			{
 				Token = token,
-				User = user.ToDto()
+				User = user.ToDto(baseUrl)
 			});
 		}
 
@@ -66,8 +91,9 @@ namespace ServiceLayer.Controllers
 		[HttpGet("me")]
 		public async Task<IActionResult> Me()
 		{
-			var user = await _userRepository.ReadAsync(UserId);
-			return Ok(new { User = user.ToDto() });
+            var baseUrl = _configuration["App:BaseUrl"];
+            var user = await _userRepository.ReadAsync(UserId);
+			return Ok(new { User = user.ToDto(baseUrl) });
 		}
 
 		[Authorize(Roles = "Admin")]
@@ -86,7 +112,6 @@ namespace ServiceLayer.Controllers
 				Id = UserId,
 				Username = req.Username,
 				EmailAddress = req.EmailAddress,
-				ProfilePicture = req.ProfilePicture,
 			};
 
 			var success = await _userRepository.UpdateAsync(userToUpdate);
@@ -96,7 +121,48 @@ namespace ServiceLayer.Controllers
 			return NoContent();
 		}
 
-		[HttpPut("me/password")]
+        [HttpPut("me/profile-picture")]
+        public async Task<IActionResult> UpdateProfilePicture([FromForm] IFormFile picture)
+        {
+            if (picture == null || picture.Length == 0)
+                return BadRequest("No image provided.");
+
+            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+            if (!allowedTypes.Contains(picture.ContentType))
+                return BadRequest("Invalid image type.");
+
+            User user = await _userRepository.ReadAsync(UserId);
+            var currentPath = user?.ProfilePicture;
+            if (!string.IsNullOrWhiteSpace(currentPath))
+            {
+                var fullCurrentPath = Path.Combine("wwwroot", currentPath);
+                if (System.IO.File.Exists(fullCurrentPath))
+                    System.IO.File.Delete(fullCurrentPath);
+            }
+
+            var root = Path.Combine("wwwroot", "profile-pictures");
+            Directory.CreateDirectory(root);
+
+            var ext = Path.GetExtension(picture.FileName);
+            var fileName = $"{Guid.NewGuid()}{ext}";
+            var fullPath = Path.Combine(root, fileName);
+
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await picture.CopyToAsync(stream);
+            }
+
+            var relativePath = $"profile-pictures/{fileName}";
+
+            var success = await _userRepository.UpdateProfilePictureAsync(new User { Id = UserId, ProfilePicture = relativePath });
+            if (!success)
+                return NotFound();
+
+            return Ok(new { ProfilePicture = relativePath });
+        }
+
+
+        [HttpPut("me/password")]
 		public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest req)
 		{
 			var success = await _userRepository.UpdatePasswordAsync(UserId, req.NewPassword, req.CurrentPassword);
@@ -113,7 +179,18 @@ namespace ServiceLayer.Controllers
 			if (UserRole != UserRole.Admin && UserId != id)
 				return Forbid();
 
-			var success = await _userRepository.DeleteAsync(new User { Id = id });
+
+            var user = await _userRepository.ReadAsync(id);
+            if (user == null)
+                return NotFound();
+
+            if (!string.IsNullOrWhiteSpace(user.ProfilePicture))
+            {
+                var fullPath = Path.Combine("wwwroot", user.ProfilePicture);
+                if (System.IO.File.Exists(fullPath))
+                    System.IO.File.Delete(fullPath);
+            }
+            var success = await _userRepository.DeleteAsync(new User { Id = id });
 			if (!success) return NotFound();
 
 			return NoContent();
