@@ -1,4 +1,7 @@
-﻿namespace DataLayer
+﻿using Microsoft.EntityFrameworkCore;
+using MySql.EntityFrameworkCore;
+
+namespace DataLayer
 {
     public class BookManagerContext : DbContext
     {
@@ -18,7 +21,7 @@
 
         public BookManagerContext(DbContextOptions options) : base(options) { }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Author>(entity =>
             {

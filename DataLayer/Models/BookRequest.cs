@@ -29,6 +29,8 @@
         [ForeignKey(nameof(ActionedById))]
         public User ActionedBy { get; set; }
 
+        public BookRequest() { }
+
 		public BookRequest(int? senderId, string isbn, string title, string requestDescription)
 		{
 			SenderId = senderId;
