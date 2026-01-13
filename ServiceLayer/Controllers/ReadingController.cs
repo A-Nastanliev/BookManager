@@ -47,8 +47,8 @@ namespace ServiceLayer.Controllers
 		public async Task<IActionResult> GetNextUserBooks([FromQuery] LoadNextDto loadNextDto, [FromQuery] UserBookStatus userBookStatus)
 		{
 			List<UserBook> books = await _userBookRepository.ReadNextByStatusAsync(loadNextDto.Count, loadNextDto.AlreadyLoaded, userBookStatus, UserId);
-
-			return Ok(books.Select(b => b.ToDto()));
+            var baseUrl = _configuration["App:BaseUrl"];
+            return Ok(books.Select(b => b.ToDto(baseUrl)));
 		}
 
 		[HttpPut("user-books/{bookId}")]

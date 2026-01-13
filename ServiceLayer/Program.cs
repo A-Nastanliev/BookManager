@@ -3,6 +3,7 @@ using DataLayer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using ServiceLayer.Services;
 using System;
 using System.Text;
 
@@ -41,6 +42,7 @@ builder.Services.AddDbContext<BookManagerContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
 );
+builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
 builder.Services.AddScoped<AuthorRepository>();
 builder.Services.AddScoped<BookCommentRepository>();
 builder.Services.AddScoped<BookRatingRepository>();

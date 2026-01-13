@@ -5,6 +5,7 @@ using ServiceLayer.Dto;
 using ServiceLayer.Dto.Book;
 using ServiceLayer.Mappers;
 using DataLayer.Models;
+using ServiceLayer.Services;
 
 namespace ServiceLayer.Controllers
 {
@@ -16,60 +17,117 @@ namespace ServiceLayer.Controllers
 		private readonly PublisherRepository _publisherRepository;
 		private readonly AuthorRepository _authorRepository;
 
-		public BookController(BookRepository bookRepository, GenreRepository genreRepository, PublisherRepository publisherRepository, AuthorRepository authorRepository)
+		private readonly IConfiguration _configuration;
+		private readonly IImageStorageService _imageStorageService;
+
+		public BookController(BookRepository bookRepository, GenreRepository genreRepository, PublisherRepository publisherRepository, 
+			AuthorRepository authorRepository, IConfiguration configuration, IImageStorageService imageStorageService)
 		{
 			_bookRepository = bookRepository;
 			_genreRepository = genreRepository;
 			_publisherRepository = publisherRepository;
 			_authorRepository = authorRepository;
+			_configuration = configuration;
+			_imageStorageService = imageStorageService;
 		}
 
 		[Authorize(Roles = "Admin")]
 		[HttpPost]
-		public async Task<IActionResult> CreateBook([FromBody] BookDto bookDto)
+		public async Task<IActionResult> CreateBook([FromForm] CreateBookDto req)
 		{
-			Book book = new Book(bookDto.ISBN, bookDto.Title, bookDto.Cover, bookDto.TotalPages, bookDto.Description,
-				bookDto.AuthorDto.Id, bookDto?.GenreDto.Id, bookDto?.PublisherDto.Id);
-			var success = await _bookRepository.CreateAsync(book);
-			if (!success) return BadRequest();
+            string coverPath = null;
 
-			return StatusCode(201, new { id = book.Id });
-		}
+            try
+            {
+                coverPath = await _imageStorageService.SaveImageAsync(req.Cover, "book-covers");
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
+            }
+
+            var book = new Book(req.ISBN, req.Title, coverPath, req.TotalPages, req.Description, req.AuthorId, req.GenreId, req.PublisherId);
+
+            var success = await _bookRepository.CreateAsync(book);
+            if (!success)
+                return BadRequest();
+
+            return StatusCode(201, new { id = book.Id });
+        }
 
 		[HttpGet("next")]
 		public async Task<IActionResult> GetNextBooks([FromQuery] LoadNextDto load)
 		{
 			var books = await _bookRepository.ReadNextAsync(load.Count, load.AlreadyLoaded);
-			return Ok(books.Select(b => b.ToDto()));
+            var baseUrl = _configuration["App:BaseUrl"];
+            return Ok(books.Select(b => b.ToDto(baseUrl)));
 		}
 
 		[HttpGet("next-by")]
 		public async Task<IActionResult> GetNextBooksBy([FromQuery] LoadNextDto load, [FromQuery] string type, [FromQuery] int id)
 		{
 			var books = await _bookRepository.ReadNextByAsync(type.ToLower(), id, load.Count, load.AlreadyLoaded);
-
-			return Ok(books.Select(b => b.ToDto()));
+            var baseUrl = _configuration["App:BaseUrl"];
+            return Ok(books.Select(b => b.ToDto(baseUrl)));
 		}
 
 		[Authorize(Roles = "Admin")]
 		[HttpPut("{id}")]
 		public async Task<IActionResult> UpdateBook(int id, [FromBody] BookUpdateDto req)
 		{
-			var success = await _bookRepository.UpdateAsync(new Book(req.Id, req.ISBN, req.Title, req.Cover, req.TotalPages, req.Description));
+			var success = await _bookRepository.UpdateAsync(new Book(req.Id, req.ISBN, req.Title, req.TotalPages, req.Description, req.GenreId, req.PublisherId));
 			if (!success) return NotFound();
 
 			return NoContent();
 		}
 
-		[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}/cover")]
+        public async Task<IActionResult> UpdateBookCover(int id, [FromForm] IFormFile cover)
+        {
+            if (cover == null || cover.Length == 0)
+                return BadRequest("No image provided.");
+
+            var book = await _bookRepository.ReadAsync(id);
+            if (book == null)
+                return NotFound();
+
+            _imageStorageService.DeleteImage(book.Cover);
+
+            string newCover;
+            try
+            {
+                newCover = await _imageStorageService.SaveImageAsync(cover, "book-covers");
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
+            }
+
+            var success = await _bookRepository.UpdateCoverAsync(new Book { Id = id, Cover = newCover });
+
+            if (!success)
+                return NotFound();
+
+            return Ok(new { Cover = newCover });
+        }
+
+        [Authorize(Roles = "Admin")]
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteBook(int id)
 		{
-			var success = await _bookRepository.DeleteAsync(new Book { Id = id });
-			if (!success) return NotFound();
+            var book = await _bookRepository.ReadAsync(id);
+            if (book == null)
+                return NotFound();
 
-			return NoContent();
-		}
+            _imageStorageService.DeleteImage(book.Cover);
+
+            var success = await _bookRepository.DeleteAsync(new Book { Id = id });
+            if (!success)
+                return NotFound();
+
+            return NoContent();
+        }
 
 		[Authorize(Roles = "Admin")]
 		[HttpPost("authors")]

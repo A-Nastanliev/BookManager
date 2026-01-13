@@ -2,12 +2,12 @@
 
 namespace ServiceLayer.Dto.Book
 {
-    public class BookUpdateDto
+    public class CreateBookDto
     {
-        public int Id { get; set; }
-        [Length(13, 13)]
         [Required]
+        [Length(13, 13)]
         public string ISBN { get; set; }
+
         [Required]
         [MaxLength(200)]
         public string Title { get; set; }
@@ -18,7 +18,12 @@ namespace ServiceLayer.Dto.Book
         [MaxLength(500)]
         public string Description { get; set; }
 
+        [Required]
+        public int AuthorId { get; set; }
+
         public int? GenreId { get; set; }
         public int? PublisherId { get; set; }
+
+        public IFormFile Cover { get; set; }
     }
 }

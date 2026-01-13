@@ -6,9 +6,9 @@ namespace ServiceLayer.Mappers
 {
 	public static class ReadingMapper
 	{
-		public static UserBookDto ToDto(this UserBook userbook)
+		public static UserBookDto ToDto(this UserBook userbook, string baseUrl)
 		{
-			return new UserBookDto(userbook.Status, userbook.Book.ToDto(), userbook.ReadingLogs?.Select(rl => rl.ToDto()).ToList());
+			return new UserBookDto(userbook.Status, userbook.Book.ToDto(baseUrl), userbook.ReadingLogs?.Select(rl => rl.ToDto()).ToList());
 		}
 
 		public static ReadingLogDto ToDto(this ReadingLog log)
@@ -25,7 +25,7 @@ namespace ServiceLayer.Mappers
 
 		public static BookRatingDto ToDto(this BookRating bookRating, string baseUrl)
 		{
-			return new BookRatingDto(bookRating.BookId, bookRating?.Book.ToDto(), bookRating.UserId, bookRating?.User.ToDto(baseUrl), bookRating.Rating);
+			return new BookRatingDto(bookRating.BookId, bookRating?.Book.ToDto(baseUrl), bookRating.UserId, bookRating?.User.ToDto(baseUrl), bookRating.Rating);
 		}
 
 		public static BookCommentDto ToDto(this BookComment bookComment)

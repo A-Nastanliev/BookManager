@@ -5,9 +5,10 @@ namespace ServiceLayer.Mappers
 {
     public static class BookMapper
     {
-        public static BookDto ToDto(this Book book)
+        public static BookDto ToDto(this Book book, string baseUrl)
         {
-            return new BookDto(book.Id, book.ISBN, book.Title, book.Cover, book.TotalPages, book.Description,
+            return new BookDto(book.Id, book.ISBN, book.Title, string.IsNullOrWhiteSpace(book.Cover) ? null: $"{baseUrl}/{book.Cover}",
+                book.TotalPages, book.Description,
                 book.Author.ToDto(), book.Genre.ToDto(), book.Publisher.ToDto()); 
         }
 

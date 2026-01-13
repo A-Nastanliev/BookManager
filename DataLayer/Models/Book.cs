@@ -58,14 +58,15 @@
             PublisherId = publisherId;
         }
 
-        public Book(int id, string isbn, string title, string cover, int totalPages, string description)
+        public Book(int id, string isbn, string title, int totalPages, string description, int?genreId, int?publisherId)
         {
             Id = id;
             ISBN = isbn;
             Title = title;
-            Cover = cover;
             TotalPages = totalPages;
             Description = description;
+            GenreId = genreId;
+            PublisherId = publisherId;
         }
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Dto;
 using ServiceLayer.Dto.User;
 using ServiceLayer.Mappers;
+using ServiceLayer.Services;
 
 namespace ServiceLayer.Controllers
 {
@@ -14,15 +15,19 @@ namespace ServiceLayer.Controllers
 	{
 		private readonly IConfiguration _configuration;
 
+		private readonly IImageStorageService _imageStorageService;
+
 		private readonly UserRepository _userRepository;
 
 		private readonly UserRestrictionRepository _restrictionRepository;
 
-		public UserController(UserRepository userRepository, UserRestrictionRepository restrictionRepository, IConfiguration configuration)
+		public UserController(UserRepository userRepository, UserRestrictionRepository restrictionRepository, 
+			IConfiguration configuration, IImageStorageService imageStorageService)
 		{
 			_userRepository = userRepository;
 			_restrictionRepository = restrictionRepository;
 			_configuration = configuration;
+			_imageStorageService = imageStorageService;
 		}
 
 		[AllowAnonymous]
@@ -31,25 +36,13 @@ namespace ServiceLayer.Controllers
 		{
             string profilePicturePath = null;
 
-            if (req.ProfilePicture != null && req.ProfilePicture.Length > 0)
+            try
             {
-                var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-                if (!allowedTypes.Contains(req.ProfilePicture.ContentType))
-                    return BadRequest("Invalid image type.");
-
-                var root = Path.Combine("wwwroot", "profile-pictures");
-                Directory.CreateDirectory(root);
-
-                var ext = Path.GetExtension(req.ProfilePicture.FileName);
-                var fileName = $"{Guid.NewGuid()}{ext}";
-                var fullPath = Path.Combine(root, fileName);
-
-                using (var stream = new FileStream(fullPath, FileMode.Create))
-                {
-                    await req.ProfilePicture.CopyToAsync(stream);
-                }
-
-                profilePicturePath = $"profile-pictures/{fileName}";
+                profilePicturePath = await _imageStorageService.SaveImageAsync(req.ProfilePicture, "profile-pictures");
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
             }
 
             var newUser = new User
@@ -127,38 +120,28 @@ namespace ServiceLayer.Controllers
             if (picture == null || picture.Length == 0)
                 return BadRequest("No image provided.");
 
-            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-            if (!allowedTypes.Contains(picture.ContentType))
-                return BadRequest("Invalid image type.");
+            var user = await _userRepository.ReadAsync(UserId);
+            if (user == null)
+                return NotFound();
 
-            User user = await _userRepository.ReadAsync(UserId);
-            var currentPath = user?.ProfilePicture;
-            if (!string.IsNullOrWhiteSpace(currentPath))
+            _imageStorageService.DeleteImage(user.ProfilePicture);
+
+            string newPath;
+            try
             {
-                var fullCurrentPath = Path.Combine("wwwroot", currentPath);
-                if (System.IO.File.Exists(fullCurrentPath))
-                    System.IO.File.Delete(fullCurrentPath);
+                newPath = await _imageStorageService.SaveImageAsync(picture, "profile-pictures");
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
             }
 
-            var root = Path.Combine("wwwroot", "profile-pictures");
-            Directory.CreateDirectory(root);
+            var success = await _userRepository.UpdateProfilePictureAsync(new User { Id = UserId, ProfilePicture = newPath });
 
-            var ext = Path.GetExtension(picture.FileName);
-            var fileName = $"{Guid.NewGuid()}{ext}";
-            var fullPath = Path.Combine(root, fileName);
-
-            using (var stream = new FileStream(fullPath, FileMode.Create))
-            {
-                await picture.CopyToAsync(stream);
-            }
-
-            var relativePath = $"profile-pictures/{fileName}";
-
-            var success = await _userRepository.UpdateProfilePictureAsync(new User { Id = UserId, ProfilePicture = relativePath });
             if (!success)
                 return NotFound();
 
-            return Ok(new { ProfilePicture = relativePath });
+            return Ok(new { ProfilePicture = newPath });
         }
 
 
@@ -179,17 +162,12 @@ namespace ServiceLayer.Controllers
 			if (UserRole != UserRole.Admin && UserId != id)
 				return Forbid();
 
-
             var user = await _userRepository.ReadAsync(id);
             if (user == null)
                 return NotFound();
 
-            if (!string.IsNullOrWhiteSpace(user.ProfilePicture))
-            {
-                var fullPath = Path.Combine("wwwroot", user.ProfilePicture);
-                if (System.IO.File.Exists(fullPath))
-                    System.IO.File.Delete(fullPath);
-            }
+            _imageStorageService.DeleteImage(user.ProfilePicture);
+
             var success = await _userRepository.DeleteAsync(new User { Id = id });
 			if (!success) return NotFound();
 

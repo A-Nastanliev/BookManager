@@ -1,4 +1,6 @@
-﻿namespace BusinessLayer.Repositories
+﻿using DataLayer.Models;
+
+namespace BusinessLayer.Repositories
 {
 	public class BookRepository : AbstractRepository<Book, int>
 	{
@@ -70,5 +72,35 @@
 				.ToListAsync();
 		}
 
+		public async Task<bool> UpdateCoverAsync(Book book)
+		{
+			var bookToUpdate = await _context.Books.FindAsync(book.Id);
+			if(bookToUpdate == null)
+				return false;
+
+			bookToUpdate.Cover = book.Cover;
+			return await _context.SaveChangesAsync() > 0;
+		}
+
+
+        public async override Task<bool> UpdateAsync(Book obj)
+        {
+            var bookToUpdate = await _context.Books.FindAsync(obj.Id);
+            if (bookToUpdate == null)
+                return false;
+
+			bookToUpdate.Title = obj.Title;
+			bookToUpdate.Description = obj.Description;
+			bookToUpdate.ISBN = obj.ISBN;
+			if(obj.GenreId != null)
+			{
+				bookToUpdate.GenreId = obj.GenreId;
+			}
+			if(obj.PublisherId != null)
+			{
+				bookToUpdate.PublisherId = obj.PublisherId;
+			}
+            return await _context.SaveChangesAsync() > 0;
+        }
 	}
 }
