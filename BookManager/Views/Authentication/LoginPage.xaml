@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookManager.Views.Authentication.LoginPage"
+             xmlns:vm="clr-namespace:BookManager.ViewModels.Authentication"
+             Title="Login"
+             x:DataType="vm:LoginVM"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout 
+            Padding="24" Spacing="20"
+            HorizontalOptions="Center" VerticalOptions="Center">
+
+            <Label
+                Text="Welcome Back"
+                FontSize="26"
+                FontAttributes="Bold"
+                TextColor="White"
+                HorizontalOptions="Center" />
+
+            <Entry
+                Placeholder="Email Address"
+                Keyboard="Email"
+                Text="{Binding Email}"
+                TextColor="White"
+                PlaceholderColor="#808080"
+                BackgroundColor="#1E1E1E" />
+
+            <Entry
+                Placeholder="Password"
+                IsPassword="True"
+                Text="{Binding Password}"
+                TextColor="White"
+                PlaceholderColor="#808080"
+                BackgroundColor="#1E1E1E" />
+
+            <Button
+                Text="Login"
+                Command="{Binding LoginCommand}"
+                BackgroundColor="#F5C451"
+                TextColor="#121212"
+                FontAttributes="Bold"
+                CornerRadius="10"
+                HeightRequest="50" />
+
+            <Button
+                Text="Don't have an account? Sign up"
+                Command="{Binding GoToSignUpCommand}"
+                BackgroundColor="Transparent"
+                TextColor="#F5C451"
+                HorizontalOptions="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

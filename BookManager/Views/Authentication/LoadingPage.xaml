@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookManager.Views.Authentication.LoadingPage"
+             Title="LoadingPage"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+    
+    <Grid HorizontalOptions="Center"
+      VerticalOptions="Center"
+      RowDefinitions="Auto,Auto,Auto"
+      RowSpacing="25">
+
+        <Label Text="Book Manager"
+           FontSize="32"
+           FontAttributes="Bold"
+           TextColor="White"
+           Grid.Row="0"
+           HorizontalOptions="Center"/>
+
+        <Label Text="Loading..."
+           FontSize="16" Grid.Row="1"
+           TextColor="#CCCCCC"
+           HorizontalOptions="Center"/>
+
+        <ActivityIndicator Grid.Row="2"
+                       IsRunning="True"
+                       WidthRequest="80"
+                       HeightRequest="80"
+                       Color="Yellow"
+                       HorizontalOptions="Center"/>
+    </Grid>
+</ContentPage>

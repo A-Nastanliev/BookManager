@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookManager.Views.Authentication.SignUpPage"
+             xmlns:vm="clr-namespace:BookManager.ViewModels.Authentication"
+             Title="SignUpPage"
+             x:DataType="vm:SignUpVM"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Center">
+
+            <Label
+                Text="Create Account"
+                FontSize="26"
+                FontAttributes="Bold"
+                TextColor="White"
+                HorizontalOptions="Center" />
+
+            <Border
+                Stroke="#F5C451"
+                StrokeThickness="2"
+                BackgroundColor="#1E1E1E"
+                StrokeShape="RoundRectangle 60"
+                WidthRequest="120"
+                HeightRequest="120"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
+
+                <Image
+                    Source="{Binding ProfileImage}"
+                    Aspect="AspectFill"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+            </Border>
+
+            <Label
+                Text="Profile picture required"
+                FontSize="12"
+                TextColor="#B0B0B0"
+                HorizontalOptions="Center" />
+
+            <Button
+                Text="Choose Profile Picture"
+                Command="{Binding PickProfilePictureCommand}"
+                BackgroundColor="#1E1E1E"
+                TextColor="#F5C451"
+                BorderColor="#F5C451"
+                BorderWidth="1"
+                CornerRadius="8"
+                HorizontalOptions="Center" />
+
+            <Entry
+                Placeholder="Username"
+                Text="{Binding Username}"
+                TextColor="White"
+                PlaceholderColor="#808080"
+                BackgroundColor="#1E1E1E"
+                HorizontalOptions="Fill" />
+
+            <Entry
+                Placeholder="Email Address"
+                Keyboard="Email"
+                Text="{Binding EmailAddress}"
+                TextColor="White"
+                PlaceholderColor="#808080"
+                BackgroundColor="#1E1E1E"
+                HorizontalOptions="Fill" />
+
+            <Entry
+                Placeholder="Password"
+                IsPassword="True"
+                Text="{Binding Password}"
+                TextColor="White"
+                PlaceholderColor="#808080"
+                BackgroundColor="#1E1E1E"
+                HorizontalOptions="Fill" />
+
+            <Button
+                Text="Sign Up"
+                Command="{Binding SignUpCommand}"
+                BackgroundColor="#F5C451"
+                TextColor="#121212"
+                FontAttributes="Bold"
+                CornerRadius="10"
+                HeightRequest="50"
+                HorizontalOptions="Fill" />
+
+            <Button
+                Text="Already have an account? Log in"
+                Command="{Binding GoToLoginCommand}"
+                BackgroundColor="Transparent"
+                TextColor="#F5C451"
+                FontSize="14"
+                HorizontalOptions="Center" />   
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

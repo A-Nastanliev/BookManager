@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="BookManager.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:BookManager"
+    xmlns:authentication="clr-namespace:BookManager.Views.Authentication"
+    xmlns:book="clr-namespace:BookManager.Views.Book"
+    Title="BookManager">
+
+
+    <ShellContent
+        Shell.NavBarIsVisible="False"
+        Shell.TabBarIsVisible="False"
+        FlyoutItemIsVisible="False"
+        ContentTemplate="{DataTemplate authentication:LoadingPage}"
+        Route="LoadingPage">
+    </ShellContent>
+
+    <TabBar>
+        <Tab Title="BookSearchPage">
+            <ShellContent
+              ContentTemplate="{DataTemplate book:BookSearchPage}"
+              Route="BookSearchPage"/>
+        </Tab>
+    </TabBar>
+</Shell>

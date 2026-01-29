@@ -80,7 +80,6 @@ namespace ServiceLayer.Controllers
 			});
 		}
 
-
 		[HttpGet("me")]
 		public async Task<IActionResult> Me()
 		{

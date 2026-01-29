@@ -11,6 +11,7 @@ namespace ServiceLayer.Dto.User
         public string EmailAddress { get; set; }
         [Required]
         public string Password { get; set; }
+        [Required]
         public IFormFile ProfilePicture { get; set; }
 
         public SignUpRequest() { }

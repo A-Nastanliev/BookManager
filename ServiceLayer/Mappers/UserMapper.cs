@@ -15,16 +15,16 @@ namespace ServiceLayer.Mappers
                     : $"{baseUrl}/{user.ProfilePicture}",
                 user.Role,
                 user.CreatedAt,
-                user.CurrentRestriction?.ToDto()
+                user.CurrentRestriction?.ToDto(true)
             );
         }
 
         public static UserDto ToPublicDto(this User user) 
         {
-            return new UserDto(user.Username, user.ProfilePicture, user.Id, user.CurrentRestriction?.ToDto());
+            return new UserDto(user.Username, user.ProfilePicture, user.Id, user.CurrentRestriction?.ToDto(false));
         }
 
-        public static RestrictionDto ToDto(this UserRestriction userRestriction)
+        public static RestrictionDto ToDto(this UserRestriction userRestriction, bool mapUser = true)
         {
             return new RestrictionDto(userRestriction.Id, userRestriction.Reason, userRestriction.StartDate,userRestriction.EndDate, userRestriction.User?.ToPublicDto() );
         }

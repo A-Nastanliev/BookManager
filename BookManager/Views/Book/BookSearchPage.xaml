@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookManager.Views.Book.BookSearchPage"
+             xmlns:vm="clr-namespace:BookManager.ViewModels.Book"
+             x:DataType="vm:BookSearchVM"
+             Title="BookSearchPage">
+    
+    <ScrollView>
+        <Grid Padding="20" RowSpacing="10" ColumnSpacing="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Image HorizontalOptions="Center" HeightRequest="200" WidthRequest="160"
+                   Source="{Binding User.PublicUser.ProfilePicture}" Grid.Row="0" Grid.ColumnSpan="2"/>
+
+            <Label Grid.Row="1" Grid.Column="0" Text="Email:" FontAttributes="Bold"/>
+            <Label Grid.Row="1" Grid.Column="1" Text="{Binding User.EmailAddress}"/>
+
+            <Label Grid.Row="2" Grid.Column="0" Text="Role:" FontAttributes="Bold"/>
+            <Label Grid.Row="2" Grid.Column="1" Text="{Binding User.Role}"/>
+
+            <Label Grid.Row="3" Grid.Column="0" Text="Created At:" FontAttributes="Bold"/>
+            <Label Grid.Row="3" Grid.Column="1" Text="{Binding User.CreatedAt}"/>
+
+            <Label Grid.Row="4" Grid.Column="0" Text="Username:" FontAttributes="Bold"/>
+            <Label Grid.Row="4" Grid.Column="1" Text="{Binding User.PublicUser.Username}"/>
+
+            <Label Grid.Row="5" Grid.Column="0" Text="Profile Picture:" FontAttributes="Bold"/>
+            <Label Grid.Row="5" Grid.Column="1" Text="{Binding User.PublicUser.ProfilePicture}"/>
+
+        </Grid>
+    </ScrollView>
+</ContentPage>
