@@ -8,8 +8,12 @@ namespace BookManager.ViewModels.Book
 {
     public partial class BookSearchVM : ObservableObject
     {
-        public BookSearchVM()
+        [ObservableProperty]
+        UserVM user;
+
+        public BookSearchVM(UserVM user)
         {
+            User = user;
         }
     }
 }

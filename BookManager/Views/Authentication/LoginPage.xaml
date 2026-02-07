@@ -3,41 +3,44 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BookManager.Views.Authentication.LoginPage"
              xmlns:vm="clr-namespace:BookManager.ViewModels.Authentication"
+             xmlns:views="clr-namespace:BookManager.Views"
              Title="Login"
              x:DataType="vm:LoginVM"
              Shell.NavBarIsVisible="False"
              Shell.TabBarIsVisible="False">
 
     <ScrollView>
-        <VerticalStackLayout 
-            Padding="24" Spacing="20"
-            HorizontalOptions="Center" VerticalOptions="Center">
+        <Grid 
+            Padding="24" RowSpacing="20" ColumnSpacing="4"  ColumnDefinitions="*, Auto"
+            HorizontalOptions="Center"   VerticalOptions="Center"  RowDefinitions="Auto, Auto, Auto, Auto, Auto">
 
             <Label
-                Text="Welcome Back"
-                FontSize="26"
+                Text="Welcome Back" Grid.ColumnSpan="2"
+                FontSize="26" Grid.Row="0"
                 FontAttributes="Bold"
                 TextColor="White"
                 HorizontalOptions="Center" />
 
             <Entry
-                Placeholder="Email Address"
-                Keyboard="Email"
+                Placeholder="Email Address" Grid.Row="1"
+                Keyboard="Email" Grid.ColumnSpan="2"
                 Text="{Binding Email}"
                 TextColor="White"
                 PlaceholderColor="#808080"
                 BackgroundColor="#1E1E1E" />
 
-            <Entry
-                Placeholder="Password"
+            <Entry x:Name="PasswordEntry"
+                Placeholder="Password" Grid.Row="2" Grid.Column="0"
                 IsPassword="True"
                 Text="{Binding Password}"
                 TextColor="White"
                 PlaceholderColor="#808080"
                 BackgroundColor="#1E1E1E" />
 
+            <views:VisibilityButton  Grid.Column="1" Grid.Row="2" TargetEntry="{x:Reference PasswordEntry}"/>
+
             <Button
-                Text="Login"
+                Text="Login" Grid.ColumnSpan="2" Grid.Row="3"
                 Command="{Binding LoginCommand}"
                 BackgroundColor="#F5C451"
                 TextColor="#121212"
@@ -46,12 +49,12 @@
                 HeightRequest="50" />
 
             <Button
-                Text="Don't have an account? Sign up"
-                Command="{Binding GoToSignUpCommand}"
+                Text="Don't have an account? Sign up" Grid.ColumnSpan="2"
+                Command="{Binding GoToSignUpCommand}" Grid.Row="4"
                 BackgroundColor="Transparent"
                 TextColor="#F5C451"
                 HorizontalOptions="Center" />
 
-        </VerticalStackLayout>
+        </Grid>
     </ScrollView>
 </ContentPage>

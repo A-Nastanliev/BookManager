@@ -1,4 +1,5 @@
-﻿using BookManager.Services;
+﻿using BookManager.Authentication;
+using BookManager.ApiClients;
 using BookManager.ViewModels.Authentication;
 using BookManager.ViewModels.Book;
 using BookManager.ViewModels.Models;
@@ -29,28 +30,33 @@ namespace BookManager
     		builder.Logging.AddDebug();
 #endif
 
-            builder.Services.AddSingleton(sp =>
-            {
-                var client = new HttpClient
-                {
-                    BaseAddress = new Uri("http://10.0.2.2:5137")
-                };
-                return client;
-            });
-
-            builder.Services.AddSingleton<ApiService>();
 
             builder.Services.AddSingleton<UserVM>();
 
-            builder.Services.AddSingleton<LoadingVM>();
-            builder.Services.AddSingleton<LoginVM>();
-            builder.Services.AddSingleton<SignUpVM>();
+            builder.Services.AddSingleton<ITokenStore, TokenStore>();
+            builder.Services.AddTransient<AuthMessageHandler>();
+
+            void AddApiClient<T>() where T : class
+            {
+                builder.Services
+                    .AddHttpClient<T>(client =>
+                    {
+                        client.BaseAddress = new Uri("http://10.0.2.2:5137");
+                    })
+                    .AddHttpMessageHandler<AuthMessageHandler>();
+            }
+
+            AddApiClient<UserClient>();
+
+            builder.Services.AddTransient<LoadingVM>();
+            builder.Services.AddTransient<LoginVM>();
+            builder.Services.AddTransient<SignUpVM>();
 
             builder.Services.AddSingleton<BookSearchVM>();
 
-            builder.Services.AddSingleton<LoadingPage>();
-            builder.Services.AddSingleton<LoginPage>();
-            builder.Services.AddSingleton<SignUpPage>();
+            builder.Services.AddTransient<LoadingPage>();
+            builder.Services.AddTransient<LoginPage>();
+            builder.Services.AddTransient<SignUpPage>();
 
             builder.Services.AddSingleton<BookSearchPage>();
 

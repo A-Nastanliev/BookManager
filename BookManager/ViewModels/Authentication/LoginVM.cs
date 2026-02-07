@@ -1,13 +1,15 @@
-﻿using BookManager.Services;
+﻿using BookManager.ApiClients;
 using BookManager.Views.Authentication;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using BookManager.Authentication;
+using BookManager.Views.Book;
 
 namespace BookManager.ViewModels.Authentication
 {
     public partial class LoginVM : ObservableObject
     {
-        private readonly ApiService _apiService;
+        private readonly UserClient _userClient;
 
         [ObservableProperty]
         private string email;
@@ -15,9 +17,9 @@ namespace BookManager.ViewModels.Authentication
         [ObservableProperty]
         private string password;
 
-        public LoginVM(ApiService apiService)
+        public LoginVM(UserClient userClient)
         {
-            _apiService = apiService;
+            _userClient = userClient;
         }
 
         [RelayCommand]
@@ -29,21 +31,27 @@ namespace BookManager.ViewModels.Authentication
                 return;
             }
 
+            if (!EmailValidator.IsValid(Email))
+            {
+                await Shell.Current.DisplayAlertAsync("Invalid Email", "Please, enter a valid email address", "OK");
+                return;
+            }
+
             try
             {
-                var response = await _apiService.EmailLoginAsync(Email, Password);
+                var result = await _userClient.EmailLoginAsync(Email, Password);
 
-                if (!response.IsSuccessStatusCode)
+                if (!result.Success)
                 {
-                    await Shell.Current.DisplayAlertAsync("Login failed", "Invalid email or password", "OK");
+                    await Shell.Current.DisplayAlertAsync("Login failed", result.Error ?? "Invalid email or password", "OK");
                     return;
                 }
 
-                await Shell.Current.GoToAsync("//LoadingPage");
+                await Shell.Current.GoToAsync($"//{nameof(BookSearchPage)}");
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+                await Shell.Current.DisplayAlertAsync("Error", ex.ToString(), "OK");
             }
         }
 

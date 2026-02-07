@@ -3,10 +3,12 @@ using DataLayer.Enums;
 using DataLayer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ServiceLayer.Dto;
 using ServiceLayer.Dto.User;
 using ServiceLayer.Mappers;
 using ServiceLayer.Services;
+using System.Data;
 
 namespace ServiceLayer.Controllers
 {
@@ -39,25 +41,31 @@ namespace ServiceLayer.Controllers
             try
             {
                 profilePicturePath = await _imageStorageService.SaveImageAsync(req.ProfilePicture, "profile-pictures");
+
+				var newUser = new User
+				{
+					Username = req.Username,
+					EmailAddress = req.EmailAddress,
+					PasswordHash = req.Password,
+					ProfilePicture = profilePicturePath
+				};
+
+				var created = await _userRepository.SignUpAsync(newUser);
+				if (!created)
+					return BadRequest("Could not create user.");
+
+				return StatusCode(201);
             }
             catch (InvalidOperationException e)
             {
                 return BadRequest(e.Message);
             }
-
-            var newUser = new User
+            catch (DbUpdateException)
             {
-                Username = req.Username,
-                EmailAddress = req.EmailAddress,
-                PasswordHash = req.Password,
-                ProfilePicture = profilePicturePath
-            };
-
-            var created = await _userRepository.SignUpAsync(newUser);
-            if (!created)
-                return BadRequest("Could not create user.");
-
-            return StatusCode(201);
+                if (profilePicturePath != null)
+                    _imageStorageService.DeleteImage(profilePicturePath);
+                return Conflict("Username or email is already in use.");
+            }
         }
 
 		[AllowAnonymous]
@@ -85,7 +93,12 @@ namespace ServiceLayer.Controllers
 		{
             var baseUrl = _configuration["App:BaseUrl"];
             var user = await _userRepository.ReadAsync(UserId);
-			return Ok(new { User = user.ToDto(baseUrl) });
+
+            if ( user.Role != UserRole)
+            {
+                return Unauthorized(new { error = "ROLE_CHANGED" });
+            }
+            return Ok(new { User = user.ToDto(baseUrl) });
 		}
 
 		[Authorize(Roles = "Admin")]

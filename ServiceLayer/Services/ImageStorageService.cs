@@ -1,4 +1,8 @@
-﻿namespace ServiceLayer.Services
+﻿using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp;
+
+namespace ServiceLayer.Services
 {
     public class ImageStorageService : IImageStorageService
     {
@@ -16,7 +20,7 @@
             _wwwRoot = env.WebRootPath;
         }
 
-        public async Task<string?> SaveImageAsync(IFormFile file, string folder)
+        public async Task<string?> SaveImageAsync(IFormFile file, string folder, int maxWidth = 1024, int maxHeight = 1024)
         {
             if (file == null || file.Length == 0)
                 return null;
@@ -31,8 +35,18 @@
             var fileName = $"{Guid.NewGuid()}{ext}";
             var fullPath = Path.Combine(directory, fileName);
 
-            using var stream = new FileStream(fullPath, FileMode.Create);
-            await file.CopyToAsync(stream);
+            using var image = await Image.LoadAsync(file.OpenReadStream());
+
+            if (image.Width > maxWidth || image.Height > maxHeight)
+            {
+                image.Mutate(x => x.Resize(new ResizeOptions
+                {
+                    Mode = ResizeMode.Max,
+                    Size = new Size(maxWidth, maxHeight)
+                }));
+            }
+
+            await image.SaveAsync(fullPath);
 
             return $"{folder}/{fileName}";
         }

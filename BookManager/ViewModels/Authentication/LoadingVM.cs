@@ -1,4 +1,4 @@
-﻿using BookManager.Services;
+﻿using BookManager.ApiClients;
 using BookManager.Views.Authentication;
 using BookManager.Views.Book;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,34 +11,22 @@ namespace BookManager.ViewModels.Authentication
 {
     public partial class LoadingVM : ObservableObject
     {
-        private readonly ApiService _apiService;
-        private bool _initialized;
+        private readonly UserClient _userClient;
 
-        public LoadingVM(ApiService apiService)
+        public LoadingVM(UserClient userClient)
         {
-            _apiService = apiService;
-        }
-
-        public void Reset()
-        {
-            _initialized = false;
+            _userClient = userClient;
         }
 
         public async Task InitializeAsync()
         {
-            await Task.Delay(100);
-
             try
             {
-                if (_initialized)
-                    return;
+                var result = await _userClient.TokenLoginAsync();
 
-                var restored = await _apiService.TokenLoginAsync();
-
-                if (restored)
+                if (result.Success)
                 {
-                    _initialized = true;
-                    await Shell.Current.GoToAsync($"///{nameof(BookSearchPage)}");
+                    await Shell.Current.GoToAsync($"//{nameof(BookSearchPage)}");
                 }
                 else
                 {
@@ -47,7 +35,7 @@ namespace BookManager.ViewModels.Authentication
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlertAsync(ex.Message, "0" + ex?.InnerException, "OK");
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
             }
         }
     }

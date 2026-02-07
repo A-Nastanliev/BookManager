@@ -1,0 +1,89 @@
+﻿using System.Text.Encodings;
+using BookManager.Authentication;
+using BookManager.ViewModels.Models;
+using System;
+using System.Collections.Generic;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+
+namespace BookManager.ApiClients
+{
+    public class UserClient
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ITokenStore _tokenStore;
+
+        private readonly UserVM _user;
+
+        public UserClient(HttpClient httpClient, UserVM currentUser, ITokenStore tokenStore)
+        {
+            _httpClient = httpClient;
+            _user = currentUser;
+            _tokenStore = tokenStore;
+        }
+
+        public async Task<AuthResult> SignUpAsync(MultipartFormDataContent content)
+        {
+            var response = await _httpClient.PostAsync("/api/users/signup", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                return new AuthResult(false, error);
+            }
+
+            return new AuthResult(true, null);
+        }
+
+        public async Task<AuthResult> EmailLoginAsync(string email, string password)
+        {
+            var payload = new { Email = email, Password = password };
+            var json = JsonSerializer.Serialize(payload);
+
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("/api/users/email_login", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                return new AuthResult(false, error);
+            }
+
+            var responseJson = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(responseJson);
+            var root = doc.RootElement;
+
+            var token = root.GetProperty("token").GetString();
+
+            _user.FromJson(root.GetProperty("user"));
+
+            await _tokenStore.SetAccessTokenAsync(token);
+
+            return new AuthResult(true, null);
+        }
+
+        public async Task<AuthResult> TokenLoginAsync()
+        {
+            var token = await _tokenStore.GetAccessTokenAsync();
+            if (string.IsNullOrWhiteSpace(token))
+                return new AuthResult(false, "No token stored");
+
+            var response = await _httpClient.GetAsync("/api/users/me");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _tokenStore.Clear();
+                return new AuthResult(false, "Token expired");
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+
+            _user.FromJson(doc.RootElement.GetProperty("user"));
+
+            return new AuthResult(true, null);
+        }
+    
+    }
+}

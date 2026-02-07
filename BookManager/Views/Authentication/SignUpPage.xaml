@@ -3,99 +3,70 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BookManager.Views.Authentication.SignUpPage"
              xmlns:vm="clr-namespace:BookManager.ViewModels.Authentication"
+             xmlns:views="clr-namespace:BookManager.Views"
              Title="SignUpPage"
              x:DataType="vm:SignUpVM"
              Shell.NavBarIsVisible="False"
              Shell.TabBarIsVisible="False">
 
     <ScrollView>
-        <VerticalStackLayout Padding="24" Spacing="20"
-                             HorizontalOptions="Center"
-                             VerticalOptions="Center">
+        <Grid Padding="24" RowSpacing="20" ColumnDefinitions="*, Auto" ColumnSpacing="20"
+            HorizontalOptions="Center" VerticalOptions="Center"
+            RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto">
 
             <Label
-                Text="Create Account"
-                FontSize="26"
-                FontAttributes="Bold"
-                TextColor="White"
-                HorizontalOptions="Center" />
+              Text="Create Account" FontSize="26" FontAttributes="Bold" TextColor="White"
+              HorizontalOptions="Center" Grid.Row="0" Grid.ColumnSpan="2"/>
 
             <Border
-                Stroke="#F5C451"
-                StrokeThickness="2"
-                BackgroundColor="#1E1E1E"
-                StrokeShape="RoundRectangle 60"
-                WidthRequest="120"
-                HeightRequest="120"
-                HorizontalOptions="Center"
-                VerticalOptions="Center">
+              Stroke="#F5C451" Grid.Row="1" Grid.ColumnSpan="2"
+              StrokeThickness="2" StrokeShape="RoundRectangle 60" WidthRequest="120"
+              HeightRequest="120" HorizontalOptions="Center" VerticalOptions="Center">
 
                 <Image
-                    Source="{Binding ProfileImage}"
-                    Aspect="AspectFill"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center" />
+                  Source="{Binding ProfileImage}"
+                  Aspect="AspectFill">
+                    <Image.Clip>
+                        <EllipseGeometry
+                          Center="60,60"
+                          RadiusX="60"
+                          RadiusY="60" />
+                    </Image.Clip>
+                </Image>
             </Border>
 
             <Label
-                Text="Profile picture required"
-                FontSize="12"
-                TextColor="#B0B0B0"
-                HorizontalOptions="Center" />
+              Text="Profile picture required" FontSize="12" TextColor="#B0B0B0"
+              HorizontalOptions="Center" Grid.Row="2" Grid.ColumnSpan="2" />
 
             <Button
-                Text="Choose Profile Picture"
-                Command="{Binding PickProfilePictureCommand}"
-                BackgroundColor="#1E1E1E"
-                TextColor="#F5C451"
-                BorderColor="#F5C451"
-                BorderWidth="1"
-                CornerRadius="8"
-                HorizontalOptions="Center" />
+              Text="Choose Profile Picture" Grid.Row="3" Grid.ColumnSpan="2" Command="{Binding PickProfilePictureCommand}"
+              BackgroundColor="#1E1E1E" TextColor="#F5C451"
+              BorderColor="#F5C451" BorderWidth="1" CornerRadius="8" HorizontalOptions="Center" />
 
             <Entry
-                Placeholder="Username"
-                Text="{Binding Username}"
-                TextColor="White"
-                PlaceholderColor="#808080"
-                BackgroundColor="#1E1E1E"
-                HorizontalOptions="Fill" />
+              Placeholder="Username" MaxLength="30" Grid.Row="4" Grid.ColumnSpan="2" Text="{Binding Username}"
+              TextColor="White" PlaceholderColor="#808080" BackgroundColor="#1E1E1E" HorizontalOptions="Fill" />
 
             <Entry
-                Placeholder="Email Address"
-                Keyboard="Email"
-                Text="{Binding EmailAddress}"
-                TextColor="White"
-                PlaceholderColor="#808080"
-                BackgroundColor="#1E1E1E"
-                HorizontalOptions="Fill" />
+              Placeholder="Email Address" Grid.Row="5" Grid.ColumnSpan="2" Keyboard="Email"
+              Text="{Binding EmailAddress}" TextColor="White" PlaceholderColor="#808080"
+              BackgroundColor="#1E1E1E" HorizontalOptions="Fill" />
 
-            <Entry
-                Placeholder="Password"
-                IsPassword="True"
-                Text="{Binding Password}"
-                TextColor="White"
-                PlaceholderColor="#808080"
-                BackgroundColor="#1E1E1E"
-                HorizontalOptions="Fill" />
+            <Entry x:Name="PasswordEntry"
+              Placeholder="Password" Grid.Row="6" Grid.Column="0" IsPassword="True"
+              Text="{Binding Password}" TextColor="White" PlaceholderColor="#808080"
+              BackgroundColor="#1E1E1E" HorizontalOptions="Fill" />
+
+            <views:VisibilityButton Grid.Column="1" Grid.Row="6" TargetEntry="{x:Reference PasswordEntry}"/>
+
+            <Button 
+              Text="Sign Up" Grid.Row="7" Grid.ColumnSpan="2" Command="{Binding SignUpCommand}" BackgroundColor="#F5C451"
+              TextColor="#121212" FontAttributes="Bold" CornerRadius="10" HeightRequest="50" HorizontalOptions="Fill" />
 
             <Button
-                Text="Sign Up"
-                Command="{Binding SignUpCommand}"
-                BackgroundColor="#F5C451"
-                TextColor="#121212"
-                FontAttributes="Bold"
-                CornerRadius="10"
-                HeightRequest="50"
-                HorizontalOptions="Fill" />
-
-            <Button
-                Text="Already have an account? Log in"
-                Command="{Binding GoToLoginCommand}"
-                BackgroundColor="Transparent"
-                TextColor="#F5C451"
-                FontSize="14"
-                HorizontalOptions="Center" />   
-        </VerticalStackLayout>
+              Text="Already have an account? Log in" Grid.Row="8" Grid.ColumnSpan="2" Command="{Binding GoToLoginCommand}"
+              BackgroundColor="Transparent" TextColor="#F5C451" FontSize="14" HorizontalOptions="Center" />
+        </Grid>
     </ScrollView>
 </ContentPage>

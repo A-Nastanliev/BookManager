@@ -43,7 +43,7 @@
             <Label Grid.Row="4" Grid.Column="1" Text="{Binding User.PublicUser.Username}"/>
 
             <Label Grid.Row="5" Grid.Column="0" Text="Profile Picture:" FontAttributes="Bold"/>
-            <Label Grid.Row="5" Grid.Column="1" Text="{Binding User.PublicUser.ProfilePicture}"/>
+            <Label Grid.Row="5" Grid.Column="1" Text="{Binding User.PublicUser.ProfilePictureSource}"/>
 
         </Grid>
     </ScrollView>

@@ -6,7 +6,8 @@
     xmlns:local="clr-namespace:BookManager"
     xmlns:authentication="clr-namespace:BookManager.Views.Authentication"
     xmlns:book="clr-namespace:BookManager.Views.Book"
-    Title="BookManager">
+    Title="BookManager"
+    Shell.FlyoutBehavior="Disabled">
 
 
     <ShellContent

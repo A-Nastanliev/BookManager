@@ -4,7 +4,6 @@ namespace ServiceLayer.Dto.User
 {
     public class EmailLoginRequest
     {
-        [EmailAddress]
         [Required]
         public string Email { get; set; }
         [Required]

@@ -1,4 +1,5 @@
-﻿using BookManager.Services;
+﻿using BookManager.ApiClients;
+using BookManager.Authentication;
 using BookManager.Views.Authentication;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -25,11 +26,11 @@ namespace BookManager.ViewModels.Authentication
 
         private FileResult selectedImage;
 
-        private ApiService _apiService;
+        private UserClient _userClient;
 
-        public SignUpVM(ApiService apiService) 
+        public SignUpVM(UserClient userClient) 
         {
-            _apiService = apiService;
+            _userClient = userClient;
         }
 
 
@@ -52,7 +53,13 @@ namespace BookManager.ViewModels.Authentication
                 string.IsNullOrWhiteSpace(EmailAddress) ||
                 string.IsNullOrWhiteSpace(Password))
             {
-                await Shell.Current.DisplayAlertAsync( "Error", "All fields are required", "OK");
+                await Shell.Current.DisplayAlertAsync("Error", "All fields are required", "OK");
+                return;
+            }
+
+            if (!EmailValidator.IsValid(EmailAddress))
+            {
+                await Shell.Current.DisplayAlertAsync("Invalid Email", "Please, enter a valid email address", "OK");
                 return;
             }
 
@@ -76,30 +83,29 @@ namespace BookManager.ViewModels.Authentication
                 if (selectedImage != null)
                 {
                     var stream = await selectedImage.OpenReadAsync();
+                    stream.Position = 0;
+
                     var imageContent = new StreamContent(stream);
                     imageContent.Headers.ContentType =
                         new MediaTypeHeaderValue("image/jpeg");
 
-                    content.Add(
-                        imageContent,
-                        "ProfilePicture",
-                        selectedImage.FileName);
+                    content.Add(imageContent, "ProfilePicture", selectedImage.FileName);
                 }
 
-                var response = await _apiService.SignUpAsync(content);
+                var result = await _userClient.SignUpAsync(content);
 
-                if (!response.IsSuccessStatusCode)
+                if (!result.Success)
                 {
-                    var error = await response.Content.ReadAsStringAsync();
-                    await Shell.Current.DisplayAlertAsync("Sign up failed", error, "OK");
+                    await Shell.Current.DisplayAlertAsync("Sign up failed", result.Error, "OK");
                     return;
                 }
 
                 await Shell.Current.DisplayAlertAsync("Success", "Account created successfully!", "OK");
+                await Shell.Current.GoToAsync(nameof(LoginPage));
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlertAsync( "Error", ex.Message, "OK");
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
             }
         }
 
