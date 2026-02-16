@@ -1,7 +1,7 @@
 ﻿namespace BusinessLayer
 {
-	public abstract class AbstractRepository<T, K> : IRepository<T, K> where T : class
-	{
+	public abstract class AbstractRepository<T, K> : IRepository<T, K> where T : class where K : struct
+    {
 		protected readonly BookManagerContext _context;
 
 		public AbstractRepository(BookManagerContext context)
@@ -59,17 +59,6 @@
 			return await _context.SaveChangesAsync() > 0;
 		}
 
-		public virtual async Task<List<T>> ReadNextAsync(int count, int loaded)
-		{
-			var entityType = _context.Model.FindEntityType(typeof(T));
-			var keyProperty = entityType.FindPrimaryKey().Properties.First();
-
-			return await _context.Set<T>()
-				.AsNoTracking()
-				.OrderBy(e => EF.Property<object>(e, keyProperty.Name))
-				.Skip(loaded)
-				.Take(count)
-				.ToListAsync();
-		}
-	}
+		public abstract Task<(List<T>, DateTime? cursorDate, K? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, K? cursorKey);
+    }
 }

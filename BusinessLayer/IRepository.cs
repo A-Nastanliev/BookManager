@@ -1,11 +1,11 @@
 ﻿namespace BusinessLayer
 {
-	public interface IRepository<T, K> where T : class
-	{
+	public interface IRepository<T, K> where T : class where K : struct
+    {
 		Task<bool> CreateAsync(T obj);
 		Task<List<T>> ReadAllAsync();
 		Task<T> ReadAsync(K obj);
-		Task<List<T>> ReadNextAsync(int count, int loaded);
+		Task<(List<T>, DateTime? cursorDate, K? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, K? cursorKey);
 		Task<bool> UpdateAsync(T OBJ);
 		Task<bool> DeleteAsync(T obj);
 

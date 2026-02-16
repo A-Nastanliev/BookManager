@@ -20,17 +20,33 @@
 			return await _context.SaveChangesAsync() > 0;
 		}
 
-		public async Task<List<ReadingLog>> ReadNextByUserBookAsync(int count, int loaded, (int userId, int bookId) key)
-		{
-			return await _context.ReadingLogs
-			   .Where(r => r.UserId == key.userId && r.BookId == key.bookId)
-			   .OrderByDescending(r => r.Date)
-			   .Skip(loaded)
-			   .Take(count)
-			   .ToListAsync();
-		}
+        public async Task<(List<ReadingLog> Items, DateTime? NextCursorDate, int? NextCursorId)> ReadNextByUserBookAsync
+            (int count, DateTime? cursorDate, int? cursorId, (int userId, int bookId) key)
+        {
+            var query = _context.ReadingLogs
+                .Where(r => r.UserId == key.userId && r.BookId == key.bookId);
 
-		public async override Task<bool> DeleteAsync(ReadingLog obj)
+            if (cursorDate.HasValue && cursorId.HasValue)
+            {
+                query = query.Where(r =>
+                    r.Date < cursorDate.Value ||
+                    (r.Date == cursorDate.Value && r.Id < cursorId.Value));
+            }
+
+            var items = await query
+                .OrderByDescending(r => r.Date)
+                .ThenByDescending(r => r.Id)
+                .Take(count)
+                .ToListAsync();
+
+            var last = items.LastOrDefault();
+            int? nextCursorId = last?.Id;
+
+            return (items, last?.Date, nextCursorId);
+        }
+
+
+        public async override Task<bool> DeleteAsync(ReadingLog obj)
 		{
 			var log = await _context.ReadingLogs.Include(l => l.UserBook).FirstOrDefaultAsync(l => l.Id == obj.Id);
 			if (log == null || log.UserBook.UserId != obj.UserId || log.UserBook.BookId != obj.BookId)
@@ -39,5 +55,10 @@
 			_context.Remove(log);
 			return await _context.SaveChangesAsync() > 0;
 		}
-	}
+
+        public override Task<(List<ReadingLog>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

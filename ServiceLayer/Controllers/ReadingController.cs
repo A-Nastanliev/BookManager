@@ -44,12 +44,25 @@ namespace ServiceLayer.Controllers
 		}
 
 		[HttpGet("user-books")]
-		public async Task<IActionResult> GetNextUserBooks([FromQuery] LoadNextDto loadNextDto, [FromQuery] UserBookStatus userBookStatus)
+		public async Task<IActionResult> GetNextUserBooks([FromQuery] CursorDto cursor, [FromQuery] UserBookStatus userBookStatus)
 		{
-			List<UserBook> books = await _userBookRepository.ReadNextByStatusAsync(loadNextDto.Count, loadNextDto.AlreadyLoaded, userBookStatus, UserId);
+            if (!cursor.CursorKey.HasValue)
+                return NotFound("Cursor key is missing.");
+
+            int bookId = cursor.CursorKey.Value;
+
+            var (books, nextCursorDate, nextCursorKey) = await _userBookRepository.ReadNextByStatusAsync
+				(cursor.Count, cursor.CursorDate, (UserId, bookId), userBookStatus, UserId);
+
             var baseUrl = _configuration["App:BaseUrl"];
-            return Ok(books.Select(b => b.ToDto(baseUrl)));
-		}
+
+            return Ok(new
+            {
+                UserBooks = books.Select(b => b.ToDto(baseUrl)),
+                CursorDate = nextCursorDate,
+                CursorKey = nextCursorKey
+            });
+        }
 
 		[HttpPut("user-books/{bookId}")]
 		public async Task<IActionResult> UpdateUserBook(int bookId, [FromBody] UserBookStatus status)
@@ -94,15 +107,18 @@ namespace ServiceLayer.Controllers
 		}
 
 		[HttpGet("user-books/{bookId}/logs")]
-		public async Task<IActionResult> ReadNextReadingLogs(int bookId, [FromQuery] LoadNextDto loadNextDto)
-		{
-			var logs = await _readingLogRepository.ReadNextByUserBookAsync(
-				loadNextDto.Count,
-				loadNextDto.AlreadyLoaded,
-				(UserId, bookId));
+		public async Task<IActionResult> ReadNextReadingLogs(int bookId, [FromQuery] CursorDto cursor)
+		{	
+            var (logs, nextCursorDate, nextCursorId) = await _readingLogRepository.ReadNextByUserBookAsync
+				(cursor.Count, cursor.CursorDate, cursor.CursorKey, (UserId, bookId));
 
-			return Ok(logs.Select(l => l.ToDto()));
-		}
+            return Ok(new
+            {
+                ReadingLogs = logs.Select(l => l.ToDto()),
+                CursorDate = nextCursorDate,
+                CursorId = nextCursorId
+            });
+        }
 
 		[HttpPut("user-books/{bookId}/logs/{logId}")]
 		public async Task<IActionResult> UpdateReadingLog(int bookId, int logId, [FromBody] ReadingLogDto dto)
@@ -154,28 +170,23 @@ namespace ServiceLayer.Controllers
 		}
 
 		[HttpGet("book-requests/mine")]
-		public async Task<IActionResult> ReadMyNextBookRequests([FromQuery] LoadNextDto dto)
+		public async Task<IActionResult> ReadMyNextBookRequests([FromQuery] CursorDto cursor)
 		{
-			List<BookRequest> bookRequests = await _bookRequestRepository.ReadNextByUserAsync(dto.Count, dto.AlreadyLoaded, UserId);
-			if (bookRequests == null)
-				return NotFound();
-
+            var (BookRequests, CursorDate, CursorId) = await _bookRequestRepository.ReadNextByUserAsync(cursor.Count, cursor.CursorDate, cursor.CursorKey, UserId);
             var baseUrl = _configuration["App:BaseUrl"];
-            return Ok(bookRequests.Select(br => br.ToDto(baseUrl)));
-		}
+            return Ok(new { BookRequests = BookRequests.Select(br => br.ToDto(baseUrl)), CursorDate, CursorId });
+        }
 
 		[HttpGet("book-requests")]
 		[Authorize(Roles = "Admin")]
-		public async Task<IActionResult> ReadNextBookRequests([FromQuery] LoadNextDto dto)
+		public async Task<IActionResult> ReadNextBookRequests([FromQuery] CursorDto cursor)
 		{
-			List<BookRequest> bookRequests = await _bookRequestRepository.ReadNextAsync(dto.Count, dto.AlreadyLoaded);
-			if (bookRequests == null)
-				return NotFound();
+            var (BookRequests, CursorDate, CursorId) = await _bookRequestRepository.ReadNextAsync(cursor.Count, cursor.CursorDate, cursor.CursorKey);
             var baseUrl = _configuration["App:BaseUrl"];
-            return Ok(bookRequests.Select(br => br.ToDto(baseUrl)));
-		}
+            return Ok(new { BookRequests = BookRequests.Select(br => br.ToDto(baseUrl)), CursorDate, CursorId });
+        }
 
-		[HttpPut("book-requests/{id}/action")]
+        [HttpPut("book-requests/{id}/action")]
 		[Authorize(Roles = "Admin")]
 		public async Task<IActionResult> UpdateBookRequest([FromQuery] BookRequestDto dto)
 		{
@@ -311,14 +322,14 @@ namespace ServiceLayer.Controllers
 		}
 
 		[HttpGet("books/{bookId}/comments")]
-		public async Task<IActionResult> ReadNextBookComments(int bookId, [FromQuery] LoadNextDto loadNextDto)
-		{
-			var comments = await _bookCommentRepository.ReadNextByBookAsync(bookId, loadNextDto.Count, loadNextDto.AlreadyLoaded);
+		public async Task<IActionResult> ReadNextBookComments(int bookId, [FromQuery] CursorDto cursor)
+		{		
+			var (BookComments, CursorDate, CursorId) = await _bookCommentRepository.ReadNextByBookAsync(bookId, cursor.Count, cursor.CursorDate, cursor.CursorKey);
+            var baseUrl = _configuration["App:BaseUrl"];
+            return Ok(new { BookComments = BookComments.Select(c => c.ToDto(baseUrl)), CursorDate, CursorId });
+        }
 
-			return Ok(comments.Select(c => c.ToDto()));
-		}
-
-		[HttpPut("comments/{commentId}")]
+        [HttpPut("comments/{commentId}")]
 		public async Task<IActionResult> UpdateBookComment(int commentId, [FromBody] string content)
 		{
 			var comment = new BookComment

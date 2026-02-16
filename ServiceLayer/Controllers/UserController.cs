@@ -4,6 +4,7 @@ using DataLayer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.IsisMtt.X509;
 using ServiceLayer.Dto;
 using ServiceLayer.Dto.User;
 using ServiceLayer.Mappers;
@@ -103,11 +104,19 @@ namespace ServiceLayer.Controllers
 
 		[Authorize(Roles = "Admin")]
 		[HttpGet("next-users")]
-		public async Task<IActionResult> GetNextUsers([FromQuery] LoadNextDto load)
+		public async Task<IActionResult> GetNextUsers([FromQuery] CursorDto cursor)
 		{
-			var users = await _userRepository.ReadNextAsync(load.Count, load.AlreadyLoaded);
-			return Ok(users.Select(u => u.ToPublicDto()));
-		}
+			(var users, DateTime? cursorDate, int? cursorKey) = await _userRepository.ReadNextAsync(cursor.Count, cursor.CursorDate, cursor.CursorKey);
+            var baseUrl = _configuration["App:BaseUrl"];
+            var userDtos = users.Select(u => u.ToPublicDto(baseUrl)).ToList();
+
+            return Ok(new
+            {
+                Users = userDtos,
+                CursorDate = cursorDate,
+                CursorId = cursorKey
+            });
+        }
 
 		[HttpPut("me")]
 		public async Task<IActionResult> UpdateProfile([FromBody] UserDto req)
@@ -206,12 +215,19 @@ namespace ServiceLayer.Controllers
 
 		[Authorize(Roles = "Admin")]
 		[HttpGet("comment-restrictions/active")]
-		public async Task<IActionResult> GetActiveCommentRestrictions([FromQuery] LoadNextDto load)
+		public async Task<IActionResult> GetActiveCommentRestrictions([FromQuery] CursorDto cursor)
 		{
-			var restrictions = await _restrictionRepository.ReadNextAsync(load.Count, load.AlreadyLoaded);
+			(var restrictions, DateTime? cursorDate, int? cursorKey) = await _restrictionRepository.ReadNextAsync(cursor.Count, cursor.CursorDate, cursor.CursorKey);
+            var baseUrl = _configuration["App:BaseUrl"];
+            var restrictionDtos = restrictions.Select(r => r.ToDto(baseUrl)).ToList();
 
-			return Ok(restrictions.Select(r => r.ToDto()));
-		}
+            return Ok(new
+            {
+                Restrictions = restrictionDtos,
+                CursorDate = cursorDate,
+                CursorId = cursorKey
+            });
+        }
 
 		[Authorize(Roles = "Admin")]
 		[HttpPut("comment-restriction/{restrictionId}/end")]

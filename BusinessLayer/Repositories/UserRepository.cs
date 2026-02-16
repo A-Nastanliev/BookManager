@@ -13,15 +13,6 @@ namespace BusinessLayer.Repositories
 				.FirstOrDefaultAsync(g => g.Id == id);
 		}
 
-        public override async Task<List<User>> ReadNextAsync(int count, int loaded)
-        {
-            return await _context.Users
-               .OrderByDescending(u => u.CreatedAt)
-               .Skip(loaded)
-               .Take(count)
-               .ToListAsync();
-        }
-
         public async Task<bool> SignUpAsync(User user)
         {
             user.PasswordHash = HashPassword(user.PasswordHash);
@@ -104,5 +95,32 @@ namespace BusinessLayer.Repositories
 
             return CryptographicOperations.FixedTimeEquals(hash, storedHash);
         }
+
+        public override async Task<(List<User>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
+        {
+            var query = _context.Users.AsQueryable();
+
+            if (cursorDate.HasValue && cursorKey.HasValue)
+            {
+                query = query.Where(u =>
+                    u.CreatedAt < cursorDate.Value ||
+                    (u.CreatedAt == cursorDate.Value && u.Id < cursorKey.Value));
+            }
+
+            var users = await query
+                .OrderByDescending(u => u.CreatedAt)
+                .ThenByDescending(u => u.Id)
+                .Take(count)
+                .ToListAsync();
+
+            var last = users.LastOrDefault();
+
+            return (
+                users,
+                last?.CreatedAt,
+                last?.Id
+            );
+        }
+
     }
 }

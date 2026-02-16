@@ -36,42 +36,6 @@ namespace BusinessLayer.Repositories
 				.ToListAsync();
 		}
 
-		public override async Task<List<Book>> ReadNextAsync(int count, int loaded)
-		{
-			return await _context.Books
-			   .Include(b => b.Author)
-			   .Include(b => b.Publisher)
-			   .Include(b => b.Genre)
-			   .OrderByDescending(b => b.CreatedAt)
-				   .ThenBy(b => b.Title)
-			   .Skip(loaded)
-			   .Take(count)
-			   .ToListAsync();
-		}
-
-		public async Task<List<Book>> ReadNextByAsync(string type, int id, int count, int loaded)
-		{
-			IQueryable<Book> query = _context.Books
-				.Include(b => b.Author)
-				.Include(b => b.Publisher)
-				.Include(b => b.Genre);
-
-			query = type switch
-			{
-				"author" => query.Where(b => b.AuthorId == id),
-				"genre" => query.Where(b => b.GenreId == id),
-				"publisher" => query.Where(b => b.PublisherId == id),
-				_ => throw new ArgumentException("Invalid filter type")
-			};
-
-			return await query
-				.OrderByDescending(b => b.CreatedAt)
-					.ThenBy(b => b.Title)
-				.Skip(loaded)
-				.Take(count)
-				.ToListAsync();
-		}
-
 		public async Task<bool> UpdateCoverAsync(Book book)
 		{
 			var bookToUpdate = await _context.Books.FindAsync(book.Id);
@@ -102,5 +66,32 @@ namespace BusinessLayer.Repositories
 			}
             return await _context.SaveChangesAsync() > 0;
         }
-	}
+
+        public override async Task<(List<Book>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
+        {
+            IQueryable<Book> query = _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Publisher)
+                .Include(b => b.Genre);
+
+            if (cursorDate.HasValue && cursorKey.HasValue)
+            {
+                query = query.Where(b =>
+                    b.CreatedAt < cursorDate.Value ||
+                    (b.CreatedAt == cursorDate.Value && b.Id < cursorKey.Value));
+            }
+
+            var items = await query
+                .OrderByDescending(b => b.CreatedAt)
+                .ThenByDescending(b => b.Id)
+                .Take(count)
+                .ToListAsync();
+
+            var last = items.LastOrDefault();
+            int? nextCursorId = last?.Id;
+
+            return (items, last?.CreatedAt, nextCursorId);
+        }
+
+    }
 }

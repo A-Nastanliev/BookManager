@@ -28,9 +28,9 @@ namespace ServiceLayer.Mappers
 			return new BookRatingDto(bookRating.BookId, bookRating?.Book.ToDto(baseUrl), bookRating.UserId, bookRating?.User.ToDto(baseUrl), bookRating.Rating);
 		}
 
-		public static BookCommentDto ToDto(this BookComment bookComment)
+		public static BookCommentDto ToDto(this BookComment bookComment, string baseUrl)
 		{
-			return new BookCommentDto(bookComment.Id, bookComment.BookId, null, bookComment.UserId, bookComment.User.ToPublicDto(),
+			return new BookCommentDto(bookComment.Id, bookComment.BookId, null, bookComment.UserId, bookComment.User.ToPublicDto(baseUrl),
 				bookComment.Comment, bookComment.UserPageProgress, bookComment.Date);
 		}
 	}

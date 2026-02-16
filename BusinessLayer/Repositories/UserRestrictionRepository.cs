@@ -30,15 +30,27 @@ namespace BusinessLayer.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public override async Task<List<UserRestriction>> ReadNextAsync(int count, int loaded)
+        public override async Task<(List<UserRestriction>, DateTime? cursorDate, int? cursorKey )> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
         {
-            return await _context.UserRestrictions
-              .Where(cr => cr.EndDate == null || cr.EndDate > DateTime.UtcNow)
-              .OrderByDescending(f => f.StartDate)
-              .Skip(loaded)
-              .Take(count)
-              .Include(cr => cr.User)
-              .ToListAsync();
+            var query = _context.UserRestrictions.Where(cr => cr.EndDate == null || cr.EndDate > DateTime.UtcNow);
+
+            if (cursorDate.HasValue && cursorKey.HasValue)
+            {
+                query = query.Where(cr =>
+                    cr.StartDate < cursorDate.Value ||
+                    (cr.StartDate == cursorDate.Value && cr.Id < cursorKey.Value));
+            }
+
+            var restrictions = await query
+                .OrderByDescending(cr => cr.StartDate)
+                .ThenByDescending(cr => cr.Id)
+                .Take(count)
+                .Include(cr => cr.User)
+                .ToListAsync();
+
+            var lastItem = restrictions.LastOrDefault();
+
+            return (restrictions, lastItem?.StartDate, lastItem?.Id);
         }
 	}
 }

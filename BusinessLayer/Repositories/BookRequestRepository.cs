@@ -21,27 +21,60 @@ namespace BusinessLayer.Repositories
 				.ToListAsync();
 		}
 
-		public async Task<List<BookRequest>> ReadNextByStatusAsync(int count, int loaded, BookRequestStatus status)
-		{
-			return await _context.BookRequests
-				.Where(br => br.Status == status)
-				.OrderByDescending(br => br.DateSent)
-				.Include(br => br.Sender)
-				.Include(br => br.ActionedBy)
-				.ToListAsync();
-		}
+        public async Task<(List<BookRequest> Items, DateTime? NextCursorDate, int? NextCursorId)> ReadNextByStatusAsync
+			(int count, DateTime? cursorDate, int? cursorId, BookRequestStatus status)
+        {
+            var query = _context.BookRequests
+                .Where(br => br.Status == status);
 
-		public async Task<List<BookRequest>> ReadNextByUserAsync(int count, int loaded, int userId)
-		{
-			return await _context.BookRequests
-			  .Where(br => br.SenderId == userId)
-			  .OrderByDescending(br => br.DateSent)
-			  .Include(br => br.Sender)
-			  .Include(br => br.ActionedBy)
-			  .ToListAsync();
-		}
+            if (cursorDate.HasValue && cursorId.HasValue)
+            {
+                query = query.Where(br =>
+                    br.DateSent < cursorDate.Value ||
+                    (br.DateSent == cursorDate.Value && br.Id < cursorId.Value));
+            }
 
-		public override async Task<bool> CreateAsync(BookRequest obj)
+            var items = await query
+                .OrderByDescending(br => br.DateSent)
+                .ThenByDescending(br => br.Id)
+                .Take(count)
+                .Include(br => br.Sender)
+                .Include(br => br.ActionedBy)
+                .ToListAsync();
+
+            var last = items.LastOrDefault();
+
+            return (items, last?.DateSent, last?.Id);
+        }
+
+        public async Task<(List<BookRequest> Items, DateTime? NextCursorDate, int? NextCursorId)> ReadNextByUserAsync
+			(int count, DateTime? cursorDate, int? cursorId, int userId)
+        {
+            var query = _context.BookRequests
+                .Where(br => br.SenderId == userId);
+
+            if (cursorDate.HasValue && cursorId.HasValue)
+            {
+                query = query.Where(br =>
+                    br.DateSent < cursorDate.Value ||
+                    (br.DateSent == cursorDate.Value && br.Id < cursorId.Value));
+            }
+
+            var items = await query
+                .OrderByDescending(br => br.DateSent)
+                .ThenByDescending(br => br.Id)
+                .Take(count)
+                .Include(br => br.Sender)
+                .Include(br => br.ActionedBy)
+                .ToListAsync();
+
+            var last = items.LastOrDefault();
+
+            return (items, last?.DateSent, last?.Id);
+        }
+
+
+        public override async Task<bool> CreateAsync(BookRequest obj)
 		{
 			obj.DateSent = DateTime.UtcNow;
 			obj.DateActioned = null;
@@ -98,5 +131,10 @@ namespace BusinessLayer.Repositories
 			_context.BookRequests.Remove(request);
 			return await _context.SaveChangesAsync() > 0;
 		}
-	}
+
+        public override Task<(List<BookRequest>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

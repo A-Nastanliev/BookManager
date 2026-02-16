@@ -54,15 +54,36 @@ namespace BusinessLayer.Repositories
 			return await _context.SaveChangesAsync() > 0;
 		}
 
-		public async Task<List<BookComment>> ReadNextByBookAsync(int bookId, int count, int loaded)
-		{
-			return await _context.BookComments
-				.Where(bc => bc.BookId == bookId)
-				.OrderByDescending(bc => bc.Date)
-				.Skip(loaded)
-				.Take(count)
-				.Include(bc => bc.User)
-				.ToListAsync();
-		}
-	}
+        public async Task<(List<BookComment> Items, DateTime? NextCursorDate, int? NextCursorId)> ReadNextByBookAsync
+			(int bookId, int count, DateTime? cursorDate, int? cursorId)
+        {
+            IQueryable<BookComment> query = _context.BookComments
+                .Where(bc => bc.BookId == bookId)
+                .Include(bc => bc.User);
+
+            if (cursorDate.HasValue && cursorId.HasValue)
+            {
+                query = query.Where(bc =>
+                    bc.Date < cursorDate.Value ||
+                    (bc.Date == cursorDate.Value && bc.Id < cursorId.Value));
+            }
+
+            var items = await query
+                .OrderByDescending(bc => bc.Date)
+                .ThenByDescending(bc => bc.Id)
+                .Take(count)
+                .ToListAsync();
+
+            var last = items.LastOrDefault();
+            int? nextCursorId = last?.Id;
+
+            return (items, last?.Date, nextCursorId);
+        }
+
+
+        public override Task<(List<BookComment>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

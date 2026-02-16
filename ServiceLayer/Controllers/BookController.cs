@@ -56,22 +56,14 @@ namespace ServiceLayer.Controllers
         }
 
 		[HttpGet("next")]
-		public async Task<IActionResult> GetNextBooks([FromQuery] LoadNextDto load)
+		public async Task<IActionResult> GetNextBooks([FromQuery] CursorDto cursor)
 		{
-			var books = await _bookRepository.ReadNextAsync(load.Count, load.AlreadyLoaded);
+			var (Books, CursorDate, CursorId) = await _bookRepository.ReadNextAsync(cursor.Count, cursor.CursorDate, cursor.CursorKey);
             var baseUrl = _configuration["App:BaseUrl"];
-            return Ok(books.Select(b => b.ToDto(baseUrl)));
-		}
+            return Ok(new { Books = Books.Select(b => b.ToDto(baseUrl)), CursorDate, CursorId });
+        }
 
-		[HttpGet("next-by")]
-		public async Task<IActionResult> GetNextBooksBy([FromQuery] LoadNextDto load, [FromQuery] string type, [FromQuery] int id)
-		{
-			var books = await _bookRepository.ReadNextByAsync(type.ToLower(), id, load.Count, load.AlreadyLoaded);
-            var baseUrl = _configuration["App:BaseUrl"];
-            return Ok(books.Select(b => b.ToDto(baseUrl)));
-		}
-
-		[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
 		[HttpPut("{id}")]
 		public async Task<IActionResult> UpdateBook(int id, [FromBody] BookUpdateDto req)
 		{

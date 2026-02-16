@@ -35,21 +35,41 @@ namespace BusinessLayer.Repositories
 			return await _context.SaveChangesAsync() > 0;
 		}
 
-		public async Task<List<UserBook>> ReadNextByStatusAsync(int count, int loaded, UserBookStatus status, int userId)
-		{
-			return await _context.UsersBook
-				.Where(ub => ub.UserId == userId && ub.Status == status)
-				.OrderByDescending(ub => ub.CreatedAt)
-				.Skip(loaded)
-				.Take(count)
-				.Include(ub => ub.Book)
-					.ThenInclude(b => b.Author)
-				.Include(ub => ub.Book)
-					.ThenInclude(b => b.Publisher)
-				.Include(ub => ub.Book)
-					.ThenInclude(b => b.Genre)
-				.ToListAsync();
-		}
+        public async Task<(List<UserBook> Items, DateTime? NextCursorDate, (int userId, int bookId)? NextCursorKey)> ReadNextByStatusAsync
+            (int count, DateTime? cursorDate, (int userId, int bookId)? cursorKey, UserBookStatus status, int userId)
+        {
+            var query = _context.UsersBook
+                .Where(ub => ub.UserId == userId && ub.Status == status);
 
-	}
+            if (cursorDate.HasValue && cursorKey.HasValue)
+            {
+                query = query.Where(ub =>
+                    ub.CreatedAt < cursorDate.Value ||
+                    (ub.CreatedAt == cursorDate.Value && ub.BookId < cursorKey.Value.bookId));
+            }
+
+            var items = await query
+                .OrderByDescending(ub => ub.CreatedAt)
+                .ThenByDescending(ub => ub.BookId)
+                .Take(count)
+                .Include(ub => ub.Book)
+                    .ThenInclude(b => b.Author)
+                .Include(ub => ub.Book)
+                    .ThenInclude(b => b.Publisher)
+                .Include(ub => ub.Book)
+                    .ThenInclude(b => b.Genre)
+                .ToListAsync();
+
+            var last = items.LastOrDefault();
+            (int userId, int bookId)? nextCursorKey = last == null ? null : (last.UserId, last.BookId);
+
+            return (items, last?.CreatedAt, nextCursorKey);
+        }
+
+
+        public override Task<(List<UserBook>, DateTime? cursorDate, (int userId, int bookId)? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, (int userId, int bookId)? cursorKey)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
