@@ -1,10 +1,11 @@
-﻿using System.Text.Encodings;
-using BookManager.Authentication;
+﻿using BookManager.Authentication;
 using BookManager.ViewModels.Models;
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
+using System.Net.Mail;
 using System.Text;
+using System.Text.Encodings;
 using System.Text.Json;
 
 namespace BookManager.ApiClients
@@ -23,8 +24,20 @@ namespace BookManager.ApiClients
             _tokenStore = tokenStore;
         }
 
-        public async Task<AuthResult> SignUpAsync(MultipartFormDataContent content)
+        public async Task<AuthResult> SignUpAsync(string username, string email, string password, string imagePath)
         {
+            using var content = new MultipartFormDataContent();
+
+            content.Add(new StringContent(username), "Username");
+            content.Add(new StringContent(email), "EmailAddress");
+            content.Add(new StringContent(password), "Password");
+
+            var stream = File.OpenRead(imagePath);
+            var streamContent = new StreamContent(stream);
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+
+            content.Add(streamContent, "ProfilePicture", Path.GetFileName(imagePath));
+
             var response = await _httpClient.PostAsync("/api/users/signup", content);
 
             if (!response.IsSuccessStatusCode)

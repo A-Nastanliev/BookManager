@@ -3,6 +3,7 @@ using BookManager.Authentication;
 using BookManager.Views.Authentication;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Maui.Alerts;
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
@@ -10,7 +11,7 @@ using System.Text;
 
 namespace BookManager.ViewModels.Authentication
 {
-    public partial class SignUpVM : ObservableObject
+    public partial class SignUpVM : ObservableObject, ITemporaryImageCleaner
     {
         [ObservableProperty]
         private string username;
@@ -24,9 +25,9 @@ namespace BookManager.ViewModels.Authentication
         [ObservableProperty]
         private ImageSource profileImage;
 
-        private FileResult selectedImage;
+        string _selectedImagePath;
 
-        private UserClient _userClient;
+        readonly UserClient _userClient;
 
         public SignUpVM(UserClient userClient) 
         {
@@ -37,13 +38,29 @@ namespace BookManager.ViewModels.Authentication
         [RelayCommand]
         private async Task PickProfilePicture()
         {
-            var result = await MediaPicker.PickPhotoAsync();
-
-            if (result != null)
+            var options = new MediaPickerOptions
             {
-                selectedImage = result;
-                ProfileImage = ImageSource.FromFile(result.FullPath);
+                Title = "Pick a profile picture",
+                SelectionLimit = 1,
+            };
+            var results = await MediaPicker.Default.PickPhotosAsync(options);
+
+            if (results == null || results.Count == 0)
+                return;
+
+            var result = results[0];
+            var localFilePath = Path.Combine(FileSystem.CacheDirectory, $"{Guid.NewGuid()}{Path.GetExtension(result.FileName)}");
+
+            using (var sourceStream = await result.OpenReadAsync())
+            using (var localFileStream = File.OpenWrite(localFilePath))
+            {
+                await sourceStream.CopyToAsync(localFileStream);
             }
+
+            CleanupTempImage();
+            _selectedImagePath = localFilePath;
+
+            ProfileImage = ImageSource.FromFile(localFilePath);
         }
 
         [RelayCommand]
@@ -63,7 +80,7 @@ namespace BookManager.ViewModels.Authentication
                 return;
             }
 
-            if (selectedImage == null)
+            if (string.IsNullOrWhiteSpace(_selectedImagePath))
             {
                 await Shell.Current.DisplayAlertAsync(
                     "Error",
@@ -72,27 +89,15 @@ namespace BookManager.ViewModels.Authentication
                 return;
             }
 
+            if(Password.Length < 4)
+            {
+                await Shell.Current.DisplayAlertAsync("Password", "Password should be atleast 4 charachters", "OK");
+                return;
+            }
+
             try
             {
-                using var content = new MultipartFormDataContent();
-
-                content.Add(new StringContent(Username), "Username");
-                content.Add(new StringContent(EmailAddress), "EmailAddress");
-                content.Add(new StringContent(Password), "Password");
-
-                if (selectedImage != null)
-                {
-                    var stream = await selectedImage.OpenReadAsync();
-                    stream.Position = 0;
-
-                    var imageContent = new StreamContent(stream);
-                    imageContent.Headers.ContentType =
-                        new MediaTypeHeaderValue("image/jpeg");
-
-                    content.Add(imageContent, "ProfilePicture", selectedImage.FileName);
-                }
-
-                var result = await _userClient.SignUpAsync(content);
+                var result = await _userClient.SignUpAsync(Username, EmailAddress, Password, _selectedImagePath);
 
                 if (!result.Success)
                 {
@@ -100,7 +105,7 @@ namespace BookManager.ViewModels.Authentication
                     return;
                 }
 
-                await Shell.Current.DisplayAlertAsync("Success", "Account created successfully!", "OK");
+                _ = Toast.Make($"{Username} created").Show();
                 await Shell.Current.GoToAsync(nameof(LoginPage));
             }
             catch (Exception ex)
@@ -113,6 +118,22 @@ namespace BookManager.ViewModels.Authentication
         private async Task GoToLogin()
         {
             await Shell.Current.GoToAsync(nameof(LoginPage));
+        }
+
+        public void CleanupTempImage()
+        {
+            if (!string.IsNullOrWhiteSpace(_selectedImagePath) && File.Exists(_selectedImagePath))
+            {
+                try
+                {
+                    File.Delete(_selectedImagePath);
+                }
+                catch
+                {
+
+                }
+
+            }
         }
     }
 }
