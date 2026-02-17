@@ -46,19 +46,25 @@ namespace ServiceLayer.Controllers
                 return BadRequest(e.Message);
             }
 
-            var book = new Book(req.ISBN, req.Title, coverPath, req.TotalPages, req.Description, req.AuthorId, req.GenreId, req.PublisherId);
+            var book = new Book(req.ISBN, req.Title, coverPath, req.TotalPages, req.Description, req.AuthorName, req.PublisherName, req.GenreName);
 
             var success = await _bookRepository.CreateAsync(book);
             if (!success)
                 return BadRequest();
 
-            return StatusCode(201, new { id = book.Id });
+            return StatusCode(201, new
+            {
+                id = book.Id,
+                authorId = book.AuthorId,
+                publisherId = book.PublisherId,
+                genreId = book.GenreId
+            });
         }
 
 		[HttpGet("next")]
-		public async Task<IActionResult> GetNextBooks([FromQuery] CursorDto cursor)
+		public async Task<IActionResult> GetNextBooks([FromQuery] CursorDto cursor, [FromQuery] string search)
 		{
-			var (Books, CursorDate, CursorId) = await _bookRepository.ReadNextAsync(cursor.Count, cursor.CursorDate, cursor.CursorKey);
+			var (Books, CursorDate, CursorId) = await _bookRepository.ReadNextAsync(cursor.Count, cursor.CursorDate, cursor.CursorKey, search);
             var baseUrl = _configuration["App:BaseUrl"];
             return Ok(new { Books = Books.Select(b => b.ToDto(baseUrl)), CursorDate, CursorId });
         }
@@ -73,7 +79,7 @@ namespace ServiceLayer.Controllers
 			return NoContent();
 		}
 
-        [Authorize(Roles = "Admin")]
+     /*   [Authorize(Roles = "Admin")]
         [HttpPut("{id}/cover")]
         public async Task<IActionResult> UpdateBookCover(int id, [FromForm] IFormFile cover)
         {
@@ -102,7 +108,7 @@ namespace ServiceLayer.Controllers
                 return NotFound();
 
             return Ok(new { Cover = newCover });
-        }
+        }*/
 
         [Authorize(Roles = "Admin")]
 		[HttpDelete("{id}")]

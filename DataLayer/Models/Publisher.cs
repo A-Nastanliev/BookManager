@@ -21,6 +21,11 @@
 
         public Publisher() { }
 
+        public Publisher(string name)
+        {
+            Name = name;
+        }
+
         public Publisher(string name, string description, string website)
         {
             Name = name;

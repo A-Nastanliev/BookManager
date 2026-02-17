@@ -46,16 +46,16 @@
 
         public Book() { }
 
-        public Book(string isbn, string title, string cover, int totalPages, string description, int authorId, int? genreId, int? publisherId)
+        public Book(string isbn, string title, string cover, int totalPages, string description, string authorName, string publisherName = null, string genreName = null)
         {
             ISBN = isbn;
             Title = title;
             Cover = cover;
             TotalPages = totalPages;
             Description = description;
-            AuthorId = authorId;
-            GenreId = genreId;
-            PublisherId = publisherId;
+            Author = new Author(authorName);
+            Publisher = string.IsNullOrWhiteSpace(publisherName) ? null : new Publisher(publisherName.Trim());
+            Genre = string.IsNullOrWhiteSpace(genreName) ? null : new Genre(genreName.Trim());
         }
 
         public Book(int id, string isbn, string title, int totalPages, string description, int?genreId, int?publisherId)

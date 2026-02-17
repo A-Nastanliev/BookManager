@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookManager.Views.Book.BookView"
+             xmlns:vm="clr-namespace:BookManager.Models.Book"
+             x:DataType="vm:BookVM"
+             x:Name="Root">
+    
+    <Border
+        Margin="6" StrokeShape="RoundRectangle 10"
+        Padding="0" HorizontalOptions="Fill" >
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer
+                Command="{Binding TapCommand, Source={x:Reference Root}}"
+                CommandParameter="{Binding BindingContext, Source={x:Reference Root}}"/>
+        </Border.GestureRecognizers>
+        <Grid>
+            <Image
+                Aspect="AspectFill"
+                HeightRequest="220"
+                Source="{Binding CoverSource}" />
+
+            <VerticalStackLayout Padding="10, 4, 10, 4" Spacing="4" Background="{StaticResource PrimaryOverlay}" HorizontalOptions="Fill" VerticalOptions="End">
+                <Label
+                    Text="{Binding Title}"
+                    LineBreakMode="TailTruncation"/>
+                <Label
+                    Text="{Binding Author.Name}"
+                    LineBreakMode="TailTruncation" FontSize="12"/>
+                <Label
+                    Text="{Binding Publisher.Name}"
+                    FontSize="8"/>
+
+            </VerticalStackLayout>
+        </Grid>
+    </Border>
+</ContentView>

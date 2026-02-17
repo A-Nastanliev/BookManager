@@ -40,6 +40,6 @@ public partial class VisibilityButton : ContentView
         if (TargetEntry == null)
             return;
 
-        Button.Source = TargetEntry.IsPassword ? "hide_password.png" : "show_password.png";
+        Icon.Source = TargetEntry.IsPassword ? "hide_password.png" : "show_password.png";
     }
 }

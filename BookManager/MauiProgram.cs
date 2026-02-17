@@ -47,18 +47,21 @@ namespace BookManager
             }
 
             AddApiClient<UserClient>();
+            AddApiClient<BookClient>();
 
             builder.Services.AddTransient<LoadingVM>();
             builder.Services.AddTransient<LoginVM>();
             builder.Services.AddTransient<SignUpVM>();
 
             builder.Services.AddSingleton<BookSearchVM>();
+            builder.Services.AddTransient<BookFormVM>();
 
             builder.Services.AddTransient<LoadingPage>();
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<SignUpPage>();
 
             builder.Services.AddSingleton<BookSearchPage>();
+            builder.Services.AddTransient<BookFormPage>();
 
             return builder.Build();
         }

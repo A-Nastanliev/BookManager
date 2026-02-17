@@ -31,6 +31,7 @@ namespace ServiceLayer.Dto.Book
         {
             Id = id;
             Title = title;
+            ISBN = isbn;
             Cover = cover;
             TotalPages = totalPages;
             Description = description;

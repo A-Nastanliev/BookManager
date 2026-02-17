@@ -6,7 +6,7 @@
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(100)]
+        [MaxLength(70)]
         public string Name { get; set; }
 
         [MaxLength(1000)]
@@ -17,6 +17,11 @@
         public List<Book> Books { get; set; } = new();
 
         public Author() { }
+
+        public Author(string name)
+        {
+            Name = name;
+        }
 
         public Author(string name, string biography, DateTime? birthDate)
         {

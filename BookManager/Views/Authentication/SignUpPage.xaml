@@ -19,7 +19,7 @@
               HorizontalOptions="Center" Grid.Row="0" Grid.ColumnSpan="2"/>
 
             <Border
-              Stroke="#F5C451" Grid.Row="1" Grid.ColumnSpan="2"
+              Stroke="{StaticResource Primary}" Grid.Row="1" Grid.ColumnSpan="2"
               StrokeThickness="2" StrokeShape="RoundRectangle 60" WidthRequest="120"
               HeightRequest="120" HorizontalOptions="Center" VerticalOptions="Center">
 
@@ -61,7 +61,7 @@
 
             <Button
               Text="Already have an account? Log in" Grid.Row="8" Grid.ColumnSpan="2" Command="{Binding GoToLoginCommand}"
-              BackgroundColor="Transparent" TextColor="#F5C451" FontSize="14" HorizontalOptions="Center" />
+              BackgroundColor="Transparent" TextColor="{StaticResource Primary}" FontSize="14" HorizontalOptions="Center" />
         </Grid>
     </ScrollView>
 </ContentPage>

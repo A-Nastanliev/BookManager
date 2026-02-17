@@ -3,6 +3,7 @@ using DataLayer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using ServiceLayer;
 using ServiceLayer.Services;
 using System;
 using System.Text;
@@ -62,6 +63,8 @@ app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<JsonResponseLoggingMiddleware>();
 
 app.MapControllers();
 app.UseSwagger();

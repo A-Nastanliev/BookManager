@@ -11,7 +11,7 @@ using System.Text;
 
 namespace BookManager.ViewModels.Authentication
 {
-    public partial class SignUpVM : ObservableObject, ITemporaryImageCleaner
+    public partial class SignUpVM : ObservableObject
     {
         [ObservableProperty]
         private string username;
@@ -57,7 +57,7 @@ namespace BookManager.ViewModels.Authentication
                 await sourceStream.CopyToAsync(localFileStream);
             }
 
-            CleanupTempImage();
+            ImageCleaner.CleanupTempImage(_selectedImagePath);
             _selectedImagePath = localFilePath;
 
             ProfileImage = ImageSource.FromFile(localFilePath);
@@ -120,20 +120,9 @@ namespace BookManager.ViewModels.Authentication
             await Shell.Current.GoToAsync(nameof(LoginPage));
         }
 
-        public void CleanupTempImage()
+        public void OnDissapearing()
         {
-            if (!string.IsNullOrWhiteSpace(_selectedImagePath) && File.Exists(_selectedImagePath))
-            {
-                try
-                {
-                    File.Delete(_selectedImagePath);
-                }
-                catch
-                {
-
-                }
-
-            }
+            ImageCleaner.CleanupTempImage(_selectedImagePath);
         }
     }
 }

@@ -27,7 +27,7 @@
                        IsRunning="True"
                        WidthRequest="80"
                        HeightRequest="80"
-                       Color="Yellow"
+                       Color="{StaticResource Primary}"
                        HorizontalOptions="Center"/>
     </Grid>
 </ContentPage>

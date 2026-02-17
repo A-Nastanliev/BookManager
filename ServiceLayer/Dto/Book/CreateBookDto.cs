@@ -19,10 +19,10 @@ namespace ServiceLayer.Dto.Book
         public string Description { get; set; }
 
         [Required]
-        public int AuthorId { get; set; }
+        public string AuthorName { get; set; }
 
-        public int? GenreId { get; set; }
-        public int? PublisherId { get; set; }
+        public string GenreName { get; set; }
+        public string PublisherName { get; set; }
 
         public IFormFile Cover { get; set; }
     }

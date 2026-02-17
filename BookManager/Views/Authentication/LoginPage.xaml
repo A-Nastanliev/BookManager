@@ -42,7 +42,7 @@
             <Button
                 Text="Login" Grid.ColumnSpan="2" Grid.Row="3"
                 Command="{Binding LoginCommand}"
-                BackgroundColor="#F5C451"
+                BackgroundColor="{StaticResource Primary}"
                 TextColor="#121212"
                 FontAttributes="Bold"
                 CornerRadius="10"
@@ -52,7 +52,7 @@
                 Text="Don't have an account? Sign up" Grid.ColumnSpan="2"
                 Command="{Binding GoToSignUpCommand}" Grid.Row="4"
                 BackgroundColor="Transparent"
-                TextColor="#F5C451"
+                TextColor="{StaticResource Primary}"
                 HorizontalOptions="Center" />
 
         </Grid>

@@ -18,6 +18,11 @@
 
         public Genre() { }
 
+        public Genre(string name)
+        {
+            Name = name;
+        }
+
         public Genre(string name, string description)
         {
             Name = name;

@@ -3,48 +3,49 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BookManager.Views.Book.BookSearchPage"
              xmlns:vm="clr-namespace:BookManager.ViewModels.Book"
+             xmlns:views="clr-namespace:BookManager.Views.Book"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:DataType="vm:BookSearchVM"
-             Title="BookSearchPage">
-    
-    <ScrollView>
-        <Grid Padding="20" RowSpacing="10" ColumnSpacing="10">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+             Title="Discover">
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+    <Grid>
+        <Grid x:Name="BookGrid" Margin="6,0" RowDefinitions="Auto, *" RowSpacing="0">
+            <Entry Text="{Binding EntrySearch, Mode=TwoWay}" Placeholder="Search by title, genre, author or publisher" Margin="10,0" 
+                 BackgroundColor="Transparent" HorizontalOptions="Fill" />
+            <CollectionView VerticalOptions="Fill" Grid.Row="1" Margin="0"
+              ItemsSource="{Binding CurrentBooks}"
+              RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+              RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
 
-            <Image HorizontalOptions="Center" HeightRequest="200" WidthRequest="160"
-                   Source="{Binding User.PublicUser.ProfilePicture}" Grid.Row="0" Grid.ColumnSpan="2"/>
+                <CollectionView.EmptyView>
+                    <Label  Text="No books found"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"/>
+                </CollectionView.EmptyView>
 
-            <Label Grid.Row="1" Grid.Column="0" Text="Email:" FontAttributes="Bold"/>
-            <Label Grid.Row="1" Grid.Column="1" Text="{Binding User.EmailAddress}"/>
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="2" />
+                </CollectionView.ItemsLayout>
 
-            <Label Grid.Row="2" Grid.Column="0" Text="Role:" FontAttributes="Bold"/>
-            <Label Grid.Row="2" Grid.Column="1" Text="{Binding User.Role}"/>
-
-            <Label Grid.Row="3" Grid.Column="0" Text="Created At:" FontAttributes="Bold"/>
-            <Label Grid.Row="3" Grid.Column="1" Text="{Binding User.CreatedAt}"/>
-
-            <Label Grid.Row="4" Grid.Column="0" Text="Username:" FontAttributes="Bold"/>
-            <Label Grid.Row="4" Grid.Column="1" Text="{Binding User.PublicUser.Username}"/>
-
-            <Label Grid.Row="5" Grid.Column="0" Text="Profile Picture:" FontAttributes="Bold"/>
-            <Label Grid.Row="5" Grid.Column="1" Text="{Binding User.PublicUser.ProfilePictureSource}"/>
-
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <views:BookView x:DataType="views:BookView"
+                            TapCommand="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectCommand}"/>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
         </Grid>
-    </ScrollView>
+        <VerticalStackLayout 
+          HorizontalOptions="End" VerticalOptions="End" Margin="20" Spacing="20" >
+            <Grid HeightRequest="72" WidthRequest="72" 
+               IsVisible="{Binding User.Role, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter='Admin'}">
+                <Button x:Name="ButtonBase" Command="{Binding GoToCreateBookCommand}" CornerRadius="36"/>
+                <Image x:Name="Icon" Source="plus_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" HeightRequest="48" WidthRequest="48">
+                    <Image.Behaviors>
+                        <toolkit:IconTintColorBehavior TintColor="White" />
+                    </Image.Behaviors>
+                </Image>
+            </Grid>
+        </VerticalStackLayout>
+    </Grid>
 </ContentPage>

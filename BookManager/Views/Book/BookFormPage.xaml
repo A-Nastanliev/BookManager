@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookManager.Views.Book.BookFormPage"
+             xmlns:vm="clr-namespace:BookManager.ViewModels.Book"
+             x:DataType="vm:BookFormVM"
+             Shell.TabBarIsVisible="False"
+             Title="{Binding Title}">
+
+    <ScrollView HorizontalScrollBarVisibility="Never" VerticalScrollBarVisibility="Never">
+        <VerticalStackLayout Spacing="20">
+            <Grid >
+                <ImageButton Source="{Binding Book.CoverSource}" Aspect="AspectFill" Command="{Binding PickCoverCommand}" HeightRequest="340"/>
+                <Label Text="Pick an image" TextColor="White"  FontSize="18" FontAttributes="Bold" 
+                       HorizontalOptions="Center" VerticalOptions="Center" IsVisible="{Binding Book.CoverSource, Converter={StaticResource NullToBoolConverter}}" />
+            </Grid>
+            <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto" Padding="10, 6" RowSpacing="20">
+                <Entry Grid.Row="0" Placeholder="Title" Text="{Binding Book.Title, Mode=TwoWay}" />
+                <Entry Grid.Row="1" Placeholder="Author" Text="{Binding Book.Author.Name, Mode=TwoWay}" MaxLength="70" />
+                <Entry Grid.Row="2" Placeholder="Genre" Text="{Binding Book.Genre.Name, Mode=TwoWay}" MaxLength="50" />
+                <Entry Grid.Row="3" Placeholder="Publisher" Text="{Binding Book.Publisher.Name, Mode=TwoWay}" MaxLength="70" />
+                <Entry Grid.Row="4" Placeholder="Total Pages" Text="{Binding Book.TotalPages, Mode=TwoWay, Converter={StaticResource IntToStringConverter}}"
+                    Keyboard="Numeric" />
+                <Entry Grid.Row="5" Placeholder="ISBN" Text="{Binding Book.ISBN, Mode=TwoWay}" Keyboard="Numeric" MaxLength="13" />
+                <Editor Grid.Row="6" Placeholder="Description" Text="{Binding Book.Description, Mode=TwoWay}" MaxLength="500" MinimumHeightRequest="180" />
+                <Button Grid.Row="7"
+                    Text="{Binding SubmitButtonText}" Command="{Binding SubmitCommand}"/>
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

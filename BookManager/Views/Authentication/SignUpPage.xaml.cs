@@ -5,7 +5,7 @@ namespace BookManager.Views.Authentication;
 
 public partial class SignUpPage : ContentPage
 {
-    ITemporaryImageCleaner _vm;
+    SignUpVM _vm;
 	public SignUpPage(SignUpVM signUpVM )
 	{
 		InitializeComponent();
@@ -15,6 +15,6 @@ public partial class SignUpPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        _vm.CleanupTempImage();
+        _vm.OnDissapearing();
     }
 }
