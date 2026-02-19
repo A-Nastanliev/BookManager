@@ -62,6 +62,7 @@ namespace BookManager
 
             builder.Services.AddSingleton<BookSearchPage>();
             builder.Services.AddTransient<BookFormPage>();
+            builder.Services.AddSingleton<PublishingHubPage>();
 
             return builder.Build();
         }

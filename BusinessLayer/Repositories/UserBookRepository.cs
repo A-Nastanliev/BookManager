@@ -11,7 +11,6 @@ namespace BusinessLayer.Repositories
 		{
 			var (userId, bookId) = key;
 			return await _context.UsersBook
-				.Include(ub => ub.User)
 				.Include(ub => ub.Book)
 				.Include(ub => ub.ReadingLogs)
 				.FirstOrDefaultAsync(ub => ub.UserId == userId && ub.BookId == bookId);
@@ -29,7 +28,7 @@ namespace BusinessLayer.Repositories
 
 		public override async Task<bool> CreateAsync(UserBook obj)
 		{
-			obj.Status = DataLayer.Enums.UserBookStatus.Whishlisted;
+			obj.Status = UserBookStatus.Whishlisted;
 			obj.CreatedAt = DateTime.UtcNow;
 			await _context.UsersBook.AddAsync(obj);
 			return await _context.SaveChangesAsync() > 0;

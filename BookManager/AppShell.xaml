@@ -19,10 +19,14 @@
     </ShellContent>
 
     <TabBar>
-        <Tab Title="BookSearchPage">
-            <ShellContent
+        <Tab Title="Books">
+            <ShellContent Title="Catalog"
               ContentTemplate="{DataTemplate book:BookSearchPage}"
               Route="BookSearchPage"/>
+            <ShellContent Title="Book Attributes"  
+                IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibility}, ConverterParameter=Admin}"
+                ContentTemplate="{DataTemplate book:PublishingHubPage}"
+                Route="CatalogManagementPage"/>
         </Tab>
     </TabBar>
 </Shell>

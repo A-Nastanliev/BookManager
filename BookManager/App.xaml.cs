@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using BookManager.ViewModels.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BookManager
 {
@@ -11,6 +12,11 @@ namespace BookManager
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
+            var user = activationState?.Context?.Services?.GetService<UserVM>();
+
+            if (user != null)
+                Resources["User"] = user;
+
             return new Window(new AppShell());
         }
     }

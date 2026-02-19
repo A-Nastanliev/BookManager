@@ -7,7 +7,7 @@
              x:Name="Root">
     
     <Border
-        Margin="6" StrokeShape="RoundRectangle 10"
+        Margin="6" StrokeShape="RoundRectangle 0"
         Padding="0">
         <Border.GestureRecognizers>
             <TapGestureRecognizer
