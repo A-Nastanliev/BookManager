@@ -67,10 +67,7 @@ namespace ServiceLayer.Controllers
 		[HttpPut("user-books/{bookId}")]
 		public async Task<IActionResult> UpdateUserBook(int bookId, [FromBody] UserBookStatus status)
 		{
-			bool success = await _userBookRepository.UpdateAsync(new UserBook { UserId = UserId, Status = status, BookId = bookId });
-
-			if (!success)
-				return NotFound();
+		   await _userBookRepository.UpdateAsync(new UserBook { UserId = UserId, Status = status, BookId = bookId });
 
 			return NoContent();
 		}
@@ -131,11 +128,7 @@ namespace ServiceLayer.Controllers
 				StartingPage = dto.StartingPage,
 				EndingPage = dto.EndingPage,
 			};
-
-			bool success = await _readingLogRepository.UpdateAsync(log);
-
-			if (!success)
-				return NotFound();
+			await _readingLogRepository.UpdateAsync(log);
 
 			return NoContent();
 		}
@@ -280,10 +273,7 @@ namespace ServiceLayer.Controllers
 				Rating = dto.Rating
 			};
 
-			bool success = await _bookRatingRepository.UpdateAsync(rating);
-
-			if (!success)
-				return NotFound();
+			await _bookRatingRepository.UpdateAsync(rating);
 
 			return NoContent();
 		}

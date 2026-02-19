@@ -1,12 +1,12 @@
 ﻿using BookManager.ApiClients;
 using BookManager.Models.Book;
+using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Maui.Alerts;
+using Microsoft.Maui.Controls.Platform.Compatibility;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Maui.Controls.Platform.Compatibility;
 
 namespace BookManager.ViewModels.Book
 {
@@ -85,7 +85,7 @@ namespace BookManager.ViewModels.Book
             }
             else
             {
-               // await UpdateBook();
+               await UpdateBook();
             }
         }
 
@@ -111,7 +111,26 @@ namespace BookManager.ViewModels.Book
                 await Shell.Current.DisplayAlertAsync("Error", $"An unexpected error occurred: {ex.Message}", "OK");
             }
         }
+        private async Task UpdateBook()
+        {
+            try
+            {
+                var result = await _bookClient.UpdateBookAsync(Book, isImageChanged ? _selectedImagePath : null);
+                if (!result.Success)
+                {
+                    await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                    return;
+                }
 
+                _ = Toast.Make($"{Book.Title} updated").Show();
+                NavigationBook.CopyFrom(Book);
+                await Shell.Current.GoToAsync("..");
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", $"An unexpected error occurred: {ex.Message}", "OK");
+            }
+        }
 
         string? Validate()
         {

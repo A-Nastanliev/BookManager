@@ -16,16 +16,16 @@
                 .ToListAsync();
         }
 
-        public override async Task<bool> UpdateAsync(Publisher obj)
+        public override async Task UpdateAsync(Publisher obj)
         {
             var publisher = await _context.Publishers.FindAsync(obj.Id);
             if (publisher == null)
-                return false;
+                return;
 
             publisher.Description = obj.Description;
             publisher.Website = obj.Website;
             publisher.Name = obj.Name;
-            return await _context.SaveChangesAsync() > 0;
+            await _context.SaveChangesAsync();
         }
 
         public override Task<(List<Publisher>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)

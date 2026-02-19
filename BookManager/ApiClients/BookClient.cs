@@ -99,6 +99,57 @@ namespace BookManager.ApiClients
             return (books, nextCursorDate, nextCursorId);
         }
 
+        public async Task<(bool Success, string? Error)> UpdateBookAsync(BookVM book, string? coverPath)
+        {
+            using var content = new MultipartFormDataContent();
 
+            content.Add(new StringContent(book.ISBN), "ISBN");
+            content.Add(new StringContent(book.Title), "Title");
+            content.Add(new StringContent(book.TotalPages.ToString()), "TotalPages");
+            content.Add(new StringContent(book.Description ?? ""), "Description");
+            content.Add(new StringContent(book.Author.Name), "AuthorName");
+
+            if (!string.IsNullOrWhiteSpace(book?.Publisher?.Name))
+                content.Add(new StringContent(book.Publisher.Name), "PublisherName");
+
+            if (!string.IsNullOrWhiteSpace(book?.Genre?.Name))
+                content.Add(new StringContent(book.Genre.Name), "GenreName");
+
+            bool hasImage = !string.IsNullOrWhiteSpace(coverPath) && File.Exists(coverPath);
+
+            if (hasImage)
+            {
+                var stream = File.OpenRead(coverPath);
+                var streamContent = new StreamContent(stream);
+                streamContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+
+                content.Add(streamContent, "Cover", Path.GetFileName(coverPath));
+            }
+
+            var response = await _httpClient.PutAsync($"/api/books/{book.Id}", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+
+                try
+                {
+                    using var doc = JsonDocument.Parse(json);
+
+                    if (doc.RootElement.TryGetProperty("error", out var errorProp))
+                    {
+                        return (false, errorProp.GetString());
+                    }
+
+                    return (false, "Unknown error occurred.");
+                }
+                catch
+                {
+                    return (false, "Unexpected server error.");
+                }
+            }
+
+            return (true, null);
+        }
     }
 }

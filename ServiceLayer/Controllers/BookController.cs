@@ -1,10 +1,11 @@
 ﻿using BusinessLayer.Repositories;
+using DataLayer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ServiceLayer.Dto;
 using ServiceLayer.Dto.Book;
 using ServiceLayer.Mappers;
-using DataLayer.Models;
 using ServiceLayer.Services;
 
 namespace ServiceLayer.Controllers
@@ -33,7 +34,7 @@ namespace ServiceLayer.Controllers
 
 		[Authorize(Roles = "Admin")]
 		[HttpPost]
-		public async Task<IActionResult> CreateBook([FromForm] CreateBookDto req)
+		public async Task<IActionResult> CreateBook([FromForm] BookFormDto req)
 		{
             string coverPath = null;
 
@@ -46,7 +47,8 @@ namespace ServiceLayer.Controllers
                 return BadRequest(e.Message);
             }
 
-            var book = new Book(req.ISBN, req.Title, coverPath, req.TotalPages, req.Description, req.AuthorName, req.PublisherName, req.GenreName);
+            var book = new Book(req.ISBN, req.Title, req.TotalPages, req.Description, req.AuthorName, req.PublisherName, req.GenreName);
+			book.Cover = coverPath;
 
             var success = await _bookRepository.CreateAsync(book);
             if (!success)
@@ -71,44 +73,67 @@ namespace ServiceLayer.Controllers
 
         [Authorize(Roles = "Admin")]
 		[HttpPut("{id}")]
-		public async Task<IActionResult> UpdateBook(int id, [FromBody] BookUpdateDto req)
+		public async Task<IActionResult> UpdateBook(int id, [FromForm] BookFormDto req)
 		{
-			var success = await _bookRepository.UpdateAsync(new Book(req.Id, req.ISBN, req.Title, req.TotalPages, req.Description, req.GenreId, req.PublisherId));
-			if (!success) return NotFound();
 
-			return NoContent();
-		}
-
-     /*   [Authorize(Roles = "Admin")]
-        [HttpPut("{id}/cover")]
-        public async Task<IActionResult> UpdateBookCover(int id, [FromForm] IFormFile cover)
-        {
-            if (cover == null || cover.Length == 0)
-                return BadRequest("No image provided.");
-
-            var book = await _bookRepository.ReadAsync(id);
-            if (book == null)
+            var existingBook = await _bookRepository.ReadAsync(id);
+            if (existingBook == null)
                 return NotFound();
 
-            _imageStorageService.DeleteImage(book.Cover);
+            var book = new Book(req.ISBN, req.Title, req.TotalPages, req.Description, req.AuthorName, req.PublisherName, req.GenreName);
+			book.Id = id;
 
-            string newCover;
+            string? oldImagePath = existingBook.Cover;
+            string? newImagePath = null;
+            bool imageUpdated = false;
+
+            if (req.Cover != null && req.Cover.Length > 0)
+            {
+                try
+                {
+                    newImagePath = await _imageStorageService.SaveImageAsync(req.Cover, "book-covers");
+
+                    book.Cover = newImagePath;
+                    imageUpdated = true;
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+
             try
             {
-                newCover = await _imageStorageService.SaveImageAsync(cover, "book-covers");
+                await _bookRepository.UpdateAsync(book);
             }
-            catch (InvalidOperationException e)
+            catch (DbUpdateException ex)
             {
-                return BadRequest(e.Message);
+                if (imageUpdated && !string.IsNullOrWhiteSpace(newImagePath))
+                    _imageStorageService.DeleteImage(newImagePath);
+
+                return Conflict(new { error = ex.Message });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                if (imageUpdated && !string.IsNullOrWhiteSpace(newImagePath))
+                    _imageStorageService.DeleteImage(newImagePath);
+
+                return BadRequest(new { error = ex.Message });
             }
 
-            var success = await _bookRepository.UpdateCoverAsync(new Book { Id = id, Cover = newCover });
+            if (imageUpdated && !string.IsNullOrWhiteSpace(oldImagePath))
+            {
+                _imageStorageService.DeleteImage(oldImagePath);
+                var baseUrl = _configuration["App:BaseUrl"];
+                return Ok(new { image = $"{baseUrl}/{newImagePath}" });
+            }
 
-            if (!success)
-                return NotFound();
-
-            return Ok(new { Cover = newCover });
-        }*/
+            return NoContent();
+        }
 
         [Authorize(Roles = "Admin")]
 		[HttpDelete("{id}")]
@@ -191,8 +216,7 @@ namespace ServiceLayer.Controllers
 		{
 			Genre genre = new Genre(req.Name, req.Description);
 			genre.Id = id;
-			var success = await _genreRepository.UpdateAsync(genre);
-			if (!success) return NotFound();
+			await _genreRepository.UpdateAsync(genre);
 
 			return NoContent();
 		}
@@ -231,8 +255,7 @@ namespace ServiceLayer.Controllers
 		{
 			Publisher publisher = new Publisher(req.Name, req.Description, req.Website);
 			publisher.Id = id;
-			var success = await _publisherRepository.UpdateAsync(publisher);
-			if (!success) return NotFound();
+			await _publisherRepository.UpdateAsync(publisher);
 
 			return NoContent();
 		}

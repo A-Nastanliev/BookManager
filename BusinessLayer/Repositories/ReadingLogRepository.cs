@@ -9,15 +9,15 @@
                 .Include(rl=> rl.UserBook)
                 .FirstOrDefaultAsync(g => g.Id == id);
         }
-		public override async Task<bool> UpdateAsync(ReadingLog obj)
+		public override async Task UpdateAsync(ReadingLog obj)
 		{
 			var log = await _context.ReadingLogs.Include(l => l.UserBook).FirstOrDefaultAsync(l => l.Id == obj.Id);
 			if (log == null || log.UserBook.UserId != obj.UserId || log.UserBook.BookId != obj.BookId)
-				return false;
+				return;
 
 			log.StartingPage = obj.StartingPage;
 			log.EndingPage = obj.EndingPage;
-			return await _context.SaveChangesAsync() > 0;
+		    await _context.SaveChangesAsync();
 		}
 
         public async Task<(List<ReadingLog> Items, DateTime? NextCursorDate, int? NextCursorId)> ReadNextByUserBookAsync

@@ -46,11 +46,10 @@
 
         public Book() { }
 
-        public Book(string isbn, string title, string cover, int totalPages, string description, string authorName, string publisherName = null, string genreName = null)
+        public Book(string isbn, string title, int totalPages, string description, string authorName, string publisherName = null, string genreName = null)
         {
             ISBN = isbn;
             Title = title;
-            Cover = cover;
             TotalPages = totalPages;
             Description = description;
             Author = new Author(authorName);

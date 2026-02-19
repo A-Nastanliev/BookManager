@@ -32,16 +32,16 @@ namespace BusinessLayer.Repositories
             return await ReadAsync(user.Id);
         }
 
-        public async override Task<bool> UpdateAsync(User obj)
+        public async override Task UpdateAsync(User obj)
         {
             var user = await _context.Users.FindAsync(obj.Id);
             if (user == null)
-                return false;
+                return;
 
             user.Username = obj.Username;
             user.EmailAddress = obj.EmailAddress;
 
-            return await _context.SaveChangesAsync() > 0;
+           await _context.SaveChangesAsync();
         }
 
         public async Task<bool> UpdateProfilePictureAsync(User obj)

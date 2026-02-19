@@ -17,14 +17,14 @@ namespace BusinessLayer.Repositories
 				.FirstOrDefaultAsync(ub => ub.UserId == userId && ub.BookId == bookId);
 		}
 
-		public async override Task<bool> UpdateAsync(UserBook obj)
+		public async override Task UpdateAsync(UserBook obj)
 		{
 			var userBook = await _context.UsersBook.FindAsync(obj.UserId, obj.BookId);
 			if (userBook == null)
-				return false;
+				return;
 
 			userBook.Status = obj.Status;
-			return await _context.SaveChangesAsync() > 0;
+			await _context.SaveChangesAsync();
 		}
 
 		public override async Task<bool> CreateAsync(UserBook obj)

@@ -25,7 +25,7 @@
 			return await _context.Set<T>().FindAsync(id);
 		}
 
-		public virtual async Task<bool> UpdateAsync(T obj)
+		public virtual async Task UpdateAsync(T obj)
 		{
 			var keyProperty = _context.Model.FindEntityType(typeof(T))
 								  .FindPrimaryKey()
@@ -38,7 +38,7 @@
 
 			_context.Entry(existingEntity).CurrentValues.SetValues(obj);
 
-			return await _context.SaveChangesAsync() > 0;
+			await _context.SaveChangesAsync() ;
 		}
 
 		public virtual async Task<bool> DeleteAsync(T entity)

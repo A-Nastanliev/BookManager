@@ -128,9 +128,7 @@ namespace ServiceLayer.Controllers
 				EmailAddress = req.EmailAddress,
 			};
 
-			var success = await _userRepository.UpdateAsync(userToUpdate);
-			if (!success)
-				return NotFound();
+			 await _userRepository.UpdateAsync(userToUpdate);
 
 			return NoContent();
 		}
@@ -233,10 +231,7 @@ namespace ServiceLayer.Controllers
 		[HttpPut("comment-restriction/{restrictionId}/end")]
 		public async Task<IActionResult> EndCommentRestriction(int restrictionId)
 		{
-
-			var success = await _restrictionRepository.UpdateAsync(new UserRestriction { Id = restrictionId });
-			if (!success)
-				return NotFound();
+			 await _restrictionRepository.UpdateAsync(new UserRestriction { Id = restrictionId });
 
 			return NoContent();
 		}

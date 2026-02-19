@@ -9,10 +9,15 @@
 
     <ScrollView HorizontalScrollBarVisibility="Never" VerticalScrollBarVisibility="Never">
         <VerticalStackLayout Spacing="20">
-            <Grid >
-                <ImageButton Source="{Binding Book.CoverSource}" Aspect="AspectFill" Command="{Binding PickCoverCommand}" HeightRequest="340"/>
-                <Label Text="Pick an image" TextColor="White"  FontSize="18" FontAttributes="Bold" 
-                       HorizontalOptions="Center" VerticalOptions="Center" IsVisible="{Binding Book.CoverSource, Converter={StaticResource NullToBoolConverter}}" />
+            <Grid Margin="0,10,0,0" HeightRequest="260" HorizontalOptions="Center" WidthRequest="180">
+                <Border StrokeShape="RoundRectangle 0">
+                    <ImageButton
+                        Source="{Binding Book.CoverSource}" Aspect="AspectFill" Command="{Binding PickCoverCommand}" />
+                </Border>
+                <Label
+                    Text="Pick an image" TextColor="White" FontSize="16" FontAttributes="Bold"
+                    HorizontalOptions="Center" VerticalOptions="Center"
+                    IsVisible="{Binding Book.CoverSource, Converter={StaticResource NullToBoolConverter}}" />
             </Grid>
             <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto" Padding="10, 6" RowSpacing="20">
                 <Entry Grid.Row="0" Placeholder="Title" Text="{Binding Book.Title, Mode=TwoWay}" />
@@ -22,7 +27,7 @@
                 <Entry Grid.Row="4" Placeholder="Total Pages" Text="{Binding Book.TotalPages, Mode=TwoWay, Converter={StaticResource IntToStringConverter}}"
                     Keyboard="Numeric" />
                 <Entry Grid.Row="5" Placeholder="ISBN" Text="{Binding Book.ISBN, Mode=TwoWay}" Keyboard="Numeric" MaxLength="13" />
-                <Editor Grid.Row="6" Placeholder="Description" Text="{Binding Book.Description, Mode=TwoWay}" MaxLength="500" MinimumHeightRequest="180" />
+                <Editor Grid.Row="6" Placeholder="Description" Text="{Binding Book.Description, Mode=TwoWay}" MaxLength="500" AutoSize="TextChanges" />
                 <Button Grid.Row="7"
                     Text="{Binding SubmitButtonText}" Command="{Binding SubmitCommand}"/>
             </Grid>

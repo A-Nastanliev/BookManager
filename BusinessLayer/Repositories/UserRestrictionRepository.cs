@@ -20,14 +20,14 @@ namespace BusinessLayer.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public override async Task<bool> UpdateAsync(UserRestriction obj)
+        public override async Task UpdateAsync(UserRestriction obj)
         {
             var restriction = await _context.UserRestrictions.FindAsync(obj.Id);
             if (restriction == null)
-                return false;
+                return;
 
             restriction.EndDate = DateTime.UtcNow;
-            return await _context.SaveChangesAsync() > 0;
+            await _context.SaveChangesAsync();
         }
 
         public override async Task<(List<UserRestriction>, DateTime? cursorDate, int? cursorKey )> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)

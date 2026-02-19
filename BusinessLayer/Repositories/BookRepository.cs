@@ -1,4 +1,5 @@
 ﻿using DataLayer.Models;
+using MySql.Data.MySqlClient;
 
 namespace BusinessLayer.Repositories
 {
@@ -89,28 +90,108 @@ namespace BusinessLayer.Repositories
 				.ToListAsync();
 		}
 
-        public async override Task<bool> UpdateAsync(Book obj)
+        public override async Task UpdateAsync(Book obj)
         {
-            var bookToUpdate = await _context.Books.FindAsync(obj.Id);
-            if (bookToUpdate == null)
-                return false;
+            try 
+            { 
+                var bookToUpdate = await _context.Books
+                    .Include(b => b.Author)
+                    .Include(b => b.Genre)
+                    .Include(b => b.Publisher)
+                    .FirstOrDefaultAsync(b => b.Id == obj.Id);
 
-			bookToUpdate.Title = obj.Title;
-			bookToUpdate.Description = obj.Description;
-			bookToUpdate.ISBN = obj.ISBN;
-            if(obj.Cover  != null)
-            {
-                bookToUpdate.Cover = obj.Cover;
+                if (bookToUpdate == null)
+                    throw new KeyNotFoundException("Book not found.");
+
+
+                if (obj.Author != null && bookToUpdate.Author?.Name != obj.Author.Name)
+                {
+                    var author = await _context.Authors.FirstOrDefaultAsync(a => a.Name == obj.Author.Name);
+
+                    if (author == null)
+                    {
+                        author = new Author
+                        {
+                            Name = obj.Author.Name
+                        };
+                        _context.Authors.Add(author);
+                    }
+                    bookToUpdate.Author = author;
+                }
+
+                if (obj.Genre != null)
+                {
+                    if (bookToUpdate.Genre == null || bookToUpdate.Genre.Name != obj.Genre.Name)
+                    {
+                        var genre = await _context.Genres.FirstOrDefaultAsync(g => g.Name == obj.Genre.Name);
+
+                        if (genre == null)
+                        {
+                            genre = new Genre
+                            {
+                                Name = obj.Genre.Name
+                            };
+                            _context.Genres.Add(genre);
+                        }
+                        bookToUpdate.Genre = genre;
+                    }
+                }
+                else
+                {
+                    bookToUpdate.Genre = null;
+                }
+
+                if (obj.Publisher != null)
+                {
+                    if (bookToUpdate.Publisher == null ||
+                        bookToUpdate.Publisher.Name != obj.Publisher.Name)
+                    {
+                        var publisher = await _context.Publishers
+                            .FirstOrDefaultAsync(p => p.Name == obj.Publisher.Name);
+
+                        if (publisher == null)
+                        {
+                            publisher = new Publisher
+                            {
+                                Name = obj.Publisher.Name
+                            };
+
+                            _context.Publishers.Add(publisher);
+                        }
+
+                        bookToUpdate.Publisher = publisher;
+                    }
+                }
+                else
+                {
+                    bookToUpdate.Publisher = null;
+                }
+
+                bookToUpdate.Title = obj.Title;
+                bookToUpdate.Description = obj.Description;
+                bookToUpdate.ISBN = obj.ISBN;
+                bookToUpdate.TotalPages = obj.TotalPages;
+
+                if (obj.Cover != null)
+                    bookToUpdate.Cover = obj.Cover;
+
+                await _context.SaveChangesAsync(); 
             }
-			if(obj.GenreId != null)
-			{
-				bookToUpdate.GenreId = obj.GenreId;
-			}
-			if(obj.PublisherId != null)
-			{
-				bookToUpdate.PublisherId = obj.PublisherId;
-			}
-            return await _context.SaveChangesAsync() > 0;
+            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+            {
+                throw new DbUpdateException("A book with this ISBN already exists.");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception( "An unknown error occurred: " + ex.Message);
+            }
+        }
+
+        private bool IsUniqueConstraintViolation(DbUpdateException ex)
+        {
+
+            return ex.InnerException?.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) == true
+                || ex.InnerException?.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase) == true;
         }
 
         public async Task<(List<Book> Books, DateTime? CursorDate, int? CursorKey)>

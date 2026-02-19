@@ -9,14 +9,14 @@
 			return await _context.BookRatings.FindAsync(id);
 		}
 
-		public override async Task<bool> UpdateAsync(BookRating obj)
+		public override async Task UpdateAsync(BookRating obj)
 		{
 			var bookRating = await _context.BookRatings.FindAsync((obj.UserId, obj.BookId));
 			if (bookRating == null)
-				return false;
+				return;
 
 			bookRating.Rating = obj.Rating;
-			return await _context.SaveChangesAsync() > 0;
+			await _context.SaveChangesAsync();
 		}
 
 		public override async Task<bool> DeleteAsync(BookRating entity)

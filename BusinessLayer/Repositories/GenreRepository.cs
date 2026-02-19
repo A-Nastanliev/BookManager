@@ -16,15 +16,15 @@
                 .ToListAsync();
         }
 
-        public override async Task<bool> UpdateAsync(Genre obj)
+        public override async Task UpdateAsync(Genre obj)
         {
             var genre = await _context.Genres.FindAsync(obj.Id);
             if (genre == null)
-                return false;
+                return;
 
             genre.Description = obj.Description;
             genre.Name = obj.Name;
-            return await _context.SaveChangesAsync() > 0;
+            await _context.SaveChangesAsync();
         }
 
         public override Task<(List<Genre>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)

@@ -8,30 +8,45 @@
     
     <Border
         Margin="6" StrokeShape="RoundRectangle 10"
-        Padding="0" HorizontalOptions="Fill" >
+        Padding="0">
         <Border.GestureRecognizers>
             <TapGestureRecognizer
                 Command="{Binding TapCommand, Source={x:Reference Root}}"
                 CommandParameter="{Binding BindingContext, Source={x:Reference Root}}"/>
         </Border.GestureRecognizers>
         <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+
             <Image
-                Aspect="AspectFill"
-                HeightRequest="220"
-                Source="{Binding CoverSource}" />
+            Aspect="AspectFill"
+            Source="{Binding CoverSource}" />
 
-            <VerticalStackLayout Padding="10, 4, 10, 4" Spacing="4" Background="{StaticResource PrimaryOverlay}" HorizontalOptions="Fill" VerticalOptions="End">
-                <Label
-                    Text="{Binding Title}"
-                    LineBreakMode="TailTruncation"/>
-                <Label
-                    Text="{Binding Author.Name}"
-                    LineBreakMode="TailTruncation" FontSize="12"/>
-                <Label
-                    Text="{Binding Publisher.Name}"
-                    FontSize="8"/>
+            <VerticalStackLayout
+            Padding="10,4"
+            Spacing="4"
+            Background="{StaticResource PrimaryOverlay}"
+            VerticalOptions="End">
 
+                <Label
+                Text="{Binding Title}"
+                LineBreakMode="TailTruncation"
+                FontAttributes="Bold"/>
+
+                <Label
+                Text="{Binding Author.Name}"
+                FontSize="12"
+                LineBreakMode="TailTruncation"/>
+
+                <Label
+                Text="{Binding Publisher.Name}"
+                FontSize="10"/>
             </VerticalStackLayout>
+
         </Grid>
     </Border>
 </ContentView>

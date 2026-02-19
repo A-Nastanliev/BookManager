@@ -6,7 +6,7 @@
 		Task<List<T>> ReadAllAsync();
 		Task<T> ReadAsync(K obj);
 		Task<(List<T>, DateTime? cursorDate, K? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, K? cursorKey);
-		Task<bool> UpdateAsync(T OBJ);
+		Task UpdateAsync(T OBJ);
 		Task<bool> DeleteAsync(T obj);
 
 	}
