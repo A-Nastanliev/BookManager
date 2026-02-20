@@ -10,6 +10,9 @@ namespace BookManager.ViewModels
         [ObservableProperty]
         bool loading;
 
+        [ObservableProperty]
+        bool isRefreshing;
+
         protected DateTime? CursorDate { get; set; }
         protected int BatchSize { get; set; } = 16;
         protected int? CursorId { get; set; }

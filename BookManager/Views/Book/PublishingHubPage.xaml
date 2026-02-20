@@ -2,11 +2,34 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BookManager.Views.Book.PublishingHubPage"
+             xmlns:segmentedControl="clr-namespace:Syncfusion.Maui.Toolkit.SegmentedControl;assembly=Syncfusion.Maui.Toolkit"
+             xmlns:views="clr-namespace:BookManager.Views.Book"
+             x:Name="Root"
              Title="Publishing Hub">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+    
+    <Grid RowDefinitions="Auto, *">
+        <segmentedControl:SfSegmentedControl Margin="0,10"
+            Grid.Row="0"  SelectedIndex="{Binding SelectedSegmentIndex, Source={x:Reference Root}, Mode=TwoWay}">
+            <segmentedControl:SfSegmentedControl.SelectionIndicatorSettings>
+                <segmentedControl:SelectionIndicatorSettings
+                 Background="{StaticResource Primary}"  Stroke="{StaticResource Primary}" />
+            </segmentedControl:SfSegmentedControl.SelectionIndicatorSettings>
+            <segmentedControl:SfSegmentedControl.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>Authors</x:String>
+                    <x:String>Publishers</x:String> 
+                    <x:String>Genres</x:String>
+                </x:Array>
+            </segmentedControl:SfSegmentedControl.ItemsSource>
+            <segmentedControl:SfSegmentedControl.TextStyle>
+                <segmentedControl:SegmentTextStyle TextColor="DarkGray"/>
+            </segmentedControl:SfSegmentedControl.TextStyle>
+        </segmentedControl:SfSegmentedControl>
+        <views:AuthorsHub 
+            Grid.Row="1" IsVisible="{Binding SelectedSegmentIndex, Source={x:Reference Root}, Converter={StaticResource EqualsConverter}, ConverterParameter=0}" />
+        <views:GenresHub  
+            Grid.Row="1" IsVisible="{Binding SelectedSegmentIndex, Source={x:Reference Root}, Converter={StaticResource EqualsConverter}, ConverterParameter=2}" />
+        <views:PublishersHub 
+            Grid.Row="1" IsVisible="{Binding SelectedSegmentIndex, Source={x:Reference Root}, Converter={StaticResource EqualsConverter}, ConverterParameter=1}" />
+    </Grid>
 </ContentPage>

@@ -12,28 +12,31 @@
         <Grid x:Name="BookGrid" Margin="6,0" RowDefinitions="Auto, *" RowSpacing="0">
             <Entry Text="{Binding EntrySearch, Mode=TwoWay}" Placeholder="Search by title, genre, author or publisher" Margin="10,0" 
                  BackgroundColor="Transparent" HorizontalOptions="Fill" />
-            <CollectionView VerticalOptions="Fill" Grid.Row="1" Margin="0"
+            <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                 Command="{Binding RefreshCommand}" Grid.Row="1">
+                <CollectionView VerticalOptions="Fill"  Margin="0"
               ItemsSource="{Binding CurrentBooks}"
               RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
               RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
 
-                <CollectionView.EmptyView>
-                    <Label  Text="No books found"
+                    <CollectionView.EmptyView>
+                        <Label  Text="No books found"
                        HorizontalOptions="Center"
                        VerticalOptions="Center"/>
-                </CollectionView.EmptyView>
+                    </CollectionView.EmptyView>
 
-                <CollectionView.ItemsLayout>
-                    <GridItemsLayout Orientation="Vertical" Span="2" />
-                </CollectionView.ItemsLayout>
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="2" />
+                    </CollectionView.ItemsLayout>
 
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <views:BookView x:DataType="views:BookView"
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <views:BookView x:DataType="views:BookView"
                             TapCommand="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectCommand}"/>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
         </Grid>
         <VerticalStackLayout 
           HorizontalOptions="End" VerticalOptions="End" Margin="20" Spacing="20" >

@@ -77,6 +77,19 @@ namespace BookManager.ViewModels.Book
             }
         }
 
+        [RelayCommand]
+        public async Task Refresh()
+        {
+            BooksCursorDate = null;
+            CursorDate = null;
+            CursorId = null;
+            CanLoadMore = true;
+            Books.Clear();
+            EntrySearch = null;
+            await Load();
+            IsRefreshing = false;
+        }
+
         private async Task HandleSearchAsync(string search, CancellationToken token)
         {
             try
