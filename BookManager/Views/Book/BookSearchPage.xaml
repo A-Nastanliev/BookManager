@@ -41,7 +41,7 @@
         <VerticalStackLayout 
           HorizontalOptions="End" VerticalOptions="End" Margin="20" Spacing="20" >
             <Grid HeightRequest="72" WidthRequest="72" 
-               IsVisible="{Binding User.Role, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter='Admin'}">
+                IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter=Admin }">
                 <Button x:Name="ButtonBase" Command="{Binding GoToCreateBookCommand}" CornerRadius="36"/>
                 <Image x:Name="Icon" Source="plus_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" HeightRequest="48" WidthRequest="48">
                     <Image.Behaviors>

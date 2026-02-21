@@ -33,18 +33,18 @@
             VerticalOptions="End">
 
                 <Label
-                Text="{Binding Title}"
+                Text="{Binding Title}" FontSize="Medium"
                 LineBreakMode="TailTruncation"
                 FontAttributes="Bold"/>
 
                 <Label
                 Text="{Binding Author.Name}"
-                FontSize="12"
+                FontSize="Small"
                 LineBreakMode="TailTruncation"/>
 
                 <Label
                 Text="{Binding Publisher.Name}"
-                FontSize="10"/>
+                FontSize="Micro"/>
             </VerticalStackLayout>
 
         </Grid>

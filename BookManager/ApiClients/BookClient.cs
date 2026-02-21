@@ -12,12 +12,9 @@ namespace BookManager.ApiClients
     {
         readonly HttpClient _httpClient;
 
-        readonly UserVM _user;
-
-        public BookClient(HttpClient httpClient, UserVM currentUser)
+        public BookClient(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _user = currentUser;
         }
 
         public async Task<(bool Success, string? Error)> CreateBookAsync
@@ -48,6 +45,12 @@ namespace BookManager.ApiClients
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
+
+                if (string.IsNullOrWhiteSpace(error))
+                {
+                    return (false, $"Server returned {response.StatusCode}");
+                }
+
                 return (false, error);
             }
 
@@ -132,6 +135,11 @@ namespace BookManager.ApiClients
             {
                 var json = await response.Content.ReadAsStringAsync();
 
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    return (false, $"Server returned status code {response.StatusCode}");
+                }
+
                 try
                 {
                     using var doc = JsonDocument.Parse(json);
@@ -145,11 +153,116 @@ namespace BookManager.ApiClients
                 }
                 catch
                 {
-                    return (false, "Unexpected server error.");
+                    return (false, $"Server returned status code {response.StatusCode} with non-JSON response.");
                 }
             }
 
             return (true, null);
+        }
+
+        public async Task<(List<AuthorVM> Authors, int? CursorKey)> GetNextAuthorsAsync(int count, int? cursorKey, string search)
+        {
+            var query = $"?count={count}";
+
+            if (cursorKey.HasValue)
+                query += $"&cursorKey={cursorKey.Value}";
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query += $"&search={Uri.EscapeDataString(search)}";
+
+            var response = await _httpClient.GetAsync("/api/books/authors" + query);
+            response.EnsureSuccessStatusCode();
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(jsonString);
+
+            var root = doc.RootElement;
+
+            var authors = new List<AuthorVM>();
+
+            foreach (var json in root.GetProperty("authors").EnumerateArray())
+            {
+                var vm = new AuthorVM();
+                vm.FromJson(json);
+                authors.Add(vm);
+            }
+
+            int? nextCursorKey = null;
+
+            if (root.TryGetProperty("cursorKey", out var ck) && ck.ValueKind != JsonValueKind.Null)
+                nextCursorKey = ck.GetInt32();
+
+            return (authors, nextCursorKey);
+        }
+
+        public async Task<(List<GenreVM> Genres, int? CursorKey)> GetNextGenresAsync(int count, int? cursorKey, string search)
+        {
+            var query = $"?count={count}";
+
+            if (cursorKey.HasValue)
+                query += $"&cursorKey={cursorKey.Value}";
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query += $"&search={Uri.EscapeDataString(search)}";
+
+            var response = await _httpClient.GetAsync("/api/books/genres" + query);
+            response.EnsureSuccessStatusCode();
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(jsonString);
+
+            var root = doc.RootElement;
+
+            var genres = new List<GenreVM>();
+
+            foreach (var json in root.GetProperty("genres").EnumerateArray())
+            {
+                var vm = new GenreVM();
+                vm.FromJson(json);
+                genres.Add(vm);
+            }
+
+            int? nextCursorKey = null;
+
+            if (root.TryGetProperty("cursorKey", out var ck) && ck.ValueKind != JsonValueKind.Null)
+                nextCursorKey = ck.GetInt32();
+
+            return (genres, nextCursorKey);
+        }
+
+        public async Task<(List<PublisherVM> Publishers, int? CursorKey)> GetNextPublishersAsync(int count, int? cursorKey, string search)
+        {
+            var query = $"?count={count}";
+
+            if (cursorKey.HasValue)
+                query += $"&cursorKey={cursorKey.Value}";
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query += $"&search={Uri.EscapeDataString(search)}";
+
+            var response = await _httpClient.GetAsync("/api/books/publishers" + query);
+            response.EnsureSuccessStatusCode();
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(jsonString);
+
+            var root = doc.RootElement;
+
+            var publishers = new List<PublisherVM>();
+
+            foreach (var json in root.GetProperty("publishers").EnumerateArray())
+            {
+                var vm = new PublisherVM();
+                vm.FromJson(json);
+                publishers.Add(vm);
+            }
+
+            int? nextCursorKey = null;
+
+            if (root.TryGetProperty("cursorKey", out var ck) && ck.ValueKind != JsonValueKind.Null)
+                nextCursorKey = ck.GetInt32();
+
+            return (publishers, nextCursorKey);
         }
     }
 }

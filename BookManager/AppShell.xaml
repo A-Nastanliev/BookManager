@@ -24,7 +24,7 @@
               ContentTemplate="{DataTemplate book:BookSearchPage}"
               Route="BookSearchPage"/>
             <ShellContent Title="Book Attributes"  
-                IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibility}, ConverterParameter=Admin}"
+                IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter=Admin}"
                 ContentTemplate="{DataTemplate book:PublishingHubPage}"
                 Route="CatalogManagementPage"/>
         </Tab>

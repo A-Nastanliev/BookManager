@@ -15,7 +15,7 @@
                         Source="{Binding Book.CoverSource}" Aspect="AspectFill" Command="{Binding PickCoverCommand}" />
                 </Border>
                 <Label
-                    Text="Pick an image" TextColor="White" FontSize="16" FontAttributes="Bold"
+                    Text="Pick an image" TextColor="White" FontSize="Large" FontAttributes="Bold"
                     HorizontalOptions="Center" VerticalOptions="Center"
                     IsVisible="{Binding Book.CoverSource, Converter={StaticResource NullToBoolConverter}}" />
             </Grid>

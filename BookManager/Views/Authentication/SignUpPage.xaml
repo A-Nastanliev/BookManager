@@ -15,7 +15,7 @@
             RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto">
 
             <Label
-              Text="Create Account" FontSize="26" FontAttributes="Bold" TextColor="White"
+              Text="Create Account" FontSize="Title" FontAttributes="Bold" TextColor="White"
               HorizontalOptions="Center" Grid.Row="0" Grid.ColumnSpan="2"/>
 
             <Border
@@ -36,7 +36,7 @@
             </Border>
 
             <Label
-              Text="Profile picture required" FontSize="12" TextColor="#B0B0B0"
+              Text="Profile picture required" FontSize="Small" TextColor="#B0B0B0"
               HorizontalOptions="Center" Grid.Row="2" Grid.ColumnSpan="2" />
 
             <Entry
@@ -56,7 +56,7 @@
             <views:VisibilityButton Grid.Column="1" Grid.Row="6" TargetEntry="{x:Reference PasswordEntry}"/>
 
             <Button 
-              Text="Sign Up" Grid.Row="7" Grid.ColumnSpan="2" Command="{Binding SignUpCommand}" BackgroundColor="#F5C451"
+              Text="Sign Up" Grid.Row="7" Grid.ColumnSpan="2" Command="{Binding SignUpCommand}" BackgroundColor="{StaticResource Primary}" FontSize="Medium"
               TextColor="#121212" FontAttributes="Bold" CornerRadius="10" HeightRequest="50" HorizontalOptions="Fill" />
 
             <Button

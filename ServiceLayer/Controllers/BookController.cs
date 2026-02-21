@@ -164,11 +164,17 @@ namespace ServiceLayer.Controllers
 		}
 
 		[HttpGet("authors")]
-		public async Task<IActionResult> GetAuthors()
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ReadNextAuthors([FromQuery] CursorDto cursor, [FromQuery] string search)
 		{
-			var authors = await _authorRepository.ReadAllAsync();
-			return Ok(authors.Select(a => a.ToDto()));
-		}
+            var (authors, nextCursorKey) = await _authorRepository.ReadNextAsync(cursor.Count, cursor.CursorKey, search);
+
+            return Ok(new
+            {
+                authors = authors.Select(a => a.ToDto()),
+                cursorKey = nextCursorKey,
+            });
+        }
 
 		[Authorize(Roles = "Admin")]
 		[HttpPut("authors/{id}")]
@@ -204,11 +210,16 @@ namespace ServiceLayer.Controllers
 		}
 
 		[HttpGet("genres")]
-		public async Task<IActionResult> ReadAllGenres()
+		public async Task<IActionResult> ReadNextGenres([FromQuery] CursorDto cursor, [FromQuery] string search)
 		{
-			var genres = await _genreRepository.ReadAllAsync();
-			return Ok(genres.Select(g => g.ToDto()));
-		}
+            var (genres, nextCursorKey) = await _genreRepository.ReadNextAsync(cursor.Count, cursor.CursorKey, search);
+
+            return Ok(new
+            {
+                genres = genres.Select(g => g.ToDto()),
+                cursorKey = nextCursorKey,
+            });
+        }
 
 		[Authorize(Roles = "Admin")]
 		[HttpPut("genres/{id}")]
@@ -243,11 +254,17 @@ namespace ServiceLayer.Controllers
 		}
 
 		[HttpGet("publishers")]
-		public async Task<IActionResult> ReadAllPublishers()
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ReadNextPublishers([FromQuery] CursorDto cursor, [FromQuery] string search)
 		{
-			var publishers = await _publisherRepository.ReadAllAsync();
-			return Ok(publishers.Select(p => p.ToDto()));
-		}
+            var (publishers, nextCursorKey) = await _publisherRepository.ReadNextAsync(cursor.Count, cursor.CursorKey, search);
+
+            return Ok(new
+            {
+                publishers = publishers.Select(p => p.ToDto()),
+                cursorKey = nextCursorKey,
+            });
+        }
 
 		[Authorize(Roles = "Admin")]
 		[HttpPut("publishers/{id}")]

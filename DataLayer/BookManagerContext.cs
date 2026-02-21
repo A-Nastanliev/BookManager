@@ -35,7 +35,7 @@ namespace DataLayer
                 entity.HasMany(a => a.Books)
                       .WithOne(b => b.Author)
                       .HasForeignKey(b => b.AuthorId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Book>(entity =>

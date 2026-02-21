@@ -27,9 +27,49 @@
             await _context.SaveChangesAsync();
         }
 
-        public override Task<(List<Genre>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
+        public override async Task<(List<Genre>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
         {
-            throw new NotImplementedException();
+            var query = _context.Genres
+                .OrderByDescending(g => g.Id)
+                .AsQueryable();
+
+            if (cursorKey.HasValue)
+            {
+                query = query.Where(g => g.Id < cursorKey.Value);
+            }
+
+            var items = await query
+                .Take(count)
+                .ToListAsync();
+
+            var last = items.LastOrDefault();
+
+            return (items, null, last?.Id);
+        }
+
+        public async Task<(List<Genre> Genres, int? CursorKey)>ReadNextAsync(int count, int? lastGenreId, string? search)
+        {
+            var query = _context.Genres.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(g => g.Name.Contains(search));
+            }
+
+            if (lastGenreId.HasValue)
+            {
+                query = query.Where(g => g.Id < lastGenreId.Value);
+            }
+
+            query = query.OrderByDescending(g => g.Id);
+
+            var items = await query
+                .Take(count)
+                .ToListAsync();
+
+            var last = items.LastOrDefault();
+
+            return (items, last?.Id);
         }
     }
 }

@@ -16,7 +16,7 @@
 
             <Label
                 Text="Welcome Back" Grid.ColumnSpan="2"
-                FontSize="26" Grid.Row="0"
+                FontSize="Title" Grid.Row="0"
                 FontAttributes="Bold"
                 TextColor="White"
                 HorizontalOptions="Center" />
@@ -43,7 +43,7 @@
                 Text="Login" Grid.ColumnSpan="2" Grid.Row="3"
                 Command="{Binding LoginCommand}"
                 BackgroundColor="{StaticResource Primary}"
-                TextColor="#121212"
+                TextColor="#121212"  FontSize="Medium"
                 FontAttributes="Bold"
                 CornerRadius="10"
                 HeightRequest="50" />

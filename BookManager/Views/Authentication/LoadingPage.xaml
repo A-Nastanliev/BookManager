@@ -12,14 +12,14 @@
       RowSpacing="25">
 
         <Label Text="Book Manager"
-           FontSize="32"
+           FontSize="Title"
            FontAttributes="Bold"
            TextColor="White"
            Grid.Row="0"
            HorizontalOptions="Center"/>
 
         <Label Text="Loading..."
-           FontSize="16" Grid.Row="1"
+           FontSize="Body" Grid.Row="1"
            TextColor="#CCCCCC"
            HorizontalOptions="Center"/>
 

@@ -1,11 +1,49 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="BookManager.Views.Book.AuthorsHub">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .Authors"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             x:Class="BookManager.Views.Book.AuthorsHub"         
+             xmlns:vm="clr-namespace:BookManager.ViewModels.Book"
+             x:DataType="vm:AuthorsHubVM"
+             xmlns:views="clr-namespace:BookManager.Views.Book"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
+
+    <Grid RowDefinitions="*, auto">
+        <Grid x:Name="AuthorGrid" Margin="12,0" RowDefinitions="Auto, *" RowSpacing="10" Grid.Row="0">
+            <Entry Text="{Binding EntrySearch, Mode=TwoWay}" Placeholder="Enter author name"
+             BackgroundColor="Transparent" HorizontalOptions="Fill" />
+            <RefreshView IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
+             Command="{Binding RefreshCommand}" Grid.Row="1">
+                <CollectionView VerticalOptions="Fill"  Margin="0"
+                  ItemsSource="{Binding CurrentAuthors}"
+                  RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+                  RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
+
+                    <CollectionView.EmptyView>
+                        <Label  Text="No authors found"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"/>
+                    </CollectionView.EmptyView>
+
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" VerticalItemSpacing="8" HorizontalItemSpacing="8" Span="2"/>
+                    </CollectionView.ItemsLayout>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <views:AuthorView x:DataType="views:AuthorView"
+                                TapCommand="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentView}}, Path=BindingContext.SelectCommand}"/>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
+        </Grid>
+        <Grid HeightRequest="60" WidthRequest="60" Grid.Row="1">
+            <Button x:Name="ButtonBase" Command="{Binding GoToCreateAuthorCommand}" CornerRadius="20"/>
+            <Image x:Name="Icon" Source="plus_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" HeightRequest="40" WidthRequest="40">
+                <Image.Behaviors>
+                    <toolkit:IconTintColorBehavior TintColor="White" />
+                </Image.Behaviors>
+            </Image>
+        </Grid>
+    </Grid>
 </ContentView>

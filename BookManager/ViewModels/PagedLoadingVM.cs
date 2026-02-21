@@ -18,6 +18,8 @@ namespace BookManager.ViewModels
         protected int? CursorId { get; set; }
         protected bool CanLoadMore { get; set; } = true;
 
+        protected CancellationTokenSource? _searchCts;
+
         protected bool CanStartLoading()
             => !Loading && CanLoadMore;
 
@@ -37,5 +39,7 @@ namespace BookManager.ViewModels
         }
 
         public abstract Task Load();
+
+        public abstract Task Refresh();
     }
 }

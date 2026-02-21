@@ -74,9 +74,9 @@ namespace ServiceLayer.Controllers
 		public async Task<IActionResult> EmailLogin([FromBody] EmailLoginRequest req)
 		{
 			var user = await _userRepository.EmailPasswordLoginAsync(req.Email, req.Password);
-			if (user == null) return Unauthorized();
+			if (user == null) return Unauthorized("The email or password you entered is incorrect.");
 
-			var secret = _configuration["Jwt:Secret"];
+            var secret = _configuration["Jwt:Secret"];
 			var issuer = _configuration["Jwt:Issuer"];
 			var audience = _configuration["Jwt:Audience"];
             var baseUrl = _configuration["App:BaseUrl"];

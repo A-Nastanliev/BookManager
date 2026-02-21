@@ -1,38 +1,35 @@
 ﻿using BookManager.ApiClients;
 using BookManager.Models.Book;
-using BookManager.ViewModels.Models;
+using BookManager.Views.Book;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
-using BookManager.Views.Book;
 
 namespace BookManager.ViewModels.Book
 {
-    public partial class BookSearchVM : PagedLoadingVM
+    public partial class GenresHubVM : PagedLoadingVM
     {
         [ObservableProperty]
-        ObservableCollection<BookVM> books = new();
+        ObservableCollection<GenreVM> genres = new();
 
         [ObservableProperty]
-        ObservableCollection<BookVM> currentBooks = new();
+        ObservableCollection<GenreVM> currentGenres = new();
 
         [ObservableProperty]
         string entrySearch;
 
-        BookClient _bookClient;
+        readonly BookClient _bookClient;
 
-        DateTime? BooksCursorDate { get; set; }
-
-        public BookSearchVM(BookClient bookClient)
+        public GenresHubVM(BookClient bookClient) 
         {
             _bookClient = bookClient;
         }
 
         [RelayCommand]
-        public async override Task Load()
+        public override async Task Load()
         {
             if (!CanStartLoading())
                 return;
@@ -41,32 +38,26 @@ namespace BookManager.ViewModels.Book
 
             try
             {
-                 var ( books, cursorDate, cursorKey) = await _bookClient.GetNextBooksAsync(BatchSize, CursorDate, CursorId, EntrySearch);
+                var (genres, cursorKey) = await _bookClient.GetNextGenresAsync(BatchSize, CursorId, EntrySearch);
 
-                if (books.Any())
+                if (genres.Any())
                 {
                     if (string.IsNullOrWhiteSpace(EntrySearch))
                     {
-                        foreach (var b in books)
+                        foreach (var g in genres)
                         {
-                            CurrentBooks.Add(b);
-                            Books.Add(b);
+                            CurrentGenres.Add(g);
+                            Genres.Add(g);
                         }
                     }
                     else
                     {
-                        foreach (var b in books)
+                        foreach (var g in genres)
                         {
-                            CurrentBooks.Add(b);
+                            CurrentGenres.Add(g);
                         }
                     }
-
-                    EndLoading(books.Count, cursorDate, cursorKey);
-
-                    if (string.IsNullOrWhiteSpace(EntrySearch))
-                    {
-                        BooksCursorDate = cursorDate;
-                    }
+                    EndLoading(genres.Count, null, cursorKey);
                     return;
                 }
 
@@ -81,15 +72,14 @@ namespace BookManager.ViewModels.Book
 
         [RelayCommand]
         public override async Task Refresh()
-        { 
+        {
             try
             {
-                BooksCursorDate = null;
                 CursorDate = null;
                 CursorId = null;
                 CanLoadMore = true;
-                CurrentBooks.Clear();
-                Books.Clear();
+                CurrentGenres.Clear();
+                Genres.Clear();
                 EntrySearch = null;
                 await Load();
             }
@@ -113,17 +103,16 @@ namespace BookManager.ViewModels.Book
                     CursorDate = null;
                     CursorId = null;
                     Loading = false;
-                    CurrentBooks.Clear();
+                    CurrentGenres.Clear();
 
                     if (string.IsNullOrWhiteSpace(search))
                     {
-                        foreach(var b in Books)
+                        foreach(var g in Genres)
                         {
-                            CurrentBooks.Add(b);
+                            CurrentGenres.Add(g);
                         }
-                        CursorDate = BooksCursorDate;
-                        CursorId = Books.LastOrDefault()?.Id;
-                        CanLoadMore = Books.Count % BatchSize == 0;
+                        CursorId = Genres.LastOrDefault()?.Id;
+                        CanLoadMore = Genres.Count % BatchSize == 0;
                         return;
                     }
 
@@ -148,15 +137,15 @@ namespace BookManager.ViewModels.Book
         }
 
         [RelayCommand]
-        public async Task Select(BookVM book)
+        public async Task Select(GenreVM genre)
         {
-            await Shell.Current.GoToAsync(nameof(BookFormPage), new Dictionary<string, object> { [nameof(BookFormVM.NavigationBook)] = book });
+            await Shell.Current.DisplayAlertAsync("Dobre", $"{genre.Name} is selected", "OK");
         }
 
         [RelayCommand]
-        public async Task GoToCreateBook()
+        public async Task GoToCreateGenre()
         {
-            await Shell.Current.GoToAsync(nameof(BookFormPage));
+            await Shell.Current.DisplayAlertAsync("Create genre", "Nema stranica sq", "OK");
         }
     }
 }

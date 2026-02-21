@@ -29,9 +29,49 @@
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public override Task<(List<Author>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
+        public override async Task<(List<Author>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
         {
-            throw new NotImplementedException();
+            var query = _context.Authors
+              .OrderByDescending(a => a.Id)
+              .AsQueryable();
+
+            if (cursorKey.HasValue)
+            {
+                query = query.Where(a => a.Id < cursorKey.Value);
+            }
+
+            var items = await query
+                .Take(count)
+                .ToListAsync();
+
+            var last = items.LastOrDefault();
+
+            return (items, null, last?.Id);
+        }
+
+        public async Task<(List<Author> Authors, int? CursorKey)> ReadNextAsync(int count, int? cursorKey, string? search)
+        {
+            var query = _context.Authors.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(a => a.Name.Contains(search));
+            }
+
+            if (cursorKey.HasValue)
+            {
+                query = query.Where(a => a.Id < cursorKey.Value);
+            }
+
+            query = query.OrderByDescending(a => a.Id);
+
+            var items = await query
+                .Take(count)
+                .ToListAsync();
+
+            var last = items.LastOrDefault();
+
+            return (items, last?.Id);
         }
     }
 }
