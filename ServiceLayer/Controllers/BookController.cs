@@ -71,6 +71,21 @@ namespace ServiceLayer.Controllers
             return Ok(new { Books = Books.Select(b => b.ToDto(baseUrl)), CursorDate, CursorId });
         }
 
+		[HttpGet("{isbn}")]
+		public async Task<IActionResult> GetBookByIsbn(string isbn)
+		{
+            if (string.IsNullOrWhiteSpace(isbn))
+                return BadRequest("ISBN is required.");
+
+            var book = await _bookRepository.GetBookByIsbnAsync(isbn);
+
+            if (book == null)
+                return NotFound($"No book found with ISBN {isbn}");
+
+            var baseUrl = _configuration["App:BaseUrl"];
+            return Ok(book.ToDto(baseUrl));
+        }
+
         [Authorize(Roles = "Admin")]
 		[HttpPut("{id}")]
 		public async Task<IActionResult> UpdateBook(int id, [FromForm] BookFormDto req)

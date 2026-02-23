@@ -1,5 +1,5 @@
-﻿using BookManager.Authentication;
-using BookManager.ApiClients;
+﻿using BookManager.ApiClients;
+using BookManager.Authentication;
 using BookManager.ViewModels.Authentication;
 using BookManager.ViewModels.Book;
 using BookManager.ViewModels.Models;
@@ -8,6 +8,7 @@ using BookManager.Views.Book;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Syncfusion.Maui.Toolkit.Hosting;
+using ZXing.Net.Maui.Controls;
 
 namespace BookManager
 {
@@ -20,6 +21,7 @@ namespace BookManager
                 .UseMauiApp<App>()
                 .ConfigureSyncfusionToolkit()
                 .UseMauiCommunityToolkit()
+                .UseBarcodeReader()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -41,7 +43,7 @@ namespace BookManager
                 builder.Services
                     .AddHttpClient<T>(client =>
                     {
-                        client.BaseAddress = new Uri("http://10.0.2.2:5137");
+                        client.BaseAddress = new Uri("http://192.168.1.100:5137");
                     })
                     .AddHttpMessageHandler<AuthMessageHandler>();
             }

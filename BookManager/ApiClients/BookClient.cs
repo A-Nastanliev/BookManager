@@ -2,6 +2,7 @@
 using BookManager.ViewModels.Models;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -55,6 +56,33 @@ namespace BookManager.ApiClients
             }
 
             return (true, null);
+        }
+
+        public async Task<(bool Success, BookVM? Book, string? Error)> GetBookByIsbnAsync(string isbn)
+        {
+            var response = await _httpClient.GetAsync(
+                $"/api/books/{Uri.EscapeDataString(isbn)}");
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (true, null, null);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                if (string.IsNullOrWhiteSpace(error))
+                    return (false, null, $"Server returned {response.StatusCode}");
+
+                return (false, null, error);
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+
+            var book = new BookVM();
+            book.FromJson(doc.RootElement);
+
+            return (true, book, null);
         }
 
 

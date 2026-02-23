@@ -6,18 +6,19 @@
              xmlns:views="clr-namespace:BookManager.Views.Book"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:DataType="vm:BookSearchVM"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
              Title="Discover">
 
-    <Grid>
-        <Grid x:Name="BookGrid" Margin="6,0" RowDefinitions="Auto, *" RowSpacing="0">
-            <Entry Text="{Binding EntrySearch, Mode=TwoWay}" Placeholder="Search by title, genre, author or publisher" Margin="10,0" 
+    <AbsoluteLayout>
+        <Grid x:Name="BookGrid" RowDefinitions="Auto, *" RowSpacing="0"  AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+            <SearchBar Text="{Binding EntrySearch, Mode=TwoWay}" Placeholder="Search by title, genre, author or publisher" Margin="0,0,4,0"
                  BackgroundColor="Transparent" HorizontalOptions="Fill" />
-            <RefreshView IsRefreshing="{Binding IsRefreshing}"
+            <RefreshView IsRefreshing="{Binding IsRefreshing}" Margin="6,0"
                  Command="{Binding RefreshCommand}" Grid.Row="1">
-                <CollectionView VerticalOptions="Fill"  Margin="0"
-              ItemsSource="{Binding CurrentBooks}"
-              RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
-              RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
+                <CollectionView VerticalOptions="Fill" 
+                      ItemsSource="{Binding CurrentBooks}"
+                      RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+                      RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
 
                     <CollectionView.EmptyView>
                         <Label  Text="No books found"
@@ -38,8 +39,8 @@
                 </CollectionView>
             </RefreshView>
         </Grid>
-        <VerticalStackLayout 
-          HorizontalOptions="End" VerticalOptions="End" Margin="20" Spacing="20" >
+        <VerticalStackLayout AbsoluteLayout.LayoutBounds="0.95,0.97,AutoSize,AutoSize" AbsoluteLayout.LayoutFlags="PositionProportional"
+          HorizontalOptions="End" VerticalOptions="End" Margin="0" Spacing="20" >
             <Grid HeightRequest="72" WidthRequest="72" 
                 IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter=Admin }">
                 <Button x:Name="ButtonBase" Command="{Binding GoToCreateBookCommand}" CornerRadius="36"/>
@@ -49,6 +50,29 @@
                     </Image.Behaviors>
                 </Image>
             </Grid>
+            <Grid HeightRequest="72" WidthRequest="72"  >
+                <Button x:Name="ScanButtonBase" CornerRadius="36" Clicked="ScanButtonBase_Clicked"/>
+                <Image Source="scan_code_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" HeightRequest="44" WidthRequest="44">
+                    <Image.Behaviors>
+                        <toolkit:IconTintColorBehavior TintColor="White" />
+                    </Image.Behaviors>
+                </Image>
+            </Grid>
         </VerticalStackLayout>
-    </Grid>
+        <Grid
+            x:Name="Overlay" IsVisible="False" BackgroundColor="#771A1A1A"
+            AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+            <BoxView BackgroundColor="#80000000">
+                <BoxView.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnOverlayTapped"/>
+                </BoxView.GestureRecognizers>
+            </BoxView>
+
+            <Grid  x:Name="ScannerPanel"  SafeAreaEdges="None"
+                VerticalOptions="End" TranslationY="300" BackgroundColor="Red">
+                <zxing:CameraBarcodeReaderView IsTorchOn="False" HeightRequest="300" IsDetecting="False" IsEnabled="False"
+                     x:Name="barcodeReaderView" HorizontalOptions="Fill" VerticalOptions="End" BarcodesDetected="barcodeReaderView_BarcodesDetected"/>
+            </Grid>
+        </Grid>
+    </AbsoluteLayout>
 </ContentPage>

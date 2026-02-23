@@ -189,7 +189,6 @@ namespace BusinessLayer.Repositories
 
         private bool IsUniqueConstraintViolation(DbUpdateException ex)
         {
-
             return ex.InnerException?.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) == true
                 || ex.InnerException?.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase) == true;
         }
@@ -243,6 +242,15 @@ namespace BusinessLayer.Repositories
         public override Task<(List<Book>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<Book> GetBookByIsbnAsync(string isbn)
+        {
+            return await _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Publisher)
+                .Include(b => b.Genre)
+                .FirstOrDefaultAsync(b=>b.ISBN==isbn);
         }
     }
 }

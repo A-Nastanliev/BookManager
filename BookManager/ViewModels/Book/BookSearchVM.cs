@@ -52,6 +52,7 @@ namespace BookManager.ViewModels.Book
                             CurrentBooks.Add(b);
                             Books.Add(b);
                         }
+                        BooksCursorDate = cursorDate;
                     }
                     else
                     {
@@ -62,11 +63,6 @@ namespace BookManager.ViewModels.Book
                     }
 
                     EndLoading(books.Count, cursorDate, cursorKey);
-
-                    if (string.IsNullOrWhiteSpace(EntrySearch))
-                    {
-                        BooksCursorDate = cursorDate;
-                    }
                     return;
                 }
 
@@ -157,6 +153,43 @@ namespace BookManager.ViewModels.Book
         public async Task GoToCreateBook()
         {
             await Shell.Current.GoToAsync(nameof(BookFormPage));
+        }
+
+        [RelayCommand]
+        public async Task SearchIsbnAsync(string barcode)
+        {
+            if (string.IsNullOrWhiteSpace(barcode))
+            {
+                await Shell.Current.DisplayAlertAsync("Error", "ISBN is required.", "OK");
+                return;
+            }
+
+            try
+            {
+                var (success, book, error) =
+                    await _bookClient.GetBookByIsbnAsync(barcode);
+
+                if (!success)
+                {
+                    await Shell.Current.DisplayAlertAsync("Error",
+                        error ?? "Unexpected error occurred.",
+                        "OK");
+                    return;
+                }
+
+                if (book == null)
+                {
+                    await Shell.Current.DisplayAlertAsync("Not found", $"No book with ISBN {barcode} exists.", "OK");
+                    return;
+                }
+
+                await SelectCommand.ExecuteAsync(book);
+            }
+            catch (Exception ex)
+            {
+
+                await Shell.Current.DisplayAlertAsync("Connection Error", $"Unable to contact server.\n\n{ex.Message}", "OK");
+            }
         }
     }
 }

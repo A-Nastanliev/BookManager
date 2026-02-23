@@ -98,10 +98,9 @@ namespace Tests
 			user.EmailAddress = "updated@test.com";
 			user.ProfilePicture = "newpic.png";
 
-			var result = await repo.UpdateAsync(user);
+			await repo.UpdateAsync(user);
 			var updated = context.Users.Single();
 
-			Assert.That(result, Is.True);
 			Assert.That(updated.Username, Is.EqualTo("updated"));
 			Assert.That(updated.EmailAddress, Is.EqualTo("updated@test.com"));
 			Assert.That(updated.ProfilePicture, Is.EqualTo("newpic.png"));
@@ -167,7 +166,7 @@ namespace Tests
 			await Task.Delay(10);
 			await repo.SignUpAsync(u2);
 
-			var users = await repo.ReadNextAsync(10, 0);
+			var (users, cursorDate, cursorKey) = await repo.ReadNextAsync(10, null, null);
 
 			Assert.That(users, Has.Count.EqualTo(2));
 			Assert.That(users.First().Username, Is.EqualTo("user2"));

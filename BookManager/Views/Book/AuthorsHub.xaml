@@ -8,12 +8,12 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
 
     <Grid RowDefinitions="*, auto">
-        <Grid x:Name="AuthorGrid" Margin="12,0" RowDefinitions="Auto, *" RowSpacing="10" Grid.Row="0">
-            <Entry Text="{Binding EntrySearch, Mode=TwoWay}" Placeholder="Enter author name"
-             BackgroundColor="Transparent" HorizontalOptions="Fill" />
+        <Grid x:Name="AuthorGrid" RowDefinitions="Auto, *" RowSpacing="10" Grid.Row="0">
+            <SearchBar Text="{Binding EntrySearch, Mode=TwoWay}" Placeholder="Enter author name"
+             BackgroundColor="Transparent" HorizontalOptions="Fill" Margin="0,0,4,0"/>
             <RefreshView IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
-             Command="{Binding RefreshCommand}" Grid.Row="1">
-                <CollectionView VerticalOptions="Fill"  Margin="0"
+             Command="{Binding RefreshCommand}" Grid.Row="1" Margin="12,0">
+                <CollectionView VerticalOptions="Fill" 
                   ItemsSource="{Binding CurrentAuthors}"
                   RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
                   RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
