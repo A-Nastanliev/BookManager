@@ -60,6 +60,7 @@ namespace BookManager
             builder.Services.AddSingleton<GenresHubVM>();
             builder.Services.AddSingleton<PublishersHubVM>();
             builder.Services.AddSingleton<AuthorsHubVM>();
+            builder.Services.AddTransient<FormVM>();
 
             builder.Services.AddTransient<LoadingPage>();
             builder.Services.AddTransient<LoginPage>();
@@ -68,6 +69,7 @@ namespace BookManager
             builder.Services.AddSingleton<BookSearchPage>();
             builder.Services.AddTransient<BookFormPage>();
             builder.Services.AddSingleton<PublishingHubPage>(); 
+            builder.Services.AddTransient<FormPage>();
 
             return builder.Build();
         }

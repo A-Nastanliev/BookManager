@@ -1,5 +1,6 @@
 ﻿using BookManager.ApiClients;
 using BookManager.Models.Book;
+using BookManager.Views.Book;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
@@ -138,13 +139,13 @@ namespace BookManager.ViewModels.Book
         [RelayCommand]
         public async Task Select(PublisherVM publisher)
         {
-            await Shell.Current.DisplayAlertAsync("Dobre", $"{publisher.Name} is selected", "OK");
+            await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.NavigationPublisher)] = publisher });
         }
 
         [RelayCommand]
         public async Task GoToCreatePublisher()
         {
-            await Shell.Current.DisplayAlertAsync("Create publisher", "Nema stranica sq", "OK");
+            await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.EntityType)] = nameof(PublisherVM) });
         }
     }
 }

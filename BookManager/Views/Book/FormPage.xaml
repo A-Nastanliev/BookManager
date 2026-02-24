@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookManager.Views.Book.FormPage"
+             xmlns:vm="clr-namespace:BookManager.ViewModels.Book"
+             x:DataType="vm:FormVM"
+             Title="{Binding Title}">
+    
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <VerticalStackLayout
+                IsVisible="{Binding EntityType,
+                            Converter={StaticResource EqualsConverter},
+                            ConverterParameter=AuthorVM}">
+
+                <Label Text="Name" />
+                <Entry Text="{Binding Author.Name}" />
+
+                <Label Text="Biography" />
+                <Editor HeightRequest="120"
+                        AutoSize="TextChanges"
+                        Text="{Binding Author.Biography}" />
+
+                <Label Text="Birth Date" />
+                <DatePicker Date="{Binding Author.BirthDate}" />
+            </VerticalStackLayout>
+
+
+            <VerticalStackLayout
+                IsVisible="{Binding EntityType,
+                            Converter={StaticResource EqualsConverter},
+                            ConverterParameter=PublisherVM}">
+
+                <Label Text="Name" />
+                <Entry Text="{Binding Publisher.Name}" />
+
+                <Label Text="Description" />
+                <Editor HeightRequest="120"
+                        AutoSize="TextChanges"
+                        Text="{Binding Publisher.Description}" />
+
+                <Label Text="Website" />
+                <Entry Text="{Binding Publisher.Website}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout
+                IsVisible="{Binding EntityType,
+                            Converter={StaticResource EqualsConverter},
+                            ConverterParameter=GenreVM}">
+
+                <Label Text="Name" />
+                <Entry Text="{Binding Genre.Name}" />
+
+                <Label Text="Description" />
+                <Editor HeightRequest="120"
+                        AutoSize="TextChanges"
+                        Text="{Binding Genre.Description}" />
+            </VerticalStackLayout>
+
+
+            <Button Text="{Binding SubmitButtonText}"
+                    Margin="0,20,0,0"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

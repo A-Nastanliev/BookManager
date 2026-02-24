@@ -1,0 +1,85 @@
+﻿using BookManager.ApiClients;
+using BookManager.Models.Book;
+using CommunityToolkit.Mvvm.ComponentModel;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BookManager.ViewModels.Book
+{
+    public partial class FormVM : ObservableObject, IQueryAttributable
+    {
+        [ObservableProperty]
+        AuthorVM navigationAuthor;
+
+        [ObservableProperty]
+        AuthorVM author = new();
+
+        [ObservableProperty]
+        PublisherVM navigationPublisher;
+
+        [ObservableProperty]
+        PublisherVM publisher = new();
+
+        [ObservableProperty]
+        GenreVM navigationGenre;
+
+        [ObservableProperty]
+        GenreVM genre = new();
+
+        [ObservableProperty]
+        string entityType;
+
+        [ObservableProperty]
+        string title;
+        [ObservableProperty]
+        string submitButtonText;
+
+        bool isEditMode;
+
+        BookClient _bookClient;
+
+        public FormVM(BookClient bookClient)
+        {
+            _bookClient = bookClient;
+        }
+
+
+        public void ApplyQueryAttributes(IDictionary<string, object> query)
+        {
+            if (query.TryGetValue($"{nameof(NavigationAuthor)}", out var obj) && obj is AuthorVM author)
+            {
+                EntityType = nameof(AuthorVM);
+                NavigationAuthor = author;
+                Author.CopyFrom(author);
+                Title = "Edit Author";
+                SubmitButtonText = "Save Changes";
+                isEditMode = true;
+            }
+            else if (query.TryGetValue($"{nameof(NavigationPublisher)}", out var obj2) && obj2 is PublisherVM publisher)
+            {
+                EntityType = nameof(PublisherVM);
+                NavigationPublisher = publisher;
+                Publisher.CopyFrom(publisher);
+                Title = "Edit Publisher";
+                SubmitButtonText = "Save Changes";
+                isEditMode = true;
+            }
+            else if (query.TryGetValue($"{nameof(NavigationGenre)}", out var obj3) && obj3 is GenreVM genre)
+            {
+                EntityType = nameof(GenreVM);
+                NavigationGenre = genre;
+                Genre.CopyFrom(genre);
+                Title = "Edit Genre";
+                SubmitButtonText = "Save Changes";
+                isEditMode = true;
+            }
+            else if (query.TryGetValue($"{nameof(EntityType)}", out var typeObj) && typeObj is string typeName)
+            {
+                EntityType = typeName;
+                Title = $"Create {typeName.Replace("VM", "")}";
+                SubmitButtonText = "Create";
+            }
+        }
+    }
+}

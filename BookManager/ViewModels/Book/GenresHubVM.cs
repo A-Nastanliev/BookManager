@@ -139,13 +139,13 @@ namespace BookManager.ViewModels.Book
         [RelayCommand]
         public async Task Select(GenreVM genre)
         {
-            await Shell.Current.DisplayAlertAsync("Dobre", $"{genre.Name} is selected", "OK");
+            await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.NavigationGenre)] = genre });
         }
 
         [RelayCommand]
         public async Task GoToCreateGenre()
         {
-            await Shell.Current.DisplayAlertAsync("Create genre", "Nema stranica sq", "OK");
+            await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.EntityType)] = nameof(GenreVM) });
         }
     }
 }
