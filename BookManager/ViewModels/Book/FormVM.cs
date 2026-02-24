@@ -4,6 +4,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Mvvm.Input;
 
 namespace BookManager.ViewModels.Book
 {
@@ -44,6 +46,148 @@ namespace BookManager.ViewModels.Book
             _bookClient = bookClient;
         }
 
+        [RelayCommand]
+        private async Task Submit()
+        {
+            if (EntityType == nameof(AuthorVM))
+                await HandleAuthorAsync();
+            else if (EntityType == nameof(PublisherVM))
+                await HandlePublisherAsync();
+            else if (EntityType == nameof(GenreVM))
+                await HandleGenreAsync();
+        }
+
+        private async Task HandleAuthorAsync()
+        {
+            if (string.IsNullOrWhiteSpace(Author.Name))
+            {
+                await Shell.Current.DisplayAlertAsync("Validation", "Name is required.", "OK");
+                return;
+            }
+
+            try
+            {
+                if (isEditMode)
+                {
+                    var result = await _bookClient.UpdateAuthorAsync(Author);
+
+                    if (!result.Success)
+                    {
+                        await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                        return;
+                    }
+
+                    NavigationAuthor.CopyFrom(Author);
+                    _ = Toast.Make($"{Author.Name} updated").Show();
+                }
+                else
+                {
+                    var result = await _bookClient.CreateAuthorAsync(Author);
+
+                    if (!result.Success)
+                    {
+                        await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                        return;
+                    }
+
+                    _ = Toast.Make($"{Author.Name} created").Show();
+                }
+
+                await Shell.Current.GoToAsync("..");
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            }
+        }
+
+        private async Task HandlePublisherAsync()
+        {
+            if (string.IsNullOrWhiteSpace(Publisher.Name))
+            {
+                await Shell.Current.DisplayAlertAsync("Validation", "Name is required.", "OK");
+                return;
+            }
+
+            try
+            {
+                if (isEditMode)
+                {
+                    var result = await _bookClient.UpdatePublisherAsync(Publisher);
+
+                    if (!result.Success)
+                    {
+                        await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                        return;
+                    }
+
+                    NavigationPublisher.CopyFrom(Publisher);
+                    _ = Toast.Make($"{Publisher.Name} updated").Show();
+                }
+                else
+                {
+                    var result = await _bookClient.CreatePublisherAsync(Publisher);
+
+                    if (!result.Success)
+                    {
+                        await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                        return;
+                    }
+
+                    _ = Toast.Make($"{Publisher.Name} created").Show();
+                }
+
+                await Shell.Current.GoToAsync("..");
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            }
+        }
+
+        private async Task HandleGenreAsync()
+        {
+            if (string.IsNullOrWhiteSpace(Genre.Name))
+            {
+                await Shell.Current.DisplayAlertAsync("Validation", "Name is required.", "OK");
+                return;
+            }
+
+            try
+            {
+                if (isEditMode)
+                {
+                    var result = await _bookClient.UpdateGenreAsync(Genre);
+
+                    if (!result.Success)
+                    {
+                        await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                        return;
+                    }
+
+                    NavigationGenre.CopyFrom(Genre);
+                    _ = Toast.Make($"{Genre.Name} updated").Show();
+                }
+                else
+                {
+                    var result = await _bookClient.CreateGenreAsync(Genre);
+
+                    if (!result.Success)
+                    {
+                        await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                        return;
+                    }
+
+                    _ = Toast.Make($"{Genre.Name} created").Show();
+                }
+
+                await Shell.Current.GoToAsync("..");
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            }
+        }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {

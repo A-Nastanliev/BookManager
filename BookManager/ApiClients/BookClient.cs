@@ -45,14 +45,7 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                var error = await response.Content.ReadAsStringAsync();
-
-                if (string.IsNullOrWhiteSpace(error))
-                {
-                    return (false, $"Server returned {response.StatusCode}");
-                }
-
-                return (false, error);
+                return (false, await ApiErrorParser.ParseAsync(response));
             }
 
             return (true, null);
@@ -68,12 +61,7 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                var error = await response.Content.ReadAsStringAsync();
-
-                if (string.IsNullOrWhiteSpace(error))
-                    return (false, null, $"Server returned {response.StatusCode}");
-
-                return (false, null, error);
+                return (false,null, await ApiErrorParser.ParseAsync(response));
             }
 
             var json = await response.Content.ReadAsStringAsync();
@@ -102,7 +90,8 @@ namespace BookManager.ApiClients
 
             var response = await _httpClient.GetAsync("/api/books/next" + query);
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(await ApiErrorParser.ParseAsync(response));
 
             var jsonString = await response.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(jsonString);
@@ -161,31 +150,35 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                var json = await response.Content.ReadAsStringAsync();
-
-                if (string.IsNullOrWhiteSpace(json))
-                {
-                    return (false, $"Server returned status code {response.StatusCode}");
-                }
-
-                try
-                {
-                    using var doc = JsonDocument.Parse(json);
-
-                    if (doc.RootElement.TryGetProperty("error", out var errorProp))
-                    {
-                        return (false, errorProp.GetString());
-                    }
-
-                    return (false, "Unknown error occurred.");
-                }
-                catch
-                {
-                    return (false, $"Server returned status code {response.StatusCode} with non-JSON response.");
-                }
+                return (false, await ApiErrorParser.ParseAsync(response));
             }
 
             return (true, null);
+        }
+
+        public async Task<(bool Success, string? Error)> CreateAuthorAsync(AuthorVM author)
+        {
+            var json = JsonSerializer.Serialize(new
+            {
+                name = author.Name,
+                biography = author.Biography,
+                birthDate = author.BirthDate
+            });
+
+            var response = await _httpClient.PostAsync(
+                "/api/books/authors",
+                new StringContent(json, Encoding.UTF8, "application/json"));
+
+            var responseJson = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(responseJson);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return (false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            author.Id = doc.RootElement.GetProperty("id").GetInt32();
+            return (true,  null);
         }
 
         public async Task<(List<AuthorVM> Authors, int? CursorKey)> GetNextAuthorsAsync(int count, int? cursorKey, string search)
@@ -199,7 +192,9 @@ namespace BookManager.ApiClients
                 query += $"&search={Uri.EscapeDataString(search)}";
 
             var response = await _httpClient.GetAsync("/api/books/authors" + query);
-            response.EnsureSuccessStatusCode();
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(await ApiErrorParser.ParseAsync(response));
 
             var jsonString = await response.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(jsonString);
@@ -223,6 +218,62 @@ namespace BookManager.ApiClients
             return (authors, nextCursorKey);
         }
 
+        public async Task<(bool Success, string? Error)> UpdateAuthorAsync(AuthorVM author)
+        {
+            var json = JsonSerializer.Serialize(new
+            {
+                name = author.Name,
+                biography = author.Biography,
+                birthDate = author.BirthDate
+            });
+
+            var response = await _httpClient.PutAsync($"/api/books/authors/{author.Id}", new StringContent(json, Encoding.UTF8, "application/json"));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return (false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            return (true, null);
+        }
+
+        public async Task<(bool Success, string? Error)> DeleteAuthorAsync(int id)
+        {
+            var response = await _httpClient.DeleteAsync($"/api/books/authors/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return (false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            return (true, null);
+        }
+
+        public async Task<(bool Success, string? Error)> CreateGenreAsync(GenreVM genre)
+        {
+            var json = JsonSerializer.Serialize(new
+            {
+                name = genre.Name,
+                description = genre.Description
+            });
+
+            var response = await _httpClient.PostAsync(
+                "/api/books/genres",
+                new StringContent(json, Encoding.UTF8, "application/json"));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return (false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            var responseJson = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(responseJson);
+
+            genre.Id = doc.RootElement.GetProperty("id").GetInt32();
+
+            return (true, null);
+        }
+
         public async Task<(List<GenreVM> Genres, int? CursorKey)> GetNextGenresAsync(int count, int? cursorKey, string search)
         {
             var query = $"?count={count}";
@@ -234,7 +285,9 @@ namespace BookManager.ApiClients
                 query += $"&search={Uri.EscapeDataString(search)}";
 
             var response = await _httpClient.GetAsync("/api/books/genres" + query);
-            response.EnsureSuccessStatusCode();
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(await ApiErrorParser.ParseAsync(response));
 
             var jsonString = await response.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(jsonString);
@@ -258,6 +311,63 @@ namespace BookManager.ApiClients
             return (genres, nextCursorKey);
         }
 
+        public async Task<(bool Success, string? Error)> UpdateGenreAsync(GenreVM genre)
+        {
+            var json = JsonSerializer.Serialize(new
+            {
+                name = genre.Name,
+                description = genre.Description
+            });
+
+            var response = await _httpClient.PutAsync($"/api/books/genres/{genre.Id}",
+                new StringContent(json, Encoding.UTF8, "application/json"));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return (false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            return (true, null);
+        }
+
+        public async Task<(bool Success, string? Error)> DeleteGenreAsync(int id)
+        {
+            var response = await _httpClient.DeleteAsync($"/api/books/genres/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return (false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            return (true, null);
+        }
+
+        public async Task<(bool Success, string? Error)> CreatePublisherAsync(PublisherVM publisher)
+        {
+            var json = JsonSerializer.Serialize(new
+            {
+                name = publisher.Name,
+                description = publisher.Description,
+                website = publisher.Website
+            });
+
+            var response = await _httpClient.PostAsync(
+                "/api/books/publishers",
+                new StringContent(json, Encoding.UTF8, "application/json"));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return (false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            var responseJson = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(responseJson);
+
+            publisher.Id = doc.RootElement.GetProperty("id").GetInt32();
+
+            return (true, null);
+        }
+
         public async Task<(List<PublisherVM> Publishers, int? CursorKey)> GetNextPublishersAsync(int count, int? cursorKey, string search)
         {
             var query = $"?count={count}";
@@ -269,7 +379,9 @@ namespace BookManager.ApiClients
                 query += $"&search={Uri.EscapeDataString(search)}";
 
             var response = await _httpClient.GetAsync("/api/books/publishers" + query);
-            response.EnsureSuccessStatusCode();
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(await ApiErrorParser.ParseAsync(response));
 
             var jsonString = await response.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(jsonString);
@@ -291,6 +403,39 @@ namespace BookManager.ApiClients
                 nextCursorKey = ck.GetInt32();
 
             return (publishers, nextCursorKey);
+        }
+
+        public async Task<(bool Success, string? Error)> UpdatePublisherAsync(PublisherVM publisher)
+        {
+            var json = JsonSerializer.Serialize(new
+            {
+                name = publisher.Name,
+                description = publisher.Description,
+                website = publisher.Website
+            });
+
+            var response = await _httpClient.PutAsync(
+                $"/api/books/publishers/{publisher.Id}",
+                new StringContent(json, Encoding.UTF8, "application/json"));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return (false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            return (true, null);
+        }
+
+        public async Task<(bool Success, string? Error)> DeletePublisherAsync(int id)
+        {
+            var response = await _httpClient.DeleteAsync($"/api/books/publishers/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return (false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            return (true, null);
         }
     }
 }

@@ -42,8 +42,7 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                var error = await response.Content.ReadAsStringAsync();
-                return new AuthResult(false, error);
+                return new AuthResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
             return new AuthResult(true, null);
@@ -59,8 +58,7 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                var error = await response.Content.ReadAsStringAsync();
-                return new AuthResult(false, error);
+                return new AuthResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
             var responseJson = await response.Content.ReadAsStringAsync();
@@ -87,7 +85,7 @@ namespace BookManager.ApiClients
             if (!response.IsSuccessStatusCode)
             {
                 _tokenStore.Clear();
-                return new AuthResult(false, "Token expired");
+                return new AuthResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
             var json = await response.Content.ReadAsStringAsync();

@@ -37,7 +37,7 @@
                 </CollectionView>
             </RefreshView>
         </Grid>
-        <Grid HeightRequest="60" WidthRequest="60" Grid.Row="1">
+        <Grid HeightRequest="60" WidthRequest="60" Grid.Row="1" Margin="0,8">
             <Button x:Name="ButtonBase" Command="{Binding GoToCreatePublisherCommand}" CornerRadius="20"/>
             <Image x:Name="Icon" Source="plus_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" HeightRequest="40" WidthRequest="40">
                 <Image.Behaviors>

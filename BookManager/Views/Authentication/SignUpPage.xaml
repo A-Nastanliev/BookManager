@@ -61,7 +61,7 @@
 
             <Button
               Text="Already have an account? Log in" Grid.Row="8" Grid.ColumnSpan="2" Command="{Binding GoToLoginCommand}"
-              BackgroundColor="Transparent" TextColor="{StaticResource Primary}" FontSize="14" HorizontalOptions="Center" />
+              BackgroundColor="Transparent" TextColor="{StaticResource Primary}" FontSize="Small" HorizontalOptions="Center" />
         </Grid>
     </ScrollView>
 </ContentPage>

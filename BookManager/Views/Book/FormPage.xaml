@@ -7,23 +7,23 @@
              Title="{Binding Title}">
     
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
+        <VerticalStackLayout Padding="20" Spacing="10">
 
             <VerticalStackLayout
                 IsVisible="{Binding EntityType,
                             Converter={StaticResource EqualsConverter},
                             ConverterParameter=AuthorVM}">
 
-                <Label Text="Name" />
+                <Label Text="Name" Margin="4,0,0,0"/>
                 <Entry Text="{Binding Author.Name}" />
 
-                <Label Text="Biography" />
-                <Editor HeightRequest="120"
+                <Label Text="Biography" Margin="4,20,0,0" />
+                <Editor MaxLength="1000"
                         AutoSize="TextChanges"
                         Text="{Binding Author.Biography}" />
 
-                <Label Text="Birth Date" />
-                <DatePicker Date="{Binding Author.BirthDate}" />
+                <Label Text="Birth Date"  Margin="4,20,0,0" />
+                <DatePicker Date="{Binding Author.BirthDate}" Format="dd MMMM yyyy" />
             </VerticalStackLayout>
 
 
@@ -32,15 +32,15 @@
                             Converter={StaticResource EqualsConverter},
                             ConverterParameter=PublisherVM}">
 
-                <Label Text="Name" />
+                <Label Text="Name" Margin="4,0,0,0"/>
                 <Entry Text="{Binding Publisher.Name}" />
 
-                <Label Text="Description" />
-                <Editor HeightRequest="120"
-                        AutoSize="TextChanges"
+                <Label Text="Description" Margin="4,20,0,0" />
+                <Editor MaxLength="500"
+                        AutoSize="TextChanges" 
                         Text="{Binding Publisher.Description}" />
 
-                <Label Text="Website" />
+                <Label Text="Website" Margin="4,20,0,0" />
                 <Entry Text="{Binding Publisher.Website}" />
             </VerticalStackLayout>
 
@@ -49,18 +49,17 @@
                             Converter={StaticResource EqualsConverter},
                             ConverterParameter=GenreVM}">
 
-                <Label Text="Name" />
+                <Label Text="Name" Margin="4,0,0,0"/>
                 <Entry Text="{Binding Genre.Name}" />
 
-                <Label Text="Description" />
-                <Editor HeightRequest="120"
+                <Label Text="Description" Margin="4,20,0,0" />
+                <Editor MaxLength="500" 
                         AutoSize="TextChanges"
                         Text="{Binding Genre.Description}" />
             </VerticalStackLayout>
 
 
-            <Button Text="{Binding SubmitButtonText}"
-                    Margin="0,20,0,0"/>
+            <Button Text="{Binding SubmitButtonText}" Command="{Binding SubmitCommand}"/>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
