@@ -6,6 +6,7 @@
     xmlns:local="clr-namespace:BookManager"
     xmlns:authentication="clr-namespace:BookManager.Views.Authentication"
     xmlns:book="clr-namespace:BookManager.Views.Book"
+    xmlns:settings="clr-namespace:BookManager.Views.Settings"
     Title="BookManager"
     Shell.FlyoutBehavior="Disabled">
 
@@ -27,6 +28,11 @@
                 IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter=Admin}"
                 ContentTemplate="{DataTemplate book:PublishingHubPage}"
                 Route="CatalogManagementPage"/>
+        </Tab>
+        <Tab Title="Settings">
+            <ShellContent Title="Settings"
+                ContentTemplate="{DataTemplate settings:SettingsPage}"
+                Route="SettingsPage"/>
         </Tab>
     </TabBar>
 </Shell>

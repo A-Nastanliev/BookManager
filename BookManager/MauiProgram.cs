@@ -3,12 +3,14 @@ using BookManager.Authentication;
 using BookManager.ViewModels.Authentication;
 using BookManager.ViewModels.Book;
 using BookManager.ViewModels.Models;
+using BookManager.ViewModels.Settings;
 using BookManager.Views.Authentication;
 using BookManager.Views.Book;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Syncfusion.Maui.Toolkit.Hosting;
 using ZXing.Net.Maui.Controls;
+using BookManager.Views.Settings;  
 
 namespace BookManager
 {
@@ -43,7 +45,7 @@ namespace BookManager
                 builder.Services
                     .AddHttpClient<T>(client =>
                     {
-                        client.BaseAddress = new Uri("http://192.168.1.100:5137");
+                        client.BaseAddress = new Uri("http://192.168.100.219:5137");
                     })
                     .AddHttpMessageHandler<AuthMessageHandler>();
             }
@@ -62,6 +64,8 @@ namespace BookManager
             builder.Services.AddSingleton<AuthorsHubVM>();
             builder.Services.AddTransient<FormVM>();
 
+            builder.Services.AddSingleton<SettingsVM>();
+
             builder.Services.AddTransient<LoadingPage>();
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<SignUpPage>();
@@ -70,6 +74,8 @@ namespace BookManager
             builder.Services.AddTransient<BookFormPage>();
             builder.Services.AddSingleton<PublishingHubPage>(); 
             builder.Services.AddTransient<FormPage>();
+
+            builder.Services.AddSingleton<SettingsPage>();
 
             return builder.Build();
         }

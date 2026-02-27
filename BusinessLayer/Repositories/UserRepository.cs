@@ -38,8 +38,15 @@ namespace BusinessLayer.Repositories
             if (user == null)
                 return;
 
-            user.Username = obj.Username;
-            user.EmailAddress = obj.EmailAddress;
+            if (!string.IsNullOrWhiteSpace(obj.Username))
+            {
+                user.Username = obj.Username;
+            }
+
+            if (!string.IsNullOrWhiteSpace(obj.EmailAddress))
+            {
+                user.EmailAddress = obj.EmailAddress;
+            }
 
            await _context.SaveChangesAsync();
         }

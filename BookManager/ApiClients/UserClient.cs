@@ -16,6 +16,7 @@ namespace BookManager.ApiClients
         private readonly ITokenStore _tokenStore;
 
         private readonly UserVM _user;
+        public event Func<Task>? OnLogout;
 
         public UserClient(HttpClient httpClient, UserVM currentUser, ITokenStore tokenStore)
         {
@@ -23,8 +24,37 @@ namespace BookManager.ApiClients
             _user = currentUser;
             _tokenStore = tokenStore;
         }
+        public async Task Logout()
+        {
+            _user.EmailAddress = null;
+            _user.CreatedAt = default(DateTime);
+            _user.PublicUser.Id = 0;
+            _user.PublicUser.ProfilePicture = null;
+            _user.PublicUser.ProfilePictureSource = null;
+            _user.PublicUser.Username = null; 
+            _user.Role = UserRole.User;
 
-        public async Task<AuthResult> SignUpAsync(string username, string email, string password, string imagePath)
+            _tokenStore?.Clear();
+            if (OnLogout != null)
+            {
+                foreach (var handler in OnLogout.GetInvocationList())
+                {
+                    if (handler is Func<Task> asyncHandler)
+                    {
+                        try
+                        {
+                            await asyncHandler();
+                        }
+                        catch (Exception ex)
+                        {
+                            await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+                        }
+                    }
+                }
+            }
+        }
+
+        public async Task<RequestResult> SignUpAsync(string username, string email, string password, string imagePath)
         {
             using var content = new MultipartFormDataContent();
 
@@ -42,13 +72,13 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                return new AuthResult(false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
-            return new AuthResult(true, null);
+            return new RequestResult(true, null);
         }
 
-        public async Task<AuthResult> EmailLoginAsync(string email, string password)
+        public async Task<RequestResult> EmailLoginAsync(string email, string password)
         {
             var payload = new { Email = email, Password = password };
             var json = JsonSerializer.Serialize(payload);
@@ -58,7 +88,7 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                return new AuthResult(false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
             var responseJson = await response.Content.ReadAsStringAsync();
@@ -71,21 +101,21 @@ namespace BookManager.ApiClients
 
             await _tokenStore.SetAccessTokenAsync(token);
 
-            return new AuthResult(true, null);
+            return new RequestResult(true, null);
         }
 
-        public async Task<AuthResult> TokenLoginAsync()
+        public async Task<RequestResult> TokenLoginAsync()
         {
             var token = await _tokenStore.GetAccessTokenAsync();
             if (string.IsNullOrWhiteSpace(token))
-                return new AuthResult(false, "No token stored");
+                return new RequestResult(false, "No token stored");
 
             var response = await _httpClient.GetAsync("/api/users/me");
 
             if (!response.IsSuccessStatusCode)
             {
                 _tokenStore.Clear();
-                return new AuthResult(false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
             var json = await response.Content.ReadAsStringAsync();
@@ -93,8 +123,102 @@ namespace BookManager.ApiClients
 
             _user.FromJson(doc.RootElement.GetProperty("user"));
 
-            return new AuthResult(true, null);
+            return new RequestResult(true, null);
         }
-    
+
+        public async Task<RequestResult> UpdateUsernameEmailAsync(string username, string emailAddress)
+        {
+            var payload = new
+            {
+                Username = username,
+                EmailAddress = emailAddress
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PutAsync("/api/users/me", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            if (!string.IsNullOrWhiteSpace(username))
+            {
+                _user.PublicUser.Username = username;
+            }
+
+            if (!string.IsNullOrWhiteSpace(emailAddress))
+            {
+                _user.EmailAddress = emailAddress;
+            }
+
+            return new RequestResult(true, null);
+        }
+
+        public async Task<RequestResult> UpdatePasswordAsync(string currentPassword, string newPassword)
+        {
+            var payload = new
+            {
+                CurrentPassword = currentPassword,
+                NewPassword = newPassword
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PutAsync("/api/users/me/password", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            return new RequestResult(true, null);
+        }
+
+        public async Task<RequestResult> UpdateProfilePictureAsync(string imagePath)
+        {
+            using var content = new MultipartFormDataContent();
+            using var stream = File.OpenRead(imagePath);
+            using var streamContent = new StreamContent(stream);
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+
+            content.Add(streamContent, "picture", Path.GetFileName(imagePath));
+
+            var response = await _httpClient.PutAsync("/api/users/me/profile-picture", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+
+            var newPath = doc.RootElement.GetProperty("profilePicture").GetString();
+
+            _user.PublicUser.ProfilePicture = newPath;
+
+            return new RequestResult(true, null);
+        }
+
+        public ImageSource GetProfilePicture(string path)
+        {
+            return ImageSource.FromUri(new Uri($"{path}"));
+        }
+
+        public async Task<RequestResult> DeleteUserAsync(int id)
+        {
+            var response = await _httpClient.DeleteAsync($"/api/users/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            return new RequestResult(true, null);
+        }
     }
 }

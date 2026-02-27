@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BookManager.ViewModels.Settings"
+             xmlns:passToggle="clr-namespace:BookManager.Views"
+             x:DataType="vm:SettingsVM"
+             x:Class="BookManager.Views.Settings.SettingsPage"
+             Title="Settings">
+    <ScrollView VerticalScrollBarVisibility="Never">
+        <VerticalStackLayout Padding="24" Spacing="20"
+                   HorizontalOptions="Fill"
+                   VerticalOptions="Start">
+
+            <Border
+                 Stroke="{StaticResource Primary}"
+                 StrokeThickness="2"
+                 StrokeShape="RoundRectangle 90"
+                 WidthRequest="180"
+                 HeightRequest="180"
+                 HorizontalOptions="Center"
+                 VerticalOptions="Center">
+
+                <ImageButton
+                     Source="{Binding ProfileImageSource}"
+                     Aspect="AspectFill"
+                     Command="{Binding PickProfilePictureCommand}">
+                    <ImageButton.Clip>
+                        <EllipseGeometry
+                             Center="90,90"
+                             RadiusX="90"
+                             RadiusY="90" />
+                    </ImageButton.Clip>
+                </ImageButton>
+            </Border>
+
+            <HorizontalStackLayout
+                Spacing="12" HorizontalOptions="Center"
+                IsVisible="{Binding IsPictureChanged}">
+                <Button
+                    Text="Confirm"
+                    Command="{Binding ConfirmProfilePictureCommand}" />
+
+                <Button
+                    Text="Cancel"
+                    Command="{Binding CancelProfilePictureCommand}" />
+            </HorizontalStackLayout>
+
+            <Label
+                 Text="{Binding User.PublicUser.Username}"
+                 FontSize="18"
+                 FontAttributes="Bold"
+                 TextColor="White"
+                 HorizontalOptions="Center" />
+
+            <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto" 
+                RowSpacing="20">
+                <Label
+                    Text="{Binding User.PublicUser.Username}" Grid.Row="0"/>
+                <Entry Text="{Binding NewUsername}"
+                     Grid.Row="1" Placeholder="New Username" MaxLength="30"/>
+                <Label
+                    Text="{Binding User.EmailAddress}" Grid.Row="2" Grid.ColumnSpan="2"/>
+                <Entry Text="{Binding NewEmail}" Placeholder="New Email"
+                    Keyboard="Email" Grid.ColumnSpan="2" Grid.Row="3"/>
+                <Button
+                    Text="Save Changes" Command="{Binding UpdateUsernameEmailCommand}" Grid.Row="4" HorizontalOptions="End"/>
+            </Grid>
+
+            <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*, Auto"
+                  RowSpacing="20" ColumnSpacing="20">
+                <Entry Text="{Binding OldPassword}"
+                    x:Name="OldPasswordEntry" Placeholder="Old Password" IsPassword="True" Grid.Row="0" Grid.Column="0"/>
+                <passToggle:VisibilityButton Grid.Column="1" Grid.Row="0" TargetEntry="{x:Reference OldPasswordEntry}"/>
+                <Entry Text="{Binding NewPassword}"
+                    x:Name="NewPasswordEntry" Placeholder="New Password" IsPassword="True" Grid.Row="1" Grid.Column="0"/>
+                <passToggle:VisibilityButton Grid.Column="1" Grid.Row="1" TargetEntry="{x:Reference NewPasswordEntry}"/>
+                <Button Text="Update Password" HorizontalOptions="End" Command="{Binding UpdatePasswordCommand}" Grid.Row="2" Grid.ColumnSpan="2"/>
+            </Grid>
+
+            <Border
+                 IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter='Administrator,Moderator'}"
+                 Stroke="LightGray" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="16">
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Command="{Binding OpenCommentRestrictionsCommand}" />
+                </Border.GestureRecognizers>
+
+                <Label Text="Search Comment restrictions" Grid.Column="1" VerticalOptions="Center" />
+            </Border>
+
+            <HorizontalStackLayout
+                Spacing="60" HorizontalOptions="Center">
+                <Button 
+                    Text="Logout" Command="{Binding LogoutCommand}"/>
+                <Button
+                    Text="Delete" Command="{Binding DeleteAccountCommand}"/>
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

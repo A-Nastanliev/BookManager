@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BookManager.Authentication
+namespace BookManager.ApiClients
 {
-    public record AuthResult(
+    public record RequestResult(
         bool Success,
         string? Error
     );

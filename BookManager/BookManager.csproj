@@ -123,6 +123,9 @@
 	  <MauiXaml Update="Views\Book\PublishingHubPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\Settings\SettingsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\VisibilityButton.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
