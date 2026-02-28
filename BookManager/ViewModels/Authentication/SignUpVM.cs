@@ -106,7 +106,7 @@ namespace BookManager.ViewModels.Authentication
                 }
 
                 _ = Toast.Make($"{Username} created").Show();
-                await Shell.Current.GoToAsync(nameof(LoginPage));
+                await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
             }
             catch (Exception ex)
             {
@@ -117,7 +117,7 @@ namespace BookManager.ViewModels.Authentication
         [RelayCommand]
         private async Task GoToLogin()
         {
-            await Shell.Current.GoToAsync(nameof(LoginPage));
+            await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
         }
 
         public void OnDissapearing()

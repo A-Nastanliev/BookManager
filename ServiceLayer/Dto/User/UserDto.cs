@@ -19,8 +19,9 @@ namespace ServiceLayer.Dto.User
 
         public UserDto() { }
 
-        public UserDto(string email, string username, string pfp, UserRole role, DateTime createdAt, RestrictionDto restriction)
+        public UserDto(int id,string email, string username, string pfp, UserRole role, DateTime createdAt, RestrictionDto restriction)
         {
+            Id = id;
             EmailAddress = email;
             Username = username;
             ProfilePicture = pfp;

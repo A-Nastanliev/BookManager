@@ -3,34 +3,99 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BookManager.Views.Book.BookFormPage"
              xmlns:vm="clr-namespace:BookManager.ViewModels.Book"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:DataType="vm:BookFormVM"
-             Shell.TabBarIsVisible="False"
+          
              Title="{Binding Title}">
+    
+    <AbsoluteLayout>
+        <ScrollView AbsoluteLayout.LayoutFlags="All" AbsoluteLayout.LayoutBounds="0,0,1,1" 
+            HorizontalScrollBarVisibility="Never" VerticalScrollBarVisibility="Never" SafeAreaEdges="Container">
+            <VerticalStackLayout Spacing="20" Padding="10">
+                <Grid Margin="0,10,0,0" HeightRequest="260" HorizontalOptions="Center" WidthRequest="180">
+                    <Border StrokeShape="RoundRectangle 0">
+                        <ImageButton
+                            Source="{Binding Book.CoverSource}" Aspect="AspectFill" Command="{Binding PickCoverCommand}" />
+                    </Border>
+                    <Label
+                        Text="Pick an image" TextColor="White" FontSize="Large"
+                        HorizontalOptions="Center" VerticalOptions="Center"
+                        IsVisible="{Binding Book.CoverSource, Converter={StaticResource NullToBoolConverter}}" />
+                </Grid>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Title" FontSize="Medium"/>
+                    <Entry
+                        Placeholder="e.g. Atomic Habits"
+                        Text="{Binding Book.Title, Mode=TwoWay}" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Author" FontSize="Medium"/>
+                    <Entry
+                        Placeholder="e.g. James Clear"
+                        Text="{Binding Book.Author.Name, Mode=TwoWay}"
+                        MaxLength="70"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Genre" FontSize="Medium"/>
+                    <Entry
+                        Placeholder="e.g. Science fiction"
+                        Text="{Binding Book.Genre.Name, Mode=TwoWay}"
+                        MaxLength="50"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Publisher" FontSize="Medium"/>
+                    <Entry
+                        Placeholder="e.g. Penguin"
+                        Text="{Binding Book.Publisher.Name, Mode=TwoWay}"
+                        MaxLength="70"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Total Pages" FontSize="Medium"/>
+                    <Entry Placeholder="e.g. 320" Keyboard="Numeric" Text="{Binding Book.TotalPages, Mode=TwoWay, Converter={StaticResource IntToStringConverter}}" />
+                </VerticalStackLayout>
+                <Grid RowSpacing="4" ColumnDefinitions="*,auto" RowDefinitions="Auto, Auto" ColumnSpacing="12">
+                    <Label Text="ISBN" FontSize="Medium"/>
+                    <Entry Grid.Column="0" Grid.Row="1" Placeholder="e.g. 3800023456789"  Keyboard="Numeric" Text="{Binding Book.ISBN, Mode=TwoWay}" />
+                    <Grid Grid.Column="1" HeightRequest="60" WidthRequest="60" Grid.RowSpan="2">
+                        <Button CornerRadius="30" Clicked="ScanButtonBase_Clicked"/>
+                        <Image Source="scan_code_icon.png" HeightRequest="36" WidthRequest="36" Aspect="AspectFit" 
+                                HorizontalOptions="Center" VerticalOptions="Center">
+                            <Image.Behaviors>
+                                <toolkit:IconTintColorBehavior TintColor="White" />
+                            </Image.Behaviors>
+                        </Image>
+                    </Grid>
+                </Grid>
 
-    <ScrollView HorizontalScrollBarVisibility="Never" VerticalScrollBarVisibility="Never">
-        <VerticalStackLayout Spacing="20">
-            <Grid Margin="0,10,0,0" HeightRequest="260" HorizontalOptions="Center" WidthRequest="180">
-                <Border StrokeShape="RoundRectangle 0">
-                    <ImageButton
-                        Source="{Binding Book.CoverSource}" Aspect="AspectFill" Command="{Binding PickCoverCommand}" />
-                </Border>
-                <Label
-                    Text="Pick an image" TextColor="White" FontSize="Large" FontAttributes="Bold"
-                    HorizontalOptions="Center" VerticalOptions="Center"
-                    IsVisible="{Binding Book.CoverSource, Converter={StaticResource NullToBoolConverter}}" />
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Description" FontSize="Medium"/>
+                    <Editor
+                        Placeholder="Book description"
+                        MaxLength="500"
+                        AutoSize="TextChanges"
+                        Text="{Binding Book.Description, Mode=TwoWay}" />
+                </VerticalStackLayout>
+
+                <Button
+                    Text="{Binding SubmitButtonText}"
+                    Command="{Binding SubmitCommand}"/>
+            </VerticalStackLayout>
+        </ScrollView>
+        <Grid
+            x:Name="Overlay" IsVisible="False" BackgroundColor="#771A1A1A"
+            AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+                <BoxView BackgroundColor="#80000000">
+                    <BoxView.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnOverlayTapped"/>
+                    </BoxView.GestureRecognizers>
+                </BoxView>
+
+                <Grid  x:Name="ScannerPanel"  SafeAreaEdges="None"
+                    VerticalOptions="End" TranslationY="300" BackgroundColor="Red">
+                    <zxing:CameraBarcodeReaderView IsTorchOn="False" HeightRequest="300" IsDetecting="False" IsEnabled="False"
+                     x:Name="barcodeReaderView" HorizontalOptions="Fill" VerticalOptions="End" BarcodesDetected="barcodeReaderView_BarcodesDetected"/>
+                </Grid>
             </Grid>
-            <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto" Padding="10, 6" RowSpacing="20">
-                <Entry Grid.Row="0" Placeholder="Title" Text="{Binding Book.Title, Mode=TwoWay}" />
-                <Entry Grid.Row="1" Placeholder="Author" Text="{Binding Book.Author.Name, Mode=TwoWay}" MaxLength="70" />
-                <Entry Grid.Row="2" Placeholder="Genre" Text="{Binding Book.Genre.Name, Mode=TwoWay}" MaxLength="50" />
-                <Entry Grid.Row="3" Placeholder="Publisher" Text="{Binding Book.Publisher.Name, Mode=TwoWay}" MaxLength="70" />
-                <Entry Grid.Row="4" Placeholder="Total Pages" Text="{Binding Book.TotalPages, Mode=TwoWay, Converter={StaticResource IntToStringConverter}}"
-                    Keyboard="Numeric" />
-                <Entry Grid.Row="5" Placeholder="ISBN" Text="{Binding Book.ISBN, Mode=TwoWay}" Keyboard="Numeric" MaxLength="13" />
-                <Editor Grid.Row="6" Placeholder="Description" Text="{Binding Book.Description, Mode=TwoWay}" MaxLength="500" AutoSize="TextChanges" />
-                <Button Grid.Row="7"
-                    Text="{Binding SubmitButtonText}" Command="{Binding SubmitCommand}"/>
-            </Grid>
-        </VerticalStackLayout>
-    </ScrollView>
+    </AbsoluteLayout>
 </ContentPage>

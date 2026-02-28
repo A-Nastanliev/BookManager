@@ -160,7 +160,9 @@ namespace ServiceLayer.Controllers
             if (!success)
                 return NotFound();
 
-            return Ok(new { ProfilePicture = newPath });
+            var baseUrl = _configuration["App:BaseUrl"];
+
+            return Ok(new { ProfilePicture = $"{baseUrl}/{user.ProfilePicture}" });
         }
 
 
@@ -179,7 +181,10 @@ namespace ServiceLayer.Controllers
 		public async Task<IActionResult> DeleteUser(int id)
 		{
 			if (UserRole != UserRole.Admin && UserId != id)
+			{
+				Console.WriteLine($"User id {UserId} and url id {id}");
 				return Forbid();
+			}
 
             var user = await _userRepository.ReadAsync(id);
             if (user == null)

@@ -70,8 +70,7 @@
 
             <Grid  x:Name="ScannerPanel"  SafeAreaEdges="None"
                 VerticalOptions="End" TranslationY="300" BackgroundColor="Red">
-                <zxing:CameraBarcodeReaderView IsTorchOn="False" HeightRequest="300" IsDetecting="False" IsEnabled="False"
-                     x:Name="barcodeReaderView" HorizontalOptions="Fill" VerticalOptions="End" BarcodesDetected="barcodeReaderView_BarcodesDetected"/>
+                <Grid x:Name="ScannerHost"  HeightRequest="300" SafeAreaEdges="None" HorizontalOptions="Fill" VerticalOptions="End" />
             </Grid>
         </Grid>
     </AbsoluteLayout>

@@ -1,5 +1,6 @@
 using BookManager.ViewModels.Book;
 using ZXing.Net.Maui;
+using ZXing.Net.Maui.Controls;
 
 namespace BookManager.Views.Book;
 
@@ -7,19 +8,14 @@ public partial class BookSearchPage : ContentPage
 {
     bool _isScannerOpen;
     bool _isProcessingScan;
-
+    CameraBarcodeReaderView? _scanner;
     BookSearchVM _vm;
+
 	public BookSearchPage(BookSearchVM vm)
 	{
 		InitializeComponent();
 		BindingContext = vm;
         _vm = vm;
-        barcodeReaderView.Options = new BarcodeReaderOptions
-        {
-            Formats = BarcodeFormat.Ean13,
-            AutoRotate = true,
-            Multiple = false,
-        };
     }
 
     protected async override void OnAppearing()
@@ -33,11 +29,30 @@ public partial class BookSearchPage : ContentPage
         if (_isScannerOpen)
             return;
 
-        barcodeReaderView.IsEnabled = true;
-        _isScannerOpen = true;
+        _scanner = new CameraBarcodeReaderView
+        {
+            Options = new BarcodeReaderOptions
+            {
+                Formats = BarcodeFormat.Ean13 | BarcodeFormat.UpcA | BarcodeFormat.Ean8,
+                AutoRotate = true,
+                Multiple = false,
+            },
+            CameraLocation = CameraLocation.Rear,
+            IsDetecting = true,
+            IsEnabled = true,
+            HeightRequest = 300,
+            HorizontalOptions = LayoutOptions.Fill,
+            VerticalOptions = LayoutOptions.End
+        };
+
+        _scanner.BarcodesDetected += barcodeReaderView_BarcodesDetected;
+
+        ScannerHost.Children.Clear();
+        ScannerHost.Children.Add(_scanner);
         Overlay.IsVisible = true;
-        barcodeReaderView.IsDetecting = true;
         Overlay.InputTransparent = false;
+        _isScannerOpen = true;
+
         await ScannerPanel.TranslateToAsync(0, 0, 250, Easing.SinOut);
     }
 
@@ -47,11 +62,21 @@ public partial class BookSearchPage : ContentPage
             return;
 
         await ScannerPanel.TranslateToAsync(0, 300, 250, Easing.SinIn);
+
+        if (_scanner != null)
+        {
+            _scanner.IsDetecting = false;
+            _scanner.BarcodesDetected -= barcodeReaderView_BarcodesDetected;
+            _scanner.Handler?.DisconnectHandler();
+
+            ScannerHost.Children.Clear();
+            _scanner = null;
+        }
+
         Overlay.InputTransparent = true;
         Overlay.IsVisible = false;
-        barcodeReaderView.IsDetecting = false;
+
         _isScannerOpen = false;
-        barcodeReaderView.IsEnabled = false;
     }
 
     private async void OnOverlayTapped(object sender, EventArgs e)
@@ -75,16 +100,18 @@ public partial class BookSearchPage : ContentPage
             try
             {
                 await CloseScannerAsync();
-
-                if (_vm is BookSearchVM vm)
-                {
-                    await vm.SearchIsbnAsync(result.Value?.Trim());
-                }
+                await _vm.SearchIsbnAsync(result.Value?.Trim());
             }
             finally
             {
                 _isProcessingScan = false;
             }
         });
+    }
+
+    protected override async void OnDisappearing()
+    {
+        await CloseScannerAsync();
+        base.OnDisappearing();
     }
 }

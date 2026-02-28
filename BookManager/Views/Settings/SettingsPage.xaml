@@ -11,91 +11,80 @@
                    HorizontalOptions="Fill"
                    VerticalOptions="Start">
 
-            <Border
-                 Stroke="{StaticResource Primary}"
-                 StrokeThickness="2"
-                 StrokeShape="RoundRectangle 90"
-                 WidthRequest="180"
-                 HeightRequest="180"
-                 HorizontalOptions="Center"
-                 VerticalOptions="Center">
-
-                <ImageButton
-                     Source="{Binding ProfileImageSource}"
-                     Aspect="AspectFill"
-                     Command="{Binding PickProfilePictureCommand}">
-                    <ImageButton.Clip>
-                        <EllipseGeometry
-                             Center="90,90"
-                             RadiusX="90"
-                             RadiusY="90" />
-                    </ImageButton.Clip>
-                </ImageButton>
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
+                    <Border
+                         Stroke="{StaticResource Primary}" StrokeThickness="2"
+                         StrokeShape="RoundRectangle 90" WidthRequest="180"
+                         HeightRequest="180"  HorizontalOptions="Center"  VerticalOptions="Center">
+                        <ImageButton  Source="{Binding ProfileImageSource}" Aspect="AspectFill"
+                            Command="{Binding PickProfilePictureCommand}">
+                            <ImageButton.Clip>
+                                <EllipseGeometry Center="90,90" RadiusX="90" RadiusY="90" />
+                            </ImageButton.Clip>
+                        </ImageButton>
+                    </Border>
+                    <HorizontalStackLayout Spacing="12" HorizontalOptions="Center"
+                        IsVisible="{Binding IsPictureChanged}">
+                        <Button Text="Confirm" Command="{Binding ConfirmProfilePictureCommand}" />
+                        <Button Text="Cancel" Command="{Binding CancelProfilePictureCommand}" />
+                    </HorizontalStackLayout>
+                    <Label Text="{Binding User.PublicUser.Username}" FontSize="Large" FontAttributes="Bold" 
+                           TextColor="White" HorizontalOptions="Center" />
+                </VerticalStackLayout>
             </Border>
 
-            <HorizontalStackLayout
-                Spacing="12" HorizontalOptions="Center"
-                IsVisible="{Binding IsPictureChanged}">
-                <Button
-                    Text="Confirm"
-                    Command="{Binding ConfirmProfilePictureCommand}" />
+            <Border Style="{StaticResource SectionCard}">
+                <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto">
+                    <Label Text="{Binding User.PublicUser.Username}" Grid.Row="0" Margin="3,0,0,0"/>
+                    <Entry Text="{Binding NewUsername}" Grid.Row="1" Placeholder="New Username" MaxLength="30"/>
+                    <Label Text="{Binding User.EmailAddress}" Grid.Row="2" Grid.ColumnSpan="2" Margin="3,20,0,0" FontSize="Small"/>
+                    <Entry Text="{Binding NewEmail}" Placeholder="New Email" Keyboard="Email" FontSize="Small" Grid.ColumnSpan="2" Grid.Row="3"/>
+                    <Button Text="Save Changes" Command="{Binding UpdateUsernameEmailCommand}" Grid.Row="4" HorizontalOptions="End" 
+                        FontSize="Small" Margin="0,20,0,0"/>
+                </Grid>
+            </Border>
 
-                <Button
-                    Text="Cancel"
-                    Command="{Binding CancelProfilePictureCommand}" />
-            </HorizontalStackLayout>
+            <Border Style="{StaticResource SectionCard}">
+                <Grid RowDefinitions="Auto, Auto, Auto, Auto" ColumnDefinitions="*, Auto" ColumnSpacing="20" RowSpacing="10">
+                    <Label Text="Change password" Grid.Row="0" FontSize="Medium" Grid.ColumnSpan="2"/>
+                    <Entry Text="{Binding OldPassword}" FontSize="Small"
+                    x:Name="OldPasswordEntry" Placeholder="Old Password" IsPassword="True" Grid.Row="1" Grid.Column="0"/>
+                    <passToggle:VisibilityButton Grid.Column="1" Grid.Row="1" TargetEntry="{x:Reference OldPasswordEntry}"/>
+                    <Entry Text="{Binding NewPassword}"  FontSize="Small"
+                    x:Name="NewPasswordEntry" Placeholder="New Password" IsPassword="True" Grid.Row="2" Grid.Column="0"/>
+                    <passToggle:VisibilityButton Grid.Column="1" Grid.Row="2" TargetEntry="{x:Reference NewPasswordEntry}"/>
+                    <Button Text="Update Password" HorizontalOptions="End" Command="{Binding UpdatePasswordCommand}" Grid.Row="3" 
+                        FontSize="Small" Grid.ColumnSpan="2" Margin="0,10,0,0"/>
+                </Grid>
+            </Border>
 
-            <Label
-                 Text="{Binding User.PublicUser.Username}"
-                 FontSize="18"
-                 FontAttributes="Bold"
-                 TextColor="White"
-                 HorizontalOptions="Center" />
-
-            <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto" 
-                RowSpacing="20">
-                <Label
-                    Text="{Binding User.PublicUser.Username}" Grid.Row="0"/>
-                <Entry Text="{Binding NewUsername}"
-                     Grid.Row="1" Placeholder="New Username" MaxLength="30"/>
-                <Label
-                    Text="{Binding User.EmailAddress}" Grid.Row="2" Grid.ColumnSpan="2"/>
-                <Entry Text="{Binding NewEmail}" Placeholder="New Email"
-                    Keyboard="Email" Grid.ColumnSpan="2" Grid.Row="3"/>
-                <Button
-                    Text="Save Changes" Command="{Binding UpdateUsernameEmailCommand}" Grid.Row="4" HorizontalOptions="End"/>
-            </Grid>
-
-            <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*, Auto"
-                  RowSpacing="20" ColumnSpacing="20">
-                <Entry Text="{Binding OldPassword}"
-                    x:Name="OldPasswordEntry" Placeholder="Old Password" IsPassword="True" Grid.Row="0" Grid.Column="0"/>
-                <passToggle:VisibilityButton Grid.Column="1" Grid.Row="0" TargetEntry="{x:Reference OldPasswordEntry}"/>
-                <Entry Text="{Binding NewPassword}"
-                    x:Name="NewPasswordEntry" Placeholder="New Password" IsPassword="True" Grid.Row="1" Grid.Column="0"/>
-                <passToggle:VisibilityButton Grid.Column="1" Grid.Row="1" TargetEntry="{x:Reference NewPasswordEntry}"/>
-                <Button Text="Update Password" HorizontalOptions="End" Command="{Binding UpdatePasswordCommand}" Grid.Row="2" Grid.ColumnSpan="2"/>
-            </Grid>
-
-            <Border
-                 IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter='Administrator,Moderator'}"
-                 Stroke="LightGray" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="16">
+            <Border 
+                 IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter='Admin'}"
+                 Style="{StaticResource SectionCard}">
 
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer
                         Command="{Binding OpenCommentRestrictionsCommand}" />
                 </Border.GestureRecognizers>
 
-                <Label Text="Search Comment restrictions" Grid.Column="1" VerticalOptions="Center" />
+                <Label Text="Search Comment restrictions" Grid.Column="1" VerticalOptions="Center" FontSize="Medium" HorizontalOptions="Center" />
             </Border>
 
-            <HorizontalStackLayout
-                Spacing="60" HorizontalOptions="Center">
-                <Button 
-                    Text="Logout" Command="{Binding LogoutCommand}"/>
-                <Button
-                    Text="Delete" Command="{Binding DeleteAccountCommand}"/>
-            </HorizontalStackLayout>
+            <Border Style="{StaticResource SectionCard}"
+                BackgroundColor="{StaticResource Gray950}">
+                <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                    <Label Text="Danger Zone" FontSize="Medium"
+                       FontAttributes="Bold" HorizontalOptions="Center"
+                       TextColor="Red" />
+
+                    <HorizontalStackLayout Spacing="40" HorizontalOptions="Center">
+                        <Button Text="Logout" Background="{StaticResource Gray400}" Command="{Binding LogoutCommand}" />
+                        <Button Text="Delete" Background="Red" Command="{Binding DeleteAccountCommand}"/>
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
+            </Border>
 
         </VerticalStackLayout>
     </ScrollView>

@@ -58,7 +58,7 @@ namespace BookManager.ViewModels.Authentication
         [RelayCommand]
         private async Task GoToSignUp()
         {
-            await Shell.Current.GoToAsync(nameof(SignUpPage));
+            await Shell.Current.GoToAsync($"//{nameof(SignUpPage)}");
         }
     }
 }

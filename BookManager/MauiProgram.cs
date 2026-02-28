@@ -45,7 +45,7 @@ namespace BookManager
                 builder.Services
                     .AddHttpClient<T>(client =>
                     {
-                        client.BaseAddress = new Uri("http://192.168.100.219:5137");
+                        client.BaseAddress = new Uri("http://192.168.1.100:5137");
                     })
                     .AddHttpMessageHandler<AuthMessageHandler>();
             }

@@ -9,8 +9,6 @@ namespace BookManager
         public AppShell()
         {
             InitializeComponent();
-            Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));
-            Routing.RegisterRoute(nameof(SignUpPage), typeof(SignUpPage));
             Routing.RegisterRoute(nameof(BookFormPage), typeof(BookFormPage));
             Routing.RegisterRoute(nameof(FormPage), typeof(FormPage));
         }

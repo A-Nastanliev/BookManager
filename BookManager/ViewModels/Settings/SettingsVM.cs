@@ -100,7 +100,7 @@ namespace BookManager.ViewModels.Settings
         public async Task Logout()
         {
             await _userClient.Logout();
-            await Shell.Current.GoToAsync(nameof(LoginPage));
+            await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
         }
 
         [RelayCommand]
@@ -118,10 +118,11 @@ namespace BookManager.ViewModels.Settings
                 if (!result.Success)
                 {
                     await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                    return;
                 }
 
                 _= Toast.Make($"{User.PublicUser.Username} was deleted", ToastDuration.Short).Show();
-                await Shell.Current.GoToAsync(nameof(LoginPage));
+                await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
                 await _userClient.Logout();
             }
             catch (Exception ex)

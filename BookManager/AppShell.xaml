@@ -19,6 +19,24 @@
         Route="LoadingPage">
     </ShellContent>
 
+
+    <ShellContent
+        Shell.NavBarIsVisible="False"
+        Shell.TabBarIsVisible="False"
+        FlyoutItemIsVisible="False"
+        ContentTemplate="{DataTemplate authentication:LoginPage}"
+        Route="LoginPage">
+    </ShellContent>
+
+
+    <ShellContent
+        Shell.NavBarIsVisible="False"
+        Shell.TabBarIsVisible="False"
+        FlyoutItemIsVisible="False"
+        ContentTemplate="{DataTemplate authentication:SignUpPage}"
+        Route="SignUpPage">
+    </ShellContent>
+
     <TabBar>
         <Tab Title="Books">
             <ShellContent Title="Catalog"

@@ -3,6 +3,17 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
+    <Style x:Key="SectionCard" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource Gray800}" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="20"/>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Padding" Value="20"/>
+    </Style>
+
     <Style TargetType="ActivityIndicator">
         <Setter Property="Color" Value="{StaticResource White}" />
     </Style>
@@ -406,13 +417,13 @@
     </Style>
 
     <Style TargetType="Shell" ApplyToDerivedTypes="True">
-        <Setter Property="Shell.BackgroundColor" Value="{StaticResource OffBlack}" />
+        <Setter Property="Shell.BackgroundColor" Value="{StaticResource Gray950}" />
         <Setter Property="Shell.ForegroundColor" Value="{StaticResource SecondaryDarkText}" />
         <Setter Property="Shell.TitleColor" Value="{StaticResource SecondaryDarkText}" />
-        <Setter Property="Shell.DisabledColor" Value="{StaticResource Gray950}" />
-        <Setter Property="Shell.UnselectedColor" Value="{StaticResource Gray200}" />
+        <Setter Property="Shell.DisabledColor" Value="{StaticResource Gray600}" />
+        <Setter Property="Shell.UnselectedColor" Value="{StaticResource Gray400}" />
         <Setter Property="Shell.NavBarHasShadow" Value="False" />
-        <Setter Property="Shell.TabBarBackgroundColor" Value="{StaticResource Black}" />
+        <Setter Property="Shell.TabBarBackgroundColor" Value="{StaticResource Gray950}" />
         <Setter Property="Shell.TabBarForegroundColor" Value="{StaticResource White}" />
         <Setter Property="Shell.TabBarTitleColor" Value="{StaticResource White}" />
         <Setter Property="Shell.TabBarUnselectedColor" Value="{StaticResource Gray200}" />

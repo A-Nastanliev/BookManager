@@ -30,7 +30,7 @@ namespace BookManager.ViewModels.Authentication
                 }
                 else
                 {
-                    await Shell.Current.GoToAsync(nameof(LoginPage));
+                    await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
                 }
             }
             catch (Exception ex)
