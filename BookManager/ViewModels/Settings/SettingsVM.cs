@@ -1,6 +1,6 @@
 ﻿using BookManager.ApiClients;
 using BookManager.Authentication;
-using BookManager.ViewModels.Models;
+using BookManager.Models.User;
 using BookManager.Views.Authentication;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;

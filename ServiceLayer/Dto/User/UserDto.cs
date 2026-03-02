@@ -30,12 +30,11 @@ namespace ServiceLayer.Dto.User
             CurrentRestriction = restriction;
         }
 
-        public UserDto(string username, string pfp, int id, RestrictionDto restriction)
+        public UserDto(string username, string pfp, int id)
         {
             Username = username;
             Id = id;
             ProfilePicture = pfp; ;
-            CurrentRestriction = restriction;
         }
     }
 }

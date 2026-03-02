@@ -1,4 +1,5 @@
 using BookManager.ViewModels.Settings;
+using BookManager.Views.Book;
 using System.Diagnostics;
 
 namespace BookManager.Views.Settings;
@@ -11,6 +12,10 @@ public partial class SettingsPage : ContentPage
 		InitializeComponent();
 		_vm = vm;
 		BindingContext = _vm;
+        RestrictionsGesture.Command = new Command(async () =>
+        {
+            await Shell.Current.GoToAsync(nameof(RestrictionsPage));
+        });
     }
     protected override void OnAppearing()
     {

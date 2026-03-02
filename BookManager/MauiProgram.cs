@@ -2,7 +2,7 @@
 using BookManager.Authentication;
 using BookManager.ViewModels.Authentication;
 using BookManager.ViewModels.Book;
-using BookManager.ViewModels.Models;
+using BookManager.Models.User;
 using BookManager.ViewModels.Settings;
 using BookManager.Views.Authentication;
 using BookManager.Views.Book;
@@ -65,6 +65,7 @@ namespace BookManager
             builder.Services.AddTransient<FormVM>();
 
             builder.Services.AddSingleton<SettingsVM>();
+            builder.Services.AddTransient<RestrictionsVM>();
 
             builder.Services.AddTransient<LoadingPage>();
             builder.Services.AddTransient<LoginPage>();
@@ -76,6 +77,7 @@ namespace BookManager
             builder.Services.AddTransient<FormPage>();
 
             builder.Services.AddSingleton<SettingsPage>();
+            builder.Services.AddTransient<RestrictionsPage>();
 
             return builder.Build();
         }

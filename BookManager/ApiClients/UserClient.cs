@@ -1,5 +1,5 @@
 ﻿using BookManager.Authentication;
-using BookManager.ViewModels.Models;
+using BookManager.Models.User;
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
@@ -33,6 +33,8 @@ namespace BookManager.ApiClients
             _user.PublicUser.ProfilePictureSource = null;
             _user.PublicUser.Username = null; 
             _user.Role = UserRole.User;
+
+            _user.Restriction = new RestrictionVM();
 
             _tokenStore?.Clear();
             if (OnLogout != null)
@@ -212,6 +214,74 @@ namespace BookManager.ApiClients
         public async Task<RequestResult> DeleteUserAsync(int id)
         {
             var response = await _httpClient.DeleteAsync($"/api/users/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            return new RequestResult(true, null);
+        }
+
+        public async Task<(List<RestrictionVM>, RequestResult, DateTime? cursorDate, int? cursorKey)>
+            GetCommentRestrictionsAsync( int count, RestrictionFilter filter, DateTime? cursorDate, int? cursorKey)
+        {
+            var queryParams = new List<string>
+            {
+                $"count={count}",
+                $"filter={filter}"
+            };
+
+            if (cursorDate.HasValue)
+                queryParams.Add($"cursorDate={Uri.EscapeDataString(cursorDate.Value.ToString("o"))}");
+
+            if (cursorKey.HasValue)
+                queryParams.Add($"cursorKey={cursorKey.Value}");
+
+            var url = "/api/users/comment-restrictions?" + string.Join("&", queryParams);
+
+            var response = await _httpClient.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return (null, new RequestResult(false, await ApiErrorParser.ParseAsync(response)), null, null);
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            var restrictions = new List<RestrictionVM>();
+
+            foreach (var element in root.GetProperty("restrictions").EnumerateArray())
+            {
+                var vm = new RestrictionVM();
+                vm.FromJson(element);
+                restrictions.Add(vm);
+            }
+
+            DateTime? nextCursorDate = null;
+            int? nextCursorKey = null;
+
+            if (root.TryGetProperty("cursorDate", out var cursorDateProp) &&
+                cursorDateProp.ValueKind != JsonValueKind.Null)
+            {
+                nextCursorDate = cursorDateProp.GetDateTime();
+            }
+
+            if (root.TryGetProperty("cursorId", out var cursorIdProp) &&
+                cursorIdProp.ValueKind != JsonValueKind.Null)
+            {
+                nextCursorKey = cursorIdProp.GetInt32();
+            }
+
+            return (restrictions, new RequestResult(true, null), nextCursorDate, nextCursorKey );
+        }
+
+        public async Task<RequestResult> EndCommentRestrictionAsync(int restrictionId)
+        {
+            var response = await _httpClient.PutAsync($"/api/users/comment-restriction/{restrictionId}/end", null);
 
             if (!response.IsSuccessStatusCode)
             {

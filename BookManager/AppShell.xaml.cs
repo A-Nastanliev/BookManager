@@ -1,6 +1,7 @@
 ﻿using BookManager.ViewModels.Authentication;
 using BookManager.Views.Authentication;
 using BookManager.Views.Book;
+using BookManager.Views.Settings;
 
 namespace BookManager
 {
@@ -11,6 +12,7 @@ namespace BookManager
             InitializeComponent();
             Routing.RegisterRoute(nameof(BookFormPage), typeof(BookFormPage));
             Routing.RegisterRoute(nameof(FormPage), typeof(FormPage));
+            Routing.RegisterRoute(nameof(RestrictionsPage), typeof(RestrictionsPage));
         }
     }
 }

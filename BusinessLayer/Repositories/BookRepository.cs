@@ -239,10 +239,6 @@ namespace BusinessLayer.Repositories
             return (items, last?.CreatedAt, last?.Id);
         }
 
-        public override Task<(List<Book>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
-        {
-            throw new NotImplementedException();
-        }
 
         public async Task<Book> GetBookByIsbnAsync(string isbn)
         {

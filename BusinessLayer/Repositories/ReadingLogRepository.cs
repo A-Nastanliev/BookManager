@@ -55,10 +55,5 @@
 			_context.Remove(log);
 			return await _context.SaveChangesAsync() > 0;
 		}
-
-        public override Task<(List<ReadingLog>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

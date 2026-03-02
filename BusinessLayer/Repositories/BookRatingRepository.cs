@@ -45,9 +45,5 @@
 				: (result.Count, result.Avg);
 		}
 
-        public override Task<(List<BookRating>, DateTime? cursorDate, (int userId, int bookId)? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, (int userId, int bookId)? cursorKey)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

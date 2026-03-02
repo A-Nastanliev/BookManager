@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookManager.Views.Settings.RestrictionsPage"
+             xmlns:segmentedControl="clr-namespace:Syncfusion.Maui.Toolkit.SegmentedControl;assembly=Syncfusion.Maui.Toolkit"
+             xmlns:vm="clr-namespace:BookManager.ViewModels.Settings"
+             xmlns:views="clr-namespace:BookManager.Views.Settings"
+             x:DataType="vm:RestrictionsVM"
+             Title="RestrictionsPage">
+    
+    <Grid Padding="16" RowSpacing="12" RowDefinitions="Auto, *, Auto">
+        <segmentedControl:SfSegmentedControl 
+           Grid.Row="0" SelectedIndex="{Binding SelectedSegment, Mode=TwoWay}">
+            <segmentedControl:SfSegmentedControl.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>Active</x:String>
+                    <x:String>Undefined</x:String>
+                    <x:String>Inactive</x:String>
+                </x:Array>
+            </segmentedControl:SfSegmentedControl.ItemsSource>
+        </segmentedControl:SfSegmentedControl>
+        <CollectionView VerticalOptions="Fill" Grid.Row="1" Margin="0,0,0,10" Grid.RowSpan="2"
+           ItemsSource="{Binding Restrictions}"
+           RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+           RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
+
+            <CollectionView.EmptyView>
+                <Label  Text="No restrictions found"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"/>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <views:RestrictionView 
+                       x:DataType="views:RestrictionView" Margin="6, 10" 
+                       SelectedId="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectedId}"                                               
+                       TapCommand="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectRestrictionCommand}"/>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+        <Button Text="End" Command="{Binding EndCommentRestrictionCommand}" HorizontalOptions="Center" Grid.Row="2" IsVisible="{Binding CanEndRestriction}" Margin="0,0,0,30"/>
+    </Grid>
+</ContentPage>

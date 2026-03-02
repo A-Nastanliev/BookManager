@@ -7,12 +7,12 @@ namespace BookManager.Converters
 {
     public class EqualsConverter : IValueConverter
     {
+        public bool Invert { get; set; }
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null || parameter == null)
-                return false;
-
-            return value.ToString() == parameter.ToString();
+            bool result = object.Equals(value, parameter);
+            return Invert ? !result : result;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

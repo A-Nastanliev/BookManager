@@ -1,4 +1,4 @@
-﻿using BookManager.ViewModels.Models;
+﻿using BookManager.Models.User;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BookManager

@@ -1,4 +1,5 @@
-﻿using BusinessLayer.Repositories;
+﻿using BusinessLayer;
+using BusinessLayer.Repositories;
 using DataLayer.Enums;
 using DataLayer.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -216,23 +217,28 @@ namespace ServiceLayer.Controllers
 			return StatusCode(201);
 		}
 
-		[Authorize(Roles = "Admin")]
-		[HttpGet("comment-restrictions/active")]
-		public async Task<IActionResult> GetActiveCommentRestrictions([FromQuery] CursorDto cursor)
-		{
-			(var restrictions, DateTime? cursorDate, int? cursorKey) = await _restrictionRepository.ReadNextAsync(cursor.Count, cursor.CursorDate, cursor.CursorKey);
+        [Authorize(Roles = "Admin")]
+        [HttpGet("comment-restrictions")]
+        public async Task<IActionResult> GetCommentRestrictions([FromQuery] CursorDto cursor, [FromQuery] RestrictionFilter filter)
+        {
+            var (restrictions, nextCursorDate, nextCursorKey) =
+                await _restrictionRepository.ReadNextAsync( cursor.Count, filter, cursor.CursorDate, cursor.CursorKey);
+
             var baseUrl = _configuration["App:BaseUrl"];
-            var restrictionDtos = restrictions.Select(r => r.ToDto(baseUrl)).ToList();
+
+            var restrictionDtos = restrictions
+                .Select(r => r.ToDto(baseUrl))
+                .ToList();
 
             return Ok(new
             {
                 Restrictions = restrictionDtos,
-                CursorDate = cursorDate,
-                CursorId = cursorKey
+                CursorDate = nextCursorDate,
+                CursorId = nextCursorKey
             });
         }
 
-		[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
 		[HttpPut("comment-restriction/{restrictionId}/end")]
 		public async Task<IActionResult> EndCommentRestriction(int restrictionId)
 		{

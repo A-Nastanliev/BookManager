@@ -11,9 +11,12 @@
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters:RoleVisibilityConverter x:Key="RoleVisibilityConverter"/>
-            <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
             <converters:IntToStringConverter x:Key="IntToStringConverter"/>
             <converters:EqualsConverter x:Key="EqualsConverter"/>
+            <converters:EqualsConverter x:Key="NotEqualsConverter" Invert="True"/>
+            <converters:EqualsMultiConverter x:Key="EqualsMultiConverter" />
+            <converters:EqualsMultiConverter x:Key="NotEqualsMultiConverter" Invert="True"/>
+            <converters:TimeConverter x:Key="TimeConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

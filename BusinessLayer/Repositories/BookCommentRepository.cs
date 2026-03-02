@@ -80,10 +80,5 @@ namespace BusinessLayer.Repositories
             return (items, last?.Date, nextCursorId);
         }
 
-
-        public override Task<(List<BookComment>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

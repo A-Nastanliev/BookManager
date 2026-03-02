@@ -131,10 +131,5 @@ namespace BusinessLayer.Repositories
 			_context.BookRequests.Remove(request);
 			return await _context.SaveChangesAsync() > 0;
 		}
-
-        public override Task<(List<BookRequest>, DateTime? cursorDate, int? cursorKey)> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

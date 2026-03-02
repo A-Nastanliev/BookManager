@@ -5,7 +5,9 @@
              xmlns:passToggle="clr-namespace:BookManager.Views"
              x:DataType="vm:SettingsVM"
              x:Class="BookManager.Views.Settings.SettingsPage"
+             xmlns:view="clr-namespace:BookManager.Views.Settings"
              Title="Settings">
+    
     <ScrollView VerticalScrollBarVisibility="Never">
         <VerticalStackLayout Padding="24" Spacing="20"
                    HorizontalOptions="Fill"
@@ -33,6 +35,8 @@
                            TextColor="White" HorizontalOptions="Center" />
                 </VerticalStackLayout>
             </Border>
+
+            <view:RestrictionView  BindingContext="{Binding Restriction, Source={StaticResource User}}"/>
 
             <Border Style="{StaticResource SectionCard}">
                 <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto">
@@ -64,8 +68,7 @@
                  Style="{StaticResource SectionCard}">
 
                 <Border.GestureRecognizers>
-                    <TapGestureRecognizer
-                        Command="{Binding OpenCommentRestrictionsCommand}" />
+                    <TapGestureRecognizer x:Name="RestrictionsGesture"/>
                 </Border.GestureRecognizers>
 
                 <Label Text="Search Comment restrictions" Grid.Column="1" VerticalOptions="Center" FontSize="Medium" HorizontalOptions="Center" />
