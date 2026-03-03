@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using ServiceLayer.Dto;
 using ServiceLayer.Dto.Book;
 using ServiceLayer.Mappers;
+using BusinessLayer;
 using ServiceLayer.Services;
 
 namespace ServiceLayer.Controllers
@@ -50,17 +51,28 @@ namespace ServiceLayer.Controllers
             var book = new Book(req.ISBN, req.Title, req.TotalPages, req.Description, req.AuthorName, req.PublisherName, req.GenreName);
 			book.Cover = coverPath;
 
-            var success = await _bookRepository.CreateAsync(book);
-            if (!success)
-                return BadRequest();
-
-            return StatusCode(201, new
+			try
+			{
+				var success = await _bookRepository.CreateAsync(book);
+				if (!success)
+				{
+                    _imageStorageService.DeleteImage(coverPath);
+                    return BadRequest();
+				}
+			}
+            catch (DbUpdateException ex)
             {
-                id = book.Id,
-                authorId = book.AuthorId,
-                publisherId = book.PublisherId,
-                genreId = book.GenreId
-            });
+				_imageStorageService.DeleteImage(coverPath);
+                return BadRequest("A book with this ISBN already exists.");
+            }
+            catch (Exception ex)
+            {
+				_imageStorageService.DeleteImage(coverPath);
+                return BadRequest("An unknown error occurred: " + ex.Message);
+            }
+
+            var baseUrl = _configuration["App:BaseUrl"];
+            return Ok();
         }
 
 		[HttpGet("next")]
@@ -71,7 +83,35 @@ namespace ServiceLayer.Controllers
             return Ok(new { Books = Books.Select(b => b.ToDto(baseUrl)), CursorDate, CursorId });
         }
 
-		[HttpGet("{isbn}")]
+        [HttpGet("author/{id}")]
+        public async Task<IActionResult> GetNextAuthorBooks([FromQuery] CursorDto cursor, int id)
+        {
+            var (Books, CursorDate, CursorId) = await _bookRepository.ReadNextByFilterAsync
+                (cursor.Count, cursor.CursorDate, cursor.CursorKey, id, BookFilterType.Author);
+            var baseUrl = _configuration["App:BaseUrl"];
+            return Ok(new { Books = Books.Select(b => b.ToDto(baseUrl)), CursorDate, CursorId });
+        }
+
+        [HttpGet("publisher/{id}")]
+        public async Task<IActionResult> GetNextPublisherBooks([FromQuery] CursorDto cursor, int id)
+        {
+            var (Books, CursorDate, CursorId) = await _bookRepository.ReadNextByFilterAsync
+                (cursor.Count, cursor.CursorDate, cursor.CursorKey, id, BookFilterType.Publisher);
+            var baseUrl = _configuration["App:BaseUrl"];
+            return Ok(new { Books = Books.Select(b => b.ToDto(baseUrl)), CursorDate, CursorId });
+        }
+
+        [HttpGet("genre/{id}")]
+        public async Task<IActionResult> GetNextGenreBooks([FromQuery] CursorDto cursor, int id)
+        {
+            var (Books, CursorDate, CursorId) = await _bookRepository.ReadNextByFilterAsync
+                (cursor.Count, cursor.CursorDate, cursor.CursorKey, id, BookFilterType.Genre);
+            var baseUrl = _configuration["App:BaseUrl"];
+            return Ok(new { Books = Books.Select(b => b.ToDto(baseUrl)), CursorDate, CursorId });
+        }
+
+
+        [HttpGet("{isbn}")]
 		public async Task<IActionResult> GetBookByIsbn(string isbn)
 		{
             if (string.IsNullOrWhiteSpace(isbn))
@@ -140,14 +180,8 @@ namespace ServiceLayer.Controllers
                 return BadRequest(new { error = ex.Message });
             }
 
-            if (imageUpdated && !string.IsNullOrWhiteSpace(oldImagePath))
-            {
-                _imageStorageService.DeleteImage(oldImagePath);
-                var baseUrl = _configuration["App:BaseUrl"];
-                return Ok(new { image = $"{baseUrl}/{newImagePath}" });
-            }
-
-            return NoContent();
+            var baseUrl = _configuration["App:BaseUrl"];
+            return Ok(new { book = book.ToDto(baseUrl) });
         }
 
         [Authorize(Roles = "Admin")]

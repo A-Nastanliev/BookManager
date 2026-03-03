@@ -59,15 +59,10 @@ namespace BookManager.ViewModels.Settings
 
             var result = results[0];
 
-            var localFilePath = Path.Combine(FileSystem.CacheDirectory, $"{Guid.NewGuid()}{Path.GetExtension(result.FileName)}");
+            await using var sourceStream = await result.OpenReadAsync();
+            var localFilePath = await ImageManager.SaveTempImageAsync(sourceStream, Path.GetExtension(result.FileName));
 
-            using (var sourceStream = await result.OpenReadAsync())
-            using (var localFileStream = File.OpenWrite(localFilePath))
-            {
-                await sourceStream.CopyToAsync(localFileStream);
-            }
-
-            ImageCleaner.CleanupTempImage(_selectedImagePath);
+            ImageManager.CleanupTempImage(_selectedImagePath);
             _selectedImagePath = localFilePath;
 
             ProfileImageSource = ImageSource.FromFile(localFilePath);
@@ -91,7 +86,7 @@ namespace BookManager.ViewModels.Settings
         [RelayCommand]
         public async Task CancelProfilePicture()
         {
-            ImageCleaner.CleanupTempImage(_selectedImagePath);
+            ImageManager.CleanupTempImage(_selectedImagePath);
             ProfileImageSource = User.PublicUser.ProfilePictureSource;
             IsPictureChanged = false;
         }

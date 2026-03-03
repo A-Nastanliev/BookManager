@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookManager.Views.Book.BookAttributePage"
+             xmlns:vm="clr-namespace:BookManager.ViewModels.Book"
+             xmlns:views="clr-namespace:BookManager.Views.Book"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:DataType="vm:BookAttributeVM"
+             Title="{Binding Title}">
+    
+    <RefreshView IsRefreshing="{Binding IsRefreshing}" Margin="6,0"
+       Command="{Binding RefreshCommand}" Grid.Row="1">
+        <CollectionView VerticalOptions="Fill" 
+            ItemsSource="{Binding Books}"
+            RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+            RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
+
+            <CollectionView.Header>
+                <VerticalStackLayout Padding="8">
+                    <VerticalStackLayout x:Name="AuthorGrid" Margin="8" Spacing="8">
+                        <VerticalStackLayout.IsVisible>
+                            <Binding Path="Author.Id"  Converter="{StaticResource NotEqualsConverter}">
+                                <Binding.ConverterParameter>
+                                    <x:Int32>0</x:Int32>
+                                </Binding.ConverterParameter>
+                            </Binding>
+                        </VerticalStackLayout.IsVisible>
+                        <Label Text="{Binding Author.Name}" FontSize="Medium"/>
+                        <Label Text="{Binding Author.BirthDate, StringFormat='{0:dd MMMM yyyy}'}" FontSize="Medium"
+                               IsVisible="{Binding Author.BirthDate, Converter={StaticResource NotEqualsConverter}, ConverterParameter={x:Null}}"/>
+                        <Label Text="{Binding Author.Biography}" FontSize="Small" LineBreakMode="WordWrap"
+                               IsVisible="{Binding Author.Biography, Converter={StaticResource NotEqualsConverter}, ConverterParameter={x:Null}}"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout x:Name="PublisherGrid" Margin="8" Spacing="8">
+                        <VerticalStackLayout.IsVisible>
+                            <Binding Path="Publisher.Id"  Converter="{StaticResource NotEqualsConverter}">
+                                <Binding.ConverterParameter>
+                                    <x:Int32>0</x:Int32>
+                                </Binding.ConverterParameter>
+                            </Binding>
+                        </VerticalStackLayout.IsVisible>
+                        <Label Text="{Binding Publisher.Name}" FontSize="Medium"/>
+                        <Label Text="{Binding Publisher.Website}" TextColor="Blue" TextDecorations="Underline" FontSize="Medium"
+                               IsVisible="{Binding Publisher.Website, Converter={StaticResource NotEqualsConverter}, ConverterParameter={x:Null}}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                        <Label Text="{Binding Publisher.Description}" FontSize="Small" LineBreakMode="WordWrap"
+                               IsVisible="{Binding Publisher.Description, Converter={StaticResource NotEqualsConverter}, ConverterParameter={x:Null}}"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout x:Name="GenreGrid" Margin="8" Spacing="8">
+                        <VerticalStackLayout.IsVisible>
+                            <Binding Path="Genre.Id"  Converter="{StaticResource NotEqualsConverter}">
+                                <Binding.ConverterParameter>
+                                    <x:Int32>0</x:Int32>
+                                </Binding.ConverterParameter>
+                            </Binding>
+                        </VerticalStackLayout.IsVisible>
+                        <Label Text="{Binding Genre.Name}" FontSize="Medium"/>
+                        <Label Text="{Binding Genre.Description}" FontSize="Small" LineBreakMode="WordWrap"
+                               IsVisible="{Binding Genre.Description, Converter={StaticResource NotEqualsConverter}, ConverterParameter={x:Null}}"/>
+                    </VerticalStackLayout>
+                    <HorizontalStackLayout HorizontalOptions="End" Spacing="8" Margin="8,0"
+                        IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter='Admin'}">
+                        <Button Text="Edit" Command="{Binding EditCommand}"/>
+                        <Button Text="Delete" Background="Red" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </CollectionView.Header>
+
+            <CollectionView.EmptyView>
+                <Grid> 
+                    <Label  Text="No books found" HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Grid>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="{Binding Span}" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <views:BookView x:DataType="views:BookView"
+                    TapCommand="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectCommand}"/>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </RefreshView>
+</ContentPage>

@@ -38,7 +38,7 @@
     </ShellContent>
 
     <TabBar>
-        <Tab Title="Books">
+        <Tab Title="Books" Icon="search_icon.png">
             <ShellContent Title="Catalog"
               ContentTemplate="{DataTemplate book:BookSearchPage}"
               Route="BookSearchPage"/>
@@ -47,7 +47,7 @@
                 ContentTemplate="{DataTemplate book:PublishingHubPage}"
                 Route="CatalogManagementPage"/>
         </Tab>
-        <Tab Title="Settings">
+        <Tab Title="Settings" Icon="settings_icon.png">
             <ShellContent Title="Settings"
                 ContentTemplate="{DataTemplate settings:SettingsPage}"
                 Route="SettingsPage"/>

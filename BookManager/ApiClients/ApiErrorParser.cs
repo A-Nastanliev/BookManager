@@ -7,9 +7,26 @@ namespace BookManager.ApiClients
 {
     public static class ApiErrorParser
     {
-        public static async Task<string> ParseAsync(HttpResponseMessage response)
+        private static Func<Task>? _onLogout;
+
+        public static void Initialize(Func<Task> onLogout)
+        {
+            _onLogout = onLogout;
+        }
+
+        public static async Task<string> ParseAsync(HttpResponseMessage response, bool handleUnauthorized = true)
         {
             var content = await response.Content.ReadAsStringAsync();
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && handleUnauthorized)
+            {
+                if (_onLogout != null)
+                {
+                    await _onLogout();
+                }
+
+                throw new UnauthorizedAccessException("Session expired. Logging out.");
+            }
 
             if (string.IsNullOrWhiteSpace(content))
                 return $"Server returned {response.StatusCode}";

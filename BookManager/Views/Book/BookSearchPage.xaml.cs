@@ -53,7 +53,13 @@ public partial class BookSearchPage : ContentPage
         Overlay.InputTransparent = false;
         _isScannerOpen = true;
 
-        await ScannerPanel.TranslateToAsync(0, 0, 250, Easing.SinOut);
+        ScannerPanel.Opacity = 0;
+        ScannerPanel.Margin = new Thickness(0, 0, 0, -40);
+
+        await Task.WhenAll(
+            ScannerPanel.FadeToAsync(1, 200),
+            ScannerPanel.TranslateToAsync(0, 0, 0),
+            ScannerPanel.AnimateBottomMargin(-40, 0, 200));
     }
 
     private async Task CloseScannerAsync()
@@ -61,7 +67,7 @@ public partial class BookSearchPage : ContentPage
         if (!_isScannerOpen)
             return;
 
-        await ScannerPanel.TranslateToAsync(0, 300, 250, Easing.SinIn);
+        await Task.WhenAll(ScannerPanel.FadeToAsync(0, 200), ScannerPanel.AnimateBottomMargin(0, -40, 200));
 
         if (_scanner != null)
         {

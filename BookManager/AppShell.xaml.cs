@@ -13,6 +13,7 @@ namespace BookManager
             Routing.RegisterRoute(nameof(BookFormPage), typeof(BookFormPage));
             Routing.RegisterRoute(nameof(FormPage), typeof(FormPage));
             Routing.RegisterRoute(nameof(RestrictionsPage), typeof(RestrictionsPage));
+            Routing.RegisterRoute(nameof(BookAttributePage), typeof(BookAttributePage));
         }
     }
 }

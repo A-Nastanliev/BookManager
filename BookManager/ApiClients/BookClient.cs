@@ -18,7 +18,7 @@ namespace BookManager.ApiClients
             _httpClient = httpClient;
         }
 
-        public async Task<(bool Success, string? Error)> CreateBookAsync
+        public async Task<RequestResult> CreateBookAsync
             ( BookVM book, string coverPath)
         {
             using var content = new MultipartFormDataContent();
@@ -45,23 +45,23 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                return (false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
-            return (true, null);
+            return new RequestResult(true, null);
         }
 
-        public async Task<(bool Success, BookVM? Book, string? Error)> GetBookByIsbnAsync(string isbn)
+        public async Task<(RequestResult Result,BookVM? Book)> GetBookByIsbnAsync(string isbn)
         {
             var response = await _httpClient.GetAsync(
                 $"/api/books/{Uri.EscapeDataString(isbn)}");
 
             if (response.StatusCode == HttpStatusCode.NotFound)
-                return (true, null, null);
+                return (new RequestResult(true, null),null);
 
             if (!response.IsSuccessStatusCode)
             {
-                return (false,null, await ApiErrorParser.ParseAsync(response));
+                return (new RequestResult(false, await ApiErrorParser.ParseAsync(response)), null);
             }
 
             var json = await response.Content.ReadAsStringAsync();
@@ -70,7 +70,7 @@ namespace BookManager.ApiClients
             var book = new BookVM();
             book.FromJson(doc.RootElement);
 
-            return (true, book, null);
+            return (new RequestResult(true,null), book);
         }
 
 
@@ -119,7 +119,57 @@ namespace BookManager.ApiClients
             return (books, nextCursorDate, nextCursorId);
         }
 
-        public async Task<(bool Success, string? Error)> UpdateBookAsync(BookVM book, string? coverPath)
+        public async Task<(List<BookVM> Books, DateTime? CursorDate, int? CursorId)> GetNextBooksByAttributeAsync
+            (string attributeType, int attributeId, int count, DateTime? cursorDate, int? cursorId)
+        {
+            var query = $"?count={count}";
+
+            if (cursorDate.HasValue)
+                query += $"&cursorDate={Uri.EscapeDataString(cursorDate.Value.ToString("o"))}";
+
+            if (cursorId.HasValue)
+                query += $"&cursorKey={cursorId.Value}";
+
+            string endpoint = "";
+            if (attributeType == nameof(AuthorVM))
+                endpoint = $"author/{attributeId}";
+            else if (attributeType == nameof(PublisherVM))
+                endpoint = $"publisher/{attributeId}";
+            else if (attributeType == nameof(GenreVM))
+                endpoint = $"genre/{attributeId}";
+
+            var response = await _httpClient.GetAsync("/api/books/" + endpoint + query);
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(await ApiErrorParser.ParseAsync(response));
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(jsonString);
+
+            var root = doc.RootElement;
+
+            var books = new List<BookVM>();
+
+            foreach (var bookJson in root.GetProperty("books").EnumerateArray())
+            {
+                var book = new BookVM();
+                book.FromJson(bookJson);
+                books.Add(book);
+            }
+
+            DateTime? nextCursorDate = null;
+            int? nextCursorId = null;
+
+            if (root.TryGetProperty("cursorDate", out var cd) && cd.ValueKind != JsonValueKind.Null)
+                nextCursorDate = cd.GetDateTime();
+
+            if (root.TryGetProperty("cursorId", out var ci) && ci.ValueKind != JsonValueKind.Null)
+                nextCursorId = ci.GetInt32();
+
+            return (books, nextCursorDate, nextCursorId);
+        }
+
+        public async Task<RequestResult> UpdateBookAsync(BookVM book, string? coverPath)
         {
             using var content = new MultipartFormDataContent();
 
@@ -150,13 +200,17 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                return (false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
-            return (true, null);
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            book.FromJson(doc.RootElement);
+
+            return new RequestResult(true, null);
         }
 
-        public async Task<(bool Success, string? Error)> CreateAuthorAsync(AuthorVM author)
+        public async Task<RequestResult> CreateAuthorAsync(AuthorVM author)
         {
             var json = JsonSerializer.Serialize(new
             {
@@ -174,11 +228,11 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                return (false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
             author.Id = doc.RootElement.GetProperty("id").GetInt32();
-            return (true,  null);
+            return new RequestResult(true, null);
         }
 
         public async Task<(List<AuthorVM> Authors, int? CursorKey)> GetNextAuthorsAsync(int count, int? cursorKey, string search)
@@ -218,7 +272,7 @@ namespace BookManager.ApiClients
             return (authors, nextCursorKey);
         }
 
-        public async Task<(bool Success, string? Error)> UpdateAuthorAsync(AuthorVM author)
+        public async Task<RequestResult> UpdateAuthorAsync(AuthorVM author)
         {
             var json = JsonSerializer.Serialize(new
             {
@@ -231,25 +285,25 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                return (false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
-            return (true, null);
+            return new RequestResult(true, null);
         }
 
-        public async Task<(bool Success, string? Error)> DeleteAuthorAsync(int id)
+        public async Task<RequestResult> DeleteAuthorAsync(int id)
         {
             var response = await _httpClient.DeleteAsync($"/api/books/authors/{id}");
 
             if (!response.IsSuccessStatusCode)
             {
-                return (false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
-            return (true, null);
+            return new RequestResult(true, null);
         }
 
-        public async Task<(bool Success, string? Error)> CreateGenreAsync(GenreVM genre)
+        public async Task<RequestResult> CreateGenreAsync(GenreVM genre)
         {
             var json = JsonSerializer.Serialize(new
             {
@@ -263,7 +317,7 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                return (false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
             var responseJson = await response.Content.ReadAsStringAsync();
@@ -271,7 +325,7 @@ namespace BookManager.ApiClients
 
             genre.Id = doc.RootElement.GetProperty("id").GetInt32();
 
-            return (true, null);
+            return new RequestResult(true, null);
         }
 
         public async Task<(List<GenreVM> Genres, int? CursorKey)> GetNextGenresAsync(int count, int? cursorKey, string search)
@@ -311,7 +365,7 @@ namespace BookManager.ApiClients
             return (genres, nextCursorKey);
         }
 
-        public async Task<(bool Success, string? Error)> UpdateGenreAsync(GenreVM genre)
+        public async Task<RequestResult> UpdateGenreAsync(GenreVM genre)
         {
             var json = JsonSerializer.Serialize(new
             {
@@ -324,25 +378,25 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                return (false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
-            return (true, null);
+            return new RequestResult(true, null);
         }
 
-        public async Task<(bool Success, string? Error)> DeleteGenreAsync(int id)
+        public async Task<RequestResult> DeleteGenreAsync(int id)
         {
             var response = await _httpClient.DeleteAsync($"/api/books/genres/{id}");
 
             if (!response.IsSuccessStatusCode)
             {
-                return (false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
-            return (true, null);
+            return new RequestResult(true, null);
         }
 
-        public async Task<(bool Success, string? Error)> CreatePublisherAsync(PublisherVM publisher)
+        public async Task<RequestResult> CreatePublisherAsync(PublisherVM publisher)
         {
             var json = JsonSerializer.Serialize(new
             {
@@ -357,7 +411,7 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                return (false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
             var responseJson = await response.Content.ReadAsStringAsync();
@@ -365,7 +419,7 @@ namespace BookManager.ApiClients
 
             publisher.Id = doc.RootElement.GetProperty("id").GetInt32();
 
-            return (true, null);
+            return new RequestResult(true, null);
         }
 
         public async Task<(List<PublisherVM> Publishers, int? CursorKey)> GetNextPublishersAsync(int count, int? cursorKey, string search)
@@ -405,7 +459,7 @@ namespace BookManager.ApiClients
             return (publishers, nextCursorKey);
         }
 
-        public async Task<(bool Success, string? Error)> UpdatePublisherAsync(PublisherVM publisher)
+        public async Task<RequestResult> UpdatePublisherAsync(PublisherVM publisher)
         {
             var json = JsonSerializer.Serialize(new
             {
@@ -420,22 +474,22 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                return (false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
-            return (true, null);
+            return new RequestResult(true, null);
         }
 
-        public async Task<(bool Success, string? Error)> DeletePublisherAsync(int id)
+        public async Task<RequestResult> DeletePublisherAsync(int id)
         {
             var response = await _httpClient.DeleteAsync($"/api/books/publishers/{id}");
 
             if (!response.IsSuccessStatusCode)
             {
-                return (false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
-            return (true, null);
+            return new RequestResult(true, null);
         }
     }
 }

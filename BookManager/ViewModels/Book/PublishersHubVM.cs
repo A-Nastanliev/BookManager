@@ -139,7 +139,7 @@ namespace BookManager.ViewModels.Book
         [RelayCommand]
         public async Task Select(PublisherVM publisher)
         {
-            await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.NavigationPublisher)] = publisher });
+            await Shell.Current.GoToAsync(nameof(BookAttributePage), new Dictionary<string, object> { [nameof(BookAttributeVM.NavigationPublisher)] = publisher });
         }
 
         [RelayCommand]

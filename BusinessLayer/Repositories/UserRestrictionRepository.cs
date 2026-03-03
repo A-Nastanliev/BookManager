@@ -30,9 +30,33 @@ namespace BusinessLayer.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public override async Task<(List<UserRestriction>, DateTime? cursorDate, int? cursorKey )> ReadNextAsync(int count, DateTime? cursorDate, int? cursorKey)
+        public async Task<(List<UserRestriction> restrictions, DateTime? cursorDate, int? cursorKey)>
+            ReadNextAsync(int count, RestrictionFilter filter, DateTime? cursorDate, int? cursorKey)
         {
-            var query = _context.UserRestrictions.Where(cr => cr.EndDate == null || cr.EndDate > DateTime.UtcNow);
+            var now = DateTime.UtcNow;
+
+            IQueryable<UserRestriction> query = _context.UserRestrictions
+                .Include(cr => cr.User);
+
+            query = filter switch
+            {
+                RestrictionFilter.Finished =>
+                    query.Where(cr =>
+                        cr.EndDate != null &&
+                        cr.EndDate < now),
+
+                RestrictionFilter.ActiveWithEndDate =>
+                    query.Where(cr =>
+                        cr.EndDate != null &&
+                        cr.EndDate > now),
+
+                RestrictionFilter.ActiveWithoutEndDate =>
+                    query.Where(cr =>
+                        cr.EndDate == null),
+
+                _ => query
+            };
+
 
             if (cursorDate.HasValue && cursorKey.HasValue)
             {
@@ -41,16 +65,20 @@ namespace BusinessLayer.Repositories
                     (cr.StartDate == cursorDate.Value && cr.Id < cursorKey.Value));
             }
 
+
             var restrictions = await query
                 .OrderByDescending(cr => cr.StartDate)
                 .ThenByDescending(cr => cr.Id)
                 .Take(count)
-                .Include(cr => cr.User)
                 .ToListAsync();
 
             var lastItem = restrictions.LastOrDefault();
 
-            return (restrictions, lastItem?.StartDate, lastItem?.Id);
+            return (
+                restrictions,
+                lastItem?.StartDate,
+                lastItem?.Id
+            );
         }
-	}
+    }
 }

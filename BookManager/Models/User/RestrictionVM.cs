@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 
-namespace BookManager.ViewModels.Models
+namespace BookManager.Models.User
 {
     public partial class RestrictionVM : ObservableObject, IJsonParseable
     {

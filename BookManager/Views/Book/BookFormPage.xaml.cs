@@ -19,15 +19,8 @@ public partial class BookFormPage : ContentPage
     protected override async void OnDisappearing()
     {
         await CloseScannerAsync();
-        Shell.SetTabBarIsVisible(this, true);
         barcodeReaderView.Handler?.DisconnectHandler();
         base.OnDisappearing();
-		_vm.OnDissapearing();
-    }
-    protected override void OnNavigatedTo(NavigatedToEventArgs args)
-    {
-        base.OnNavigatedTo(args);
-        Shell.SetTabBarIsVisible(this, false);
     }
 
     private void barcodeReaderView_BarcodesDetected(object sender, BarcodeDetectionEventArgs e)
@@ -73,7 +66,14 @@ public partial class BookFormPage : ContentPage
         barcodeReaderView.CameraLocation = CameraLocation.Rear;
         barcodeReaderView.IsEnabled = true;
         barcodeReaderView.IsDetecting = true;
-        await ScannerPanel.TranslateToAsync(0, 0, 250, Easing.SinOut);
+
+        ScannerPanel.Opacity = 0;
+        ScannerPanel.Margin = new Thickness(0, 0, 0, -40);
+
+        await Task.WhenAll(
+            ScannerPanel.FadeToAsync(1, 200),
+            ScannerPanel.TranslateToAsync(0, 0, 0),
+            ScannerPanel.AnimateBottomMargin(-40, 0, 200));
     }
 
 
@@ -82,7 +82,7 @@ public partial class BookFormPage : ContentPage
         if (!_isScannerOpen)
             return;
 
-        await ScannerPanel.TranslateToAsync(0, 300, 250, Easing.SinIn);
+        await Task.WhenAll(ScannerPanel.FadeToAsync(0, 200), ScannerPanel.AnimateBottomMargin(0, -40, 200));
         Overlay.InputTransparent = true;
         Overlay.IsVisible = false;
         barcodeReaderView.IsDetecting = false;

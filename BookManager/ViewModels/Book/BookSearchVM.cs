@@ -1,6 +1,5 @@
 ﻿using BookManager.ApiClients;
 using BookManager.Models.Book;
-using BookManager.ViewModels.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
@@ -166,13 +165,13 @@ namespace BookManager.ViewModels.Book
 
             try
             {
-                var (success, book, error) =
+                var (result, book) =
                     await _bookClient.GetBookByIsbnAsync(barcode);
 
-                if (!success)
+                if (!result.Success)
                 {
                     await Shell.Current.DisplayAlertAsync("Error",
-                        error ?? "Unexpected error occurred.",
+                        result.Error ?? "Unexpected error occurred.",
                         "OK");
                     return;
                 }

@@ -52,15 +52,10 @@ namespace BookManager.ViewModels.Book
 
             var result = results[0];
 
-            var localFilePath = Path.Combine(FileSystem.CacheDirectory, $"{Guid.NewGuid()}{Path.GetExtension(result.FileName)}");
+            await using var sourceStream = await result.OpenReadAsync();
+            var localFilePath = await ImageManager.SaveTempImageAsync(sourceStream, Path.GetExtension(result.FileName));
 
-            using (var sourceStream = await result.OpenReadAsync())
-            using (var localFileStream = File.OpenWrite(localFilePath))
-            {
-                await sourceStream.CopyToAsync(localFileStream);
-            }
-
-            ImageCleaner.CleanupTempImage(_selectedImagePath);
+            ImageManager.CleanupTempImage(_selectedImagePath);
             _selectedImagePath = localFilePath;
 
             Book.CoverSource = ImageSource.FromFile(localFilePath);
@@ -113,6 +108,12 @@ namespace BookManager.ViewModels.Book
         }
         private async Task UpdateBook()
         {
+            if (string.IsNullOrWhiteSpace(Book.Author.Name) || string.IsNullOrWhiteSpace(Book.ISBN) || string.IsNullOrWhiteSpace(Book.Title) )
+            {
+                await Shell.Current.DisplayAlertAsync("Missing fields", "Author, ISBN and title are required!", "OK");
+                return;
+            }
+
             try
             {
                 var result = await _bookClient.UpdateBookAsync(Book, isImageChanged ? _selectedImagePath : null);
@@ -163,11 +164,6 @@ namespace BookManager.ViewModels.Book
                 isEditMode = true;
             }
         }
-
-        public void OnDissapearing()
-        {
-            ImageCleaner.CleanupTempImage(_selectedImagePath);
-        }     
     
     }
 }

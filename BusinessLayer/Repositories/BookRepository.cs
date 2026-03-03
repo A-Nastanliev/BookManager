@@ -9,60 +9,71 @@ namespace BusinessLayer.Repositories
 
         public override async Task<bool> CreateAsync(Book obj)
         {
-            var author = await _context.Authors
-                .FirstOrDefaultAsync(a => a.Name == obj.Author.Name);
-
-            if (author == null)
+            try
             {
-                author = new Author { Name = obj.Author.Name };
-                _context.Authors.Add(author);
-                await _context.SaveChangesAsync();
-            }
+                var author = await _context.Authors
+                    .FirstOrDefaultAsync(a => a.Name == obj.Author.Name);
 
-            Genre? genre = null;
-            if (obj.Genre != null)
-            {
-                genre = await _context.Genres
-                    .FirstOrDefaultAsync(g => g.Name == obj.Genre.Name);
-
-                if (genre == null)
+                if (author == null)
                 {
-                    genre = new Genre { Name = obj.Genre.Name };
-                    _context.Genres.Add(genre);
+                    author = new Author { Name = obj.Author.Name };
+                    _context.Authors.Add(author);
                     await _context.SaveChangesAsync();
                 }
-            }
 
-            Publisher? publisher = null;
-            if (obj.Publisher != null)
-            {
-                publisher = await _context.Publishers
-                    .FirstOrDefaultAsync(p => p.Name == obj.Publisher.Name);
-
-                if (publisher == null)
+                Genre? genre = null;
+                if (obj.Genre != null)
                 {
-                    publisher = new Publisher { Name = obj.Publisher.Name };
-                    _context.Publishers.Add(publisher);
-                    await _context.SaveChangesAsync();
+                    genre = await _context.Genres
+                        .FirstOrDefaultAsync(g => g.Name == obj.Genre.Name);
+
+                    if (genre == null)
+                    {
+                        genre = new Genre { Name = obj.Genre.Name };
+                        _context.Genres.Add(genre);
+                        await _context.SaveChangesAsync();
+                    }
                 }
+
+                Publisher? publisher = null;
+                if (obj.Publisher != null)
+                {
+                    publisher = await _context.Publishers
+                        .FirstOrDefaultAsync(p => p.Name == obj.Publisher.Name);
+
+                    if (publisher == null)
+                    {
+                        publisher = new Publisher { Name = obj.Publisher.Name };
+                        _context.Publishers.Add(publisher);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                var book = new Book
+                {
+                    ISBN = obj.ISBN,
+                    Title = obj.Title,
+                    Cover = obj.Cover,
+                    TotalPages = obj.TotalPages,
+                    Description = obj.Description,
+                    CreatedAt = DateTime.UtcNow,
+                    AuthorId = author.Id,
+                    GenreId = genre?.Id,
+                    PublisherId = publisher?.Id
+                };
+
+                _context.Books.Add(book);
+
+                return await _context.SaveChangesAsync() > 0;
             }
-
-            var book = new Book
+            catch (DbUpdateException ex) when(IsUniqueConstraintViolation(ex))
             {
-                ISBN = obj.ISBN,
-                Title = obj.Title,
-                Cover = obj.Cover,
-                TotalPages = obj.TotalPages,
-                Description = obj.Description,
-                CreatedAt = DateTime.UtcNow,
-                AuthorId = author.Id,
-                GenreId = genre?.Id,
-                PublisherId = publisher?.Id
-            };
-
-            _context.Books.Add(book);
-
-            return await _context.SaveChangesAsync() > 0;
+                throw new DbUpdateException("A book with this ISBN already exists.");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception( "An unknown error occurred: " + ex.Message);
+            }
         }
 
 
@@ -175,7 +186,8 @@ namespace BusinessLayer.Repositories
                 if (obj.Cover != null)
                     bookToUpdate.Cover = obj.Cover;
 
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
+                obj = bookToUpdate;
             }
             catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
             {
@@ -239,6 +251,40 @@ namespace BusinessLayer.Repositories
             return (items, last?.CreatedAt, last?.Id);
         }
 
+        public async Task<(List<Book> Books, DateTime? CursorDate, int? CursorKey)> 
+            ReadNextByFilterAsync( int count, DateTime? lastCreatedAt, int? lastBookId, int id, BookFilterType filterType)
+        {
+            var query = _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Publisher)
+                .Include(b => b.Genre)
+                .AsQueryable();
+
+            query = filterType switch
+            {
+                BookFilterType.Author => query.Where(b => b.AuthorId == id),
+                BookFilterType.Publisher => query.Where(b => b.PublisherId == id),
+                BookFilterType.Genre => query.Where(b => b.GenreId == id),
+                _ => query
+            };
+
+            if (lastCreatedAt.HasValue && lastBookId.HasValue)
+            {
+                query = query.Where(b =>
+                    b.CreatedAt < lastCreatedAt.Value ||
+                    (b.CreatedAt == lastCreatedAt.Value && b.Id < lastBookId.Value));
+            }
+
+            var items = await query
+                .OrderByDescending(b => b.CreatedAt)
+                .ThenByDescending(b => b.Id)
+                .Take(count)
+                .ToListAsync();
+
+            var last = items.LastOrDefault();
+
+            return (items, last?.CreatedAt, last?.Id);
+        }
 
         public async Task<Book> GetBookByIsbnAsync(string isbn)
         {

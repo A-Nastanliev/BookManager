@@ -90,7 +90,7 @@ namespace BookManager.ApiClients
 
             if (!response.IsSuccessStatusCode)
             {
-                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response, false));
             }
 
             var responseJson = await response.Content.ReadAsStringAsync();
@@ -117,7 +117,7 @@ namespace BookManager.ApiClients
             if (!response.IsSuccessStatusCode)
             {
                 _tokenStore.Clear();
-                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response, false));
             }
 
             var json = await response.Content.ReadAsStringAsync();

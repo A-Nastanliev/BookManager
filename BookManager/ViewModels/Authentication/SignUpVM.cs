@@ -49,15 +49,11 @@ namespace BookManager.ViewModels.Authentication
                 return;
 
             var result = results[0];
-            var localFilePath = Path.Combine(FileSystem.CacheDirectory, $"{Guid.NewGuid()}{Path.GetExtension(result.FileName)}");
+                
+            await using var sourceStream = await result.OpenReadAsync();
+            var localFilePath = await ImageManager.SaveTempImageAsync(sourceStream, Path.GetExtension(result.FileName));
 
-            using (var sourceStream = await result.OpenReadAsync())
-            using (var localFileStream = File.OpenWrite(localFilePath))
-            {
-                await sourceStream.CopyToAsync(localFileStream);
-            }
-
-            ImageCleaner.CleanupTempImage(_selectedImagePath);
+            ImageManager.CleanupTempImage(_selectedImagePath);
             _selectedImagePath = localFilePath;
 
             ProfileImage = ImageSource.FromFile(localFilePath);
@@ -118,11 +114,6 @@ namespace BookManager.ViewModels.Authentication
         private async Task GoToLogin()
         {
             await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
-        }
-
-        public void OnDissapearing()
-        {
-            ImageCleaner.CleanupTempImage(_selectedImagePath);
         }
     }
 }

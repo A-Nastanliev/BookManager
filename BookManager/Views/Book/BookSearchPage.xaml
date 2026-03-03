@@ -68,9 +68,9 @@
                 </BoxView.GestureRecognizers>
             </BoxView>
 
-            <Grid  x:Name="ScannerPanel"  SafeAreaEdges="None"
-                VerticalOptions="End" TranslationY="300" BackgroundColor="Red">
-                <Grid x:Name="ScannerHost"  HeightRequest="300" SafeAreaEdges="None" HorizontalOptions="Fill" VerticalOptions="End" />
+            <Grid  x:Name="ScannerPanel"
+                VerticalOptions="End" BackgroundColor="Red">
+                <Grid x:Name="ScannerHost"  HeightRequest="300" HorizontalOptions="Fill" VerticalOptions="End" />
             </Grid>
         </Grid>
     </AbsoluteLayout>

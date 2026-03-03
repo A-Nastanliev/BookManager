@@ -7,7 +7,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Text.Json;
 
-namespace BookManager.ViewModels.Models
+namespace BookManager.Models.User
 {
     public partial class PublicUserVM : ObservableObject, IJsonParseable
     {

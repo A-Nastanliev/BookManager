@@ -12,9 +12,4 @@ public partial class SignUpPage : ContentPage
 		BindingContext = signUpVM;
         _vm = signUpVM;
 	}
-    protected override void OnDisappearing()
-    {
-        base.OnDisappearing();
-        _vm.OnDissapearing();
-    }
 }

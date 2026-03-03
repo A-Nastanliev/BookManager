@@ -1,11 +1,12 @@
 ﻿using BookManager.ApiClients;
 using BookManager.Models.Book;
+using BookManager.Views.Book;
+using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Mvvm.Input;
 
 namespace BookManager.ViewModels.Book
 {
@@ -93,7 +94,11 @@ namespace BookManager.ViewModels.Book
                     _ = Toast.Make($"{Author.Name} created").Show();
                 }
 
-                await Shell.Current.GoToAsync("..");
+                await Shell.Current.GoToAsync("..", new Dictionary<string, object> 
+                { 
+                    [nameof(BookAttributeVM.NavigationAuthor)] = Author,
+                    ["Updated"] = true
+                });
             }
             catch (Exception ex)
             {
@@ -137,7 +142,11 @@ namespace BookManager.ViewModels.Book
                     _ = Toast.Make($"{Publisher.Name} created").Show();
                 }
 
-                await Shell.Current.GoToAsync("..");
+                await Shell.Current.GoToAsync("..", new Dictionary<string, object>
+                {
+                    [nameof(BookAttributeVM.NavigationPublisher)] = Publisher,
+                    ["Updated"] = true
+                });
             }
             catch (Exception ex)
             {
@@ -181,7 +190,11 @@ namespace BookManager.ViewModels.Book
                     _ = Toast.Make($"{Genre.Name} created").Show();
                 }
 
-                await Shell.Current.GoToAsync("..");
+                await Shell.Current.GoToAsync("..", new Dictionary<string, object> 
+                { 
+                    [nameof(BookAttributeVM.NavigationGenre)] = Genre,
+                    ["Updated"] = true
+                });
             }
             catch (Exception ex)
             {
