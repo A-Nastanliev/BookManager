@@ -139,7 +139,7 @@ namespace BookManager.ViewModels.Book
         [RelayCommand]
         public async Task Select(GenreVM genre)
         {
-            await Shell.Current.GoToAsync(nameof(BookAttributePage), new Dictionary<string, object> { [nameof(BookAttributeVM.NavigationGenre)] = genre });
+            await Shell.Current.GoToAsync(nameof(BookAttributePage), new Dictionary<string, object> { [nameof(BookAttributeVM.Genre)] = genre });
         }
 
         [RelayCommand]

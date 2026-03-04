@@ -12,20 +12,12 @@ namespace BookManager.ViewModels.Book
 {
     public partial class FormVM : ObservableObject, IQueryAttributable
     {
-        [ObservableProperty]
-        AuthorVM navigationAuthor;
 
         [ObservableProperty]
         AuthorVM author = new();
 
         [ObservableProperty]
-        PublisherVM navigationPublisher;
-
-        [ObservableProperty]
         PublisherVM publisher = new();
-
-        [ObservableProperty]
-        GenreVM navigationGenre;
 
         [ObservableProperty]
         GenreVM genre = new();
@@ -78,7 +70,6 @@ namespace BookManager.ViewModels.Book
                         return;
                     }
 
-                    NavigationAuthor.CopyFrom(Author);
                     _ = Toast.Make($"{Author.Name} updated").Show();
                 }
                 else
@@ -96,7 +87,7 @@ namespace BookManager.ViewModels.Book
 
                 await Shell.Current.GoToAsync("..", new Dictionary<string, object> 
                 { 
-                    [nameof(BookAttributeVM.NavigationAuthor)] = Author,
+                    [nameof(BookAttributeVM.Author)] = Author,
                     ["Updated"] = true
                 });
             }
@@ -126,7 +117,6 @@ namespace BookManager.ViewModels.Book
                         return;
                     }
 
-                    NavigationPublisher.CopyFrom(Publisher);
                     _ = Toast.Make($"{Publisher.Name} updated").Show();
                 }
                 else
@@ -144,7 +134,7 @@ namespace BookManager.ViewModels.Book
 
                 await Shell.Current.GoToAsync("..", new Dictionary<string, object>
                 {
-                    [nameof(BookAttributeVM.NavigationPublisher)] = Publisher,
+                    [nameof(BookAttributeVM.Publisher)] = Publisher,
                     ["Updated"] = true
                 });
             }
@@ -174,7 +164,6 @@ namespace BookManager.ViewModels.Book
                         return;
                     }
 
-                    NavigationGenre.CopyFrom(Genre);
                     _ = Toast.Make($"{Genre.Name} updated").Show();
                 }
                 else
@@ -192,7 +181,7 @@ namespace BookManager.ViewModels.Book
 
                 await Shell.Current.GoToAsync("..", new Dictionary<string, object> 
                 { 
-                    [nameof(BookAttributeVM.NavigationGenre)] = Genre,
+                    [nameof(BookAttributeVM.Genre)] = Genre,
                     ["Updated"] = true
                 });
             }
@@ -204,28 +193,25 @@ namespace BookManager.ViewModels.Book
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            if (query.TryGetValue($"{nameof(NavigationAuthor)}", out var obj) && obj is AuthorVM author)
+            if (query.TryGetValue($"{nameof(Author)}", out var obj) && obj is AuthorVM author)
             {
                 EntityType = nameof(AuthorVM);
-                NavigationAuthor = author;
                 Author.CopyFrom(author);
                 Title = "Edit Author";
                 SubmitButtonText = "Save Changes";
                 isEditMode = true;
             }
-            else if (query.TryGetValue($"{nameof(NavigationPublisher)}", out var obj2) && obj2 is PublisherVM publisher)
+            else if (query.TryGetValue($"{nameof(Publisher)}", out var obj2) && obj2 is PublisherVM publisher)
             {
                 EntityType = nameof(PublisherVM);
-                NavigationPublisher = publisher;
                 Publisher.CopyFrom(publisher);
                 Title = "Edit Publisher";
                 SubmitButtonText = "Save Changes";
                 isEditMode = true;
             }
-            else if (query.TryGetValue($"{nameof(NavigationGenre)}", out var obj3) && obj3 is GenreVM genre)
+            else if (query.TryGetValue($"{nameof(Genre)}", out var obj3) && obj3 is GenreVM genre)
             {
                 EntityType = nameof(GenreVM);
-                NavigationGenre = genre;
                 Genre.CopyFrom(genre);
                 Title = "Edit Genre";
                 SubmitButtonText = "Save Changes";

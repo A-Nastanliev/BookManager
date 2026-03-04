@@ -7,25 +7,18 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
+using CommunityToolkit.Maui.Alerts;
 
 namespace BookManager.ViewModels.Book
 {
     public partial class BookAttributeVM : PagedLoadingVM, IQueryAttributable
     {
-        [ObservableProperty]
-        AuthorVM navigationAuthor;
 
         [ObservableProperty]
         AuthorVM author = new();
 
         [ObservableProperty]
-        PublisherVM navigationPublisher;
-
-        [ObservableProperty]
         PublisherVM publisher = new();
-
-        [ObservableProperty]
-        GenreVM navigationGenre;
 
         [ObservableProperty]
         GenreVM genre = new();
@@ -54,29 +47,26 @@ namespace BookManager.ViewModels.Book
 
         public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            if (query.TryGetValue($"{nameof(NavigationAuthor)}", out var obj) && obj is AuthorVM author)
+            if (query.TryGetValue($"{nameof(Author)}", out var obj) && obj is AuthorVM author)
             {
                 EntityType = nameof(AuthorVM);
-                NavigationAuthor = author;
                 attributeId = author.Id;
                 Author.CopyFrom(author);
-                Title = $"{NavigationAuthor.Name}";
+                Title = $"{Author.Name}";
             }
-            else if (query.TryGetValue($"{nameof(NavigationPublisher)}", out var obj2) && obj2 is PublisherVM publisher)
+            else if (query.TryGetValue($"{nameof(Publisher)}", out var obj2) && obj2 is PublisherVM publisher)
             {
                 EntityType = nameof(PublisherVM);
-                NavigationPublisher = publisher;
                 Publisher.CopyFrom(publisher);
                 attributeId = publisher.Id;
-                Title = $"{NavigationPublisher.Name}";
+                Title = $"{Publisher.Name}";
             }
-            else if (query.TryGetValue($"{nameof(NavigationGenre)}", out var obj3) && obj3 is GenreVM genre)
+            else if (query.TryGetValue($"{nameof(Genre)}", out var obj3) && obj3 is GenreVM genre)
             {
                 EntityType = nameof(GenreVM);
-                NavigationGenre = genre;
                 Genre.CopyFrom(genre);
                 attributeId = genre.Id;
-                Title = $"{NavigationGenre.Name}";
+                Title = $"{Genre.Name}";
             }
 
             if (query.TryGetValue("Updated", out var updatedObj) && updatedObj is bool wasUpdated && wasUpdated)
@@ -121,11 +111,11 @@ namespace BookManager.ViewModels.Book
         public async Task Edit()
         {
             if (EntityType == nameof(AuthorVM))
-                await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.NavigationAuthor)] = Author });
+                await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.Author)] = Author });
             else if (EntityType == nameof(PublisherVM))
-                await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.NavigationPublisher)] = Publisher });
+                await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.Publisher)] = Publisher });
             else if (EntityType == nameof(GenreVM))
-                await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.NavigationGenre)] = Genre });
+                await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.Genre)] = Genre });
         }
 
         [RelayCommand]
@@ -134,12 +124,22 @@ namespace BookManager.ViewModels.Book
             try
             {
                 RequestResult result = new RequestResult(false, "error");
+                string name = EntityType;
                 if (EntityType == nameof(AuthorVM))
+                {
+                    name = Author.Name;
                     result = await _bookClient.DeleteAuthorAsync(Author.Id);
+                }
                 else if (EntityType == nameof(PublisherVM))
+                {
+                    name = Publisher.Name;
                     result = await _bookClient.DeletePublisherAsync(Publisher.Id);
+                }
                 else if (EntityType == nameof(GenreVM))
+                {
+                    name = Genre.Name;
                     result = await _bookClient.DeleteGenreAsync(Genre.Id);
+                }
 
                 if (!result.Success)
                 {
@@ -147,6 +147,7 @@ namespace BookManager.ViewModels.Book
                     return;
                 }
 
+                _ = Toast.Make($"{name} deleted").Show();
                 await Shell.Current.GoToAsync("..");
             }
             catch (Exception ex) 
@@ -177,7 +178,7 @@ namespace BookManager.ViewModels.Book
         [RelayCommand]
         public async Task Select(BookVM book)
         {
-            await Shell.Current.GoToAsync(nameof(BookFormPage), new Dictionary<string, object> { [nameof(BookFormVM.NavigationBook)] = book });
+            await Shell.Current.GoToAsync(nameof(BookDetailPage), new Dictionary<string, object> { [nameof(BookDetailVM.Book)] = book });
         }
     }
 }

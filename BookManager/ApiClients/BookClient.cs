@@ -48,6 +48,10 @@ namespace BookManager.ApiClients
                 return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            book.FromJson(doc.RootElement.GetProperty("book"));
+
             return new RequestResult(true, null);
         }
 
@@ -205,7 +209,19 @@ namespace BookManager.ApiClients
 
             var json = await response.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(json);
-            book.FromJson(doc.RootElement);
+            book.FromJson(doc.RootElement.GetProperty("book"));
+
+            return new RequestResult(true, null);
+        }
+
+        public async Task<RequestResult> DeleteBookAsync(int id)
+        {
+            var response = await _httpClient.DeleteAsync($"api/books/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+            }
 
             return new RequestResult(true, null);
         }

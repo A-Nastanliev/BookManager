@@ -144,7 +144,7 @@ namespace BookManager.ViewModels.Book
         [RelayCommand]
         public async Task Select(AuthorVM author)
         {
-            await Shell.Current.GoToAsync(nameof(BookAttributePage), new Dictionary<string, object> { [nameof(BookAttributeVM.NavigationAuthor)] = author });
+            await Shell.Current.GoToAsync(nameof(BookAttributePage), new Dictionary<string, object> { [nameof(BookAttributeVM.Author)] = author });
         }
 
         [RelayCommand]

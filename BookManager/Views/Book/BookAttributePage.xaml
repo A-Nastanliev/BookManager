@@ -64,7 +64,7 @@
                     <HorizontalStackLayout HorizontalOptions="End" Spacing="8" Margin="8,0"
                         IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter='Admin'}">
                         <Button Text="Edit" Command="{Binding EditCommand}"/>
-                        <Button Text="Delete" Background="Red" />
+                        <Button Text="Delete" Background="Red" Command="{Binding DeleteCommand}" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
             </CollectionView.Header>

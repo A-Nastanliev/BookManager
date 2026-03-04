@@ -1,16 +1,16 @@
 ﻿using BookManager.ApiClients;
 using BookManager.Models.Book;
+using BookManager.Views.Book;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
-using BookManager.Views.Book;
 
 namespace BookManager.ViewModels.Book
 {
-    public partial class BookSearchVM : PagedLoadingVM
+    public partial class BookSearchVM : PagedLoadingVM, IQueryAttributable
     {
         [ObservableProperty]
         ObservableCollection<BookVM> books = new();
@@ -94,6 +94,35 @@ namespace BookManager.ViewModels.Book
             }
         }
 
+        public async void ApplyQueryAttributes(IDictionary<string, object> query)
+        {
+            if (query.TryGetValue("Updated", out var updatedObj) && updatedObj is bool wasUpdated &&
+                query.TryGetValue($"{nameof(BookVM)}", out var updatedBook) && updatedBook is BookVM book)
+            {
+                if (wasUpdated)
+                {
+                    var bookToUpdate = CurrentBooks.FirstOrDefault(b => b.Id == book.Id);
+                    if (bookToUpdate != null)
+                    {
+                        bookToUpdate.CopyFrom(book);
+                    }
+                    bookToUpdate = Books.FirstOrDefault(b => b.Id == book.Id);
+                    if (bookToUpdate != null)
+                    {
+                        bookToUpdate.CopyFrom(book);
+                    }
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(EntrySearch))
+                    {
+                        CurrentBooks.Insert(0, book);
+                    }
+                    Books.Insert(0, book);
+                }
+            }
+        }
+
         private async Task HandleSearchAsync(string search, CancellationToken token)
         {
             try
@@ -145,7 +174,7 @@ namespace BookManager.ViewModels.Book
         [RelayCommand]
         public async Task Select(BookVM book)
         {
-            await Shell.Current.GoToAsync(nameof(BookFormPage), new Dictionary<string, object> { [nameof(BookFormVM.NavigationBook)] = book });
+            await Shell.Current.GoToAsync(nameof(BookDetailPage), new Dictionary<string, object> { [nameof(BookDetailVM.Book)] = book });
         }
 
         [RelayCommand]

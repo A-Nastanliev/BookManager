@@ -71,8 +71,9 @@ namespace ServiceLayer.Controllers
                 return BadRequest("An unknown error occurred: " + ex.Message);
             }
 
+            book = await _bookRepository.ReadAsync(book.Id);
             var baseUrl = _configuration["App:BaseUrl"];
-            return Ok();
+            return Ok(new {book = book.ToDto(baseUrl)});
         }
 
 		[HttpGet("next")]
@@ -180,7 +181,13 @@ namespace ServiceLayer.Controllers
                 return BadRequest(new { error = ex.Message });
             }
 
+            if (imageUpdated)
+            {
+                _imageStorageService.DeleteImage(oldImagePath);
+            }
+
             var baseUrl = _configuration["App:BaseUrl"];
+            book = await _bookRepository.ReadAsync(book.Id);
             return Ok(new { book = book.ToDto(baseUrl) });
         }
 
@@ -192,13 +199,20 @@ namespace ServiceLayer.Controllers
             if (book == null)
                 return NotFound();
 
-            _imageStorageService.DeleteImage(book.Cover);
+            try
+            {
+                var success = await _bookRepository.DeleteAsync(book);
 
-            var success = await _bookRepository.DeleteAsync(new Book { Id = id });
-            if (!success)
-                return NotFound();
+                if (!success)
+                    return NotFound();
 
-            return NoContent();
+                _imageStorageService.DeleteImage(book.Cover);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
 		[Authorize(Roles = "Admin")]

@@ -1,8 +1,31 @@
-﻿namespace BusinessLayer.Repositories
+﻿using DataLayer.Enums;
+
+namespace BusinessLayer.Repositories
 {
     public class ReadingLogRepository : AbstractRepository<ReadingLog, int>
     {
         public ReadingLogRepository(BookManagerContext context) : base(context) { }
+
+        public override async Task<bool> CreateAsync(ReadingLog obj)
+        {
+            var userBook = await _context.UsersBook.FindAsync((obj.UserId, obj.BookId));
+            if (userBook == null) 
+            {
+                userBook = new UserBook
+                {
+                    UserId = obj.UserId,
+                    BookId = obj.BookId,
+                    Status = UserBookStatus.Reading,
+                    CreatedAt = DateTime.UtcNow
+                };
+               
+            }
+            obj.UserBook = userBook;
+            obj.Date = DateTime.UtcNow;
+
+            return await _context.SaveChangesAsync()>0;
+        }
+
         public override async Task<ReadingLog> ReadAsync(int id)
         {
             return await _context.ReadingLogs

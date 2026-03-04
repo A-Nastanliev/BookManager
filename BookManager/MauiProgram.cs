@@ -52,6 +52,7 @@ namespace BookManager
 
             AddApiClient<UserClient>();
             AddApiClient<BookClient>();
+            AddApiClient<ReadingClient>();
 
             builder.Services.AddTransient<LoadingVM>();
             builder.Services.AddTransient<LoginVM>();
@@ -64,6 +65,7 @@ namespace BookManager
             builder.Services.AddSingleton<AuthorsHubVM>();
             builder.Services.AddTransient<FormVM>();
             builder.Services.AddTransient<BookAttributeVM>();
+            builder.Services.AddTransient<BookDetailVM>();
 
             builder.Services.AddSingleton<SettingsVM>();
             builder.Services.AddTransient<RestrictionsVM>();
@@ -77,6 +79,7 @@ namespace BookManager
             builder.Services.AddSingleton<PublishingHubPage>(); 
             builder.Services.AddTransient<FormPage>();
             builder.Services.AddTransient<BookAttributePage>();
+            builder.Services.AddTransient<BookDetailPage>();
 
             builder.Services.AddSingleton<SettingsPage>();
             builder.Services.AddTransient<RestrictionsPage>(); 

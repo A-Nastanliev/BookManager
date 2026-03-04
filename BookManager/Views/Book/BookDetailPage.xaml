@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookManager.Views.Book.BookDetailPage"
+             xmlns:vm="clr-namespace:BookManager.ViewModels.Book"
+             xmlns:views="clr-namespace:BookManager.Views.Book"
+             xmlns:tabView="clr-namespace:Syncfusion.Maui.Toolkit.TabView;assembly=Syncfusion.Maui.Toolkit"
+             x:DataType="vm:BookDetailVM"
+             Title="{Binding Book.Title}">
+    
+    <ScrollView VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
+    <Grid RowDefinitions="Auto,*">
+        <Grid Row="0" >
+            <Image HeightRequest="450" Source="{Binding Book.CoverSource}" Aspect="AspectFill"/>
+            <VerticalStackLayout  Padding="16" VerticalOptions="End" Background="{StaticResource PrimaryOverlay}">
+                <Label  Text="{Binding Book.Title}"  FontSize="Title" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
+                <Label Text="{Binding Book.Author.Name}" FontSize="Medium"/>
+                <HorizontalStackLayout HorizontalOptions="End" Spacing="8" Margin="8,0"
+                    IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter='Admin'}">
+                    <Button Text="Edit" Command="{Binding EditCommand}"/>
+                    <Button Text="Delete" Background="Red" Command="{Binding DeleteCommand}" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Grid>
+        <tabView:SfTabView  Grid.Row="1">
+            <tabView:SfTabView.Items>
+                <tabView:SfTabItem Header="Details">
+                    <tabView:SfTabItem.Content>
+                            <ScrollView>
+                                <VerticalStackLayout Padding="20" Spacing="14">
+                                    <Label Text="Author" FontAttributes="Bold"/>
+                                    <Label Text="{Binding Book.Author.Name}" TextColor="{StaticResource Primary}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding AuthorTappedCommand}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label Text="Genre" FontAttributes="Bold"/>
+                                    <Label Text="{Binding Book.Genre.Name, TargetNullValue='Unknown'}" TextColor="{StaticResource Primary}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer  Command="{Binding GenreTappedCommand}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label Text="Publisher" FontAttributes="Bold"/>
+                                    <Label Text="{Binding Book.Publisher.Name, TargetNullValue='Unknown'}" TextColor="{StaticResource Primary}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding PublisherTappedCommand}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label Text="Description"  FontAttributes="Bold"/>
+                                    <Label Text="{Binding Genre.Description, TargetNullValue='No description'}"
+                                           LineBreakMode="WordWrap"/>
+                                </VerticalStackLayout>
+                            </ScrollView>
+                        </tabView:SfTabItem.Content>
+                </tabView:SfTabItem>
+                <tabView:SfTabItem Header="Comments">
+                    <tabView:SfTabItem.Content>
+                        <Grid >
+                            <Label Text="No comments" HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Grid>
+                    </tabView:SfTabItem.Content>
+                </tabView:SfTabItem>
+                <tabView:SfTabItem Header="Logs">
+                    <tabView:SfTabItem.Content>
+                        <Grid>
+                            <Label Text="No logs" HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Grid>
+                    </tabView:SfTabItem.Content>
+                </tabView:SfTabItem>
+            </tabView:SfTabView.Items>
+        </tabView:SfTabView>
+
+    </Grid>
+    </ScrollView>
+</ContentPage>

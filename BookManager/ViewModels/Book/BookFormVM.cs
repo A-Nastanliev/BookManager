@@ -23,9 +23,6 @@ namespace BookManager.ViewModels.Book
         [ObservableProperty]
         string submitButtonText;
 
-        [ObservableProperty]
-        BookVM navigationBook;
-
         bool isEditMode;
 
         bool isImageChanged;
@@ -84,7 +81,6 @@ namespace BookManager.ViewModels.Book
             }
         }
 
-
         private async Task CreateBook()
         { 
             try
@@ -94,7 +90,11 @@ namespace BookManager.ViewModels.Book
                 if (result.Success)
                 {
                     _ = Toast.Make($"{Book.Title} created").Show();
-                    await Shell.Current.GoToAsync("..");
+                    await Shell.Current.GoToAsync("..", new Dictionary<string, object>
+                    {
+                        [nameof(BookVM)] = Book,
+                        ["Updated"] = false
+                    });
                 }
                 else
                 {
@@ -124,8 +124,11 @@ namespace BookManager.ViewModels.Book
                 }
 
                 _ = Toast.Make($"{Book.Title} updated").Show();
-                NavigationBook.CopyFrom(Book);
-                await Shell.Current.GoToAsync("..");
+                await Shell.Current.GoToAsync("..", new Dictionary<string, object>
+                {
+                    [nameof(BookVM)] = Book,
+                    ["Updated"] = true
+                });
             }
             catch (Exception ex)
             {
@@ -155,9 +158,8 @@ namespace BookManager.ViewModels.Book
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            if (query.TryGetValue($"{nameof(NavigationBook)}", out var obj) && obj is BookVM book)
+            if (query.TryGetValue($"{nameof(Book)}", out var obj) && obj is BookVM book)
             {
-                NavigationBook = book;
                 Book.CopyFrom(book);
                 Title = "Edit book";
                 SubmitButtonText = "Save Changes";

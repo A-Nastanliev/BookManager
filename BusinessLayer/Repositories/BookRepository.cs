@@ -64,7 +64,9 @@ namespace BusinessLayer.Repositories
 
                 _context.Books.Add(book);
 
-                return await _context.SaveChangesAsync() > 0;
+                bool sucess = await _context.SaveChangesAsync() > 0;
+                obj.Id = book.Id;
+                return sucess;
             }
             catch (DbUpdateException ex) when(IsUniqueConstraintViolation(ex))
             {
@@ -83,10 +85,6 @@ namespace BusinessLayer.Repositories
 				.Include(b => b.Author)
 				.Include(b => b.Genre)
 				.Include(b => b.Publisher)
-				.Include(b => b.Comments)
-					.ThenInclude(c => c.User)
-				.Include(b => b.Ratings)
-				.Include(b => b.UserBooks)
 				.FirstOrDefaultAsync(g => g.Id == id);
 		}
 		public override async Task<List<Book>> ReadAllAsync()
@@ -187,7 +185,6 @@ namespace BusinessLayer.Repositories
                     bookToUpdate.Cover = obj.Cover;
 
                 await _context.SaveChangesAsync();
-                obj = bookToUpdate;
             }
             catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
             {
@@ -293,6 +290,30 @@ namespace BusinessLayer.Repositories
                 .Include(b => b.Publisher)
                 .Include(b => b.Genre)
                 .FirstOrDefaultAsync(b=>b.ISBN==isbn);
+        }
+
+        public override async Task<bool> DeleteAsync(Book obj)
+        {
+            try
+            {
+                var book = await _context.Books
+                    .FirstOrDefaultAsync(b => b.Id == obj.Id);
+
+                if (book == null)
+                    return false;
+
+                _context.Books.Remove(book);
+
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new Exception("Cannot delete book due to related data.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An unknown error occurred while deleting.", ex);
+            }
         }
     }
 }
