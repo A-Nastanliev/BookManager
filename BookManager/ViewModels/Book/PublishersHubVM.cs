@@ -3,6 +3,8 @@ using BookManager.Models.Book;
 using BookManager.Views.Book;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -26,6 +28,32 @@ namespace BookManager.ViewModels.Book
         public PublishersHubVM(BookClient bookClient)
         {
             _bookClient = bookClient;
+
+            WeakReferenceMessenger.Default.Register<ValueChangedMessage<PublisherVM>, string>(this, Messages.PublisherCreated, (receptient, message) => 
+            {
+                Publishers.Insert(0, message.Value);
+
+                if (string.IsNullOrWhiteSpace(EntrySearch) || message.Value.Name.Contains(EntrySearch, StringComparison.OrdinalIgnoreCase))
+                {
+                    CurrentPublishers.Insert(0, message.Value);
+                }
+            });
+
+            WeakReferenceMessenger.Default.Register<ValueChangedMessage<PublisherVM>, string>(this, Messages.PublisherUpdated, (receptient, message) =>
+            {
+                var publisher = Publishers.FirstOrDefault(p => p.Id == message.Value.Id);
+                publisher?.CopyFrom(message.Value);
+            });
+
+            WeakReferenceMessenger.Default.Register<ValueChangedMessage<PublisherVM>, string>(this, Messages.PublisherDeleted, (receptient, message) =>
+            {
+                var p = Publishers.FirstOrDefault(x => x.Id == message.Value.Id);
+                if (p != null) Publishers.Remove(p);
+
+                p = CurrentPublishers.FirstOrDefault(x => x.Id == message.Value.Id);
+                if (p != null) CurrentPublishers.Remove(p);
+           });
+
         }
 
         [RelayCommand]

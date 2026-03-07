@@ -177,14 +177,13 @@ namespace ServiceLayer.Controllers
 			return NoContent();
 		}
 
-
-		[HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteUser(int id)
 		{
-			if (UserRole != UserRole.Admin && UserId != id)
+			if(id == UserId)
 			{
-				Console.WriteLine($"User id {UserId} and url id {id}");
-				return Forbid();
+				return BadRequest("Administrators cannot delete themselves");
 			}
 
             var user = await _userRepository.ReadAsync(id);
@@ -199,7 +198,22 @@ namespace ServiceLayer.Controllers
 			return NoContent();
 		}
 
-		[Authorize(Roles = "Admin")]
+        [HttpDelete("me")]
+        public async Task<IActionResult> DeleteMyself()
+        {
+            var user = await _userRepository.ReadAsync(UserId);
+            if (user == null)
+                return NotFound();
+
+            _imageStorageService.DeleteImage(user.ProfilePicture);
+
+            var success = await _userRepository.DeleteAsync(new User { Id = UserId });
+            if (!success) return NotFound();
+
+            return NoContent();
+        }
+
+        [Authorize(Roles = "Admin")]
 		[HttpPost("{id}/comment-restriction")]
 		public async Task<IActionResult> CreateCommentRestriction(int id, [FromBody] RestrictionDto req)
 		{

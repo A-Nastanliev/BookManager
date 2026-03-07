@@ -223,6 +223,18 @@ namespace BookManager.ApiClients
             return new RequestResult(true, null);
         }
 
+        public async Task<RequestResult> DeleteMyselfAsync()
+        {
+            var response = await _httpClient.DeleteAsync($"/api/users/me");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            return new RequestResult(true, null);
+        }
+
         public async Task<(List<RestrictionVM>, RequestResult, DateTime? cursorDate, int? cursorKey)>
             GetCommentRestrictionsAsync( int count, RestrictionFilter filter, DateTime? cursorDate, int? cursorKey)
         {

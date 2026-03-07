@@ -83,7 +83,8 @@
 
                     <HorizontalStackLayout Spacing="40" HorizontalOptions="Center">
                         <Button Text="Logout" Background="{StaticResource Gray400}" Command="{Binding LogoutCommand}" />
-                        <Button Text="Delete" Background="Red" Command="{Binding DeleteAccountCommand}"/>
+                        <Button Text="Delete" Background="Red" Command="{Binding DeleteAccountCommand}"
+                            IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter='User'}"/>
                     </HorizontalStackLayout>
 
                 </VerticalStackLayout>

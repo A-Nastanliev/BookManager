@@ -10,7 +10,9 @@ using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Syncfusion.Maui.Toolkit.Hosting;
 using ZXing.Net.Maui.Controls;
-using BookManager.Views.Settings;  
+using BookManager.Views.Reading;
+using BookManager.Views.Settings;
+using BookManager.ViewModels.Reading;
 
 namespace BookManager
 {
@@ -45,7 +47,7 @@ namespace BookManager
                 builder.Services
                     .AddHttpClient<T>(client =>
                     {
-                        client.BaseAddress = new Uri("http://192.168.1.100:5137");
+                        client.BaseAddress = new Uri("http://192.168.100.2:5137");
                     })
                     .AddHttpMessageHandler<AuthMessageHandler>();
             }
@@ -67,6 +69,8 @@ namespace BookManager
             builder.Services.AddTransient<BookAttributeVM>();
             builder.Services.AddTransient<BookDetailVM>();
 
+            builder.Services.AddTransient<UserBooksVM>();
+
             builder.Services.AddSingleton<SettingsVM>();
             builder.Services.AddTransient<RestrictionsVM>();
 
@@ -80,6 +84,8 @@ namespace BookManager
             builder.Services.AddTransient<FormPage>();
             builder.Services.AddTransient<BookAttributePage>();
             builder.Services.AddTransient<BookDetailPage>();
+
+            builder.Services.AddTransient<UserBooksPage>();
 
             builder.Services.AddSingleton<SettingsPage>();
             builder.Services.AddTransient<RestrictionsPage>(); 

@@ -1,13 +1,15 @@
 ﻿using BookManager.ApiClients;
 using BookManager.Models.Book;
 using BookManager.Views.Book;
+using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
-using CommunityToolkit.Maui.Alerts;
 
 namespace BookManager.ViewModels.Book
 {
@@ -53,6 +55,7 @@ namespace BookManager.ViewModels.Book
                 attributeId = author.Id;
                 Author.CopyFrom(author);
                 Title = $"{Author.Name}";
+                query.Remove($"{nameof(Author)}");
             }
             else if (query.TryGetValue($"{nameof(Publisher)}", out var obj2) && obj2 is PublisherVM publisher)
             {
@@ -60,6 +63,7 @@ namespace BookManager.ViewModels.Book
                 Publisher.CopyFrom(publisher);
                 attributeId = publisher.Id;
                 Title = $"{Publisher.Name}";
+                query.Remove($"{nameof(Publisher)}");
             }
             else if (query.TryGetValue($"{nameof(Genre)}", out var obj3) && obj3 is GenreVM genre)
             {
@@ -67,11 +71,13 @@ namespace BookManager.ViewModels.Book
                 Genre.CopyFrom(genre);
                 attributeId = genre.Id;
                 Title = $"{Genre.Name}";
+                query.Remove($"{nameof(Genre)}");
             }
 
             if (query.TryGetValue("Updated", out var updatedObj) && updatedObj is bool wasUpdated && wasUpdated)
             {
                 await Refresh();
+                query.Remove("Updated");
                 return;
             }
         }
@@ -110,35 +116,54 @@ namespace BookManager.ViewModels.Book
         [RelayCommand]
         public async Task Edit()
         {
-            if (EntityType == nameof(AuthorVM))
-                await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.Author)] = Author });
-            else if (EntityType == nameof(PublisherVM))
-                await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.Publisher)] = Publisher });
-            else if (EntityType == nameof(GenreVM))
-                await Shell.Current.GoToAsync(nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.Genre)] = Genre });
+            switch (EntityType)
+            {
+                case nameof(AuthorVM):
+                    await Shell.Current.GoToAsync( nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.Author)] = Author });
+                    break;
+                case nameof(PublisherVM):
+                    await Shell.Current.GoToAsync( nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.Publisher)] = Publisher });
+                    break;
+                case nameof(GenreVM):
+                    await Shell.Current.GoToAsync( nameof(FormPage), new Dictionary<string, object> { [nameof(FormVM.Genre)] = Genre });
+                    break;
+            }
         }
 
         [RelayCommand]
         public async Task Delete()
         {
+            string title = EntityType switch
+            {
+                nameof(AuthorVM) => $"Delete {Author.Name}",
+                nameof(PublisherVM) => $"Delete {Publisher.Name}",
+                nameof(GenreVM) => $"Delete {Genre.Name}",
+                _ => "Delete"
+            };
+
+            bool confirm = await Shell.Current.DisplayAlertAsync(title, "This action cannot be undone", "Yes", "No");
+
+            if (!confirm)
+                return;
+
             try
             {
                 RequestResult result = new RequestResult(false, "error");
                 string name = EntityType;
-                if (EntityType == nameof(AuthorVM))
+                switch (EntityType)
                 {
-                    name = Author.Name;
-                    result = await _bookClient.DeleteAuthorAsync(Author.Id);
-                }
-                else if (EntityType == nameof(PublisherVM))
-                {
-                    name = Publisher.Name;
-                    result = await _bookClient.DeletePublisherAsync(Publisher.Id);
-                }
-                else if (EntityType == nameof(GenreVM))
-                {
-                    name = Genre.Name;
-                    result = await _bookClient.DeleteGenreAsync(Genre.Id);
+                    case nameof(AuthorVM):
+                        name = Author.Name;
+                        result = await _bookClient.DeleteAuthorAsync(Author.Id);
+                        break;
+                    case nameof(PublisherVM):
+                        name = Publisher.Name;
+                        result = await _bookClient.DeletePublisherAsync(Publisher.Id);
+                        break;
+                    case nameof(GenreVM):
+                        name = Genre.Name;
+                        result = await _bookClient.DeleteGenreAsync(Genre.Id);
+                        break;
                 }
 
                 if (!result.Success)
@@ -148,6 +173,22 @@ namespace BookManager.ViewModels.Book
                 }
 
                 _ = Toast.Make($"{name} deleted").Show();
+
+                switch (EntityType)
+                {
+                    case nameof(AuthorVM):
+                        WeakReferenceMessenger.Default.Send(new ValueChangedMessage<AuthorVM>(Author), Messages.AuthorDeleted);
+                        break;
+
+                    case nameof(PublisherVM):
+                        WeakReferenceMessenger.Default.Send(new ValueChangedMessage<PublisherVM>(Publisher),Messages.PublisherDeleted);
+                        break;
+
+                    case nameof(GenreVM):
+                        WeakReferenceMessenger.Default.Send(new ValueChangedMessage<GenreVM>(Genre), Messages.GenreDeleted);
+                        break;
+                }
+
                 await Shell.Current.GoToAsync("..");
             }
             catch (Exception ex) 

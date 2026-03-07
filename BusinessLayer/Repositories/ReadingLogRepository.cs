@@ -1,4 +1,5 @@
 ﻿using DataLayer.Enums;
+using System.Net;
 
 namespace BusinessLayer.Repositories
 {
@@ -8,22 +9,43 @@ namespace BusinessLayer.Repositories
 
         public override async Task<bool> CreateAsync(ReadingLog obj)
         {
-            var userBook = await _context.UsersBook.FindAsync((obj.UserId, obj.BookId));
-            if (userBook == null) 
+            var hasOverlap = await _context.ReadingLogs.AnyAsync(rl =>
+                rl.UserId == obj.UserId &&
+                rl.BookId == obj.BookId &&
+                rl.StartingPage <= obj.EndingPage &&
+                rl.EndingPage >= obj.StartingPage);
+
+            if (hasOverlap)
+                return false;
+
+            var userBook = await _context.UsersBook.FindAsync(obj.UserId, obj.BookId);
+            if (userBook == null)
             {
                 userBook = new UserBook
                 {
                     UserId = obj.UserId,
                     BookId = obj.BookId,
-                    Status = UserBookStatus.Reading,
                     CreatedAt = DateTime.UtcNow
                 };
-               
+                await _context.UsersBook.AddAsync(userBook);
             }
             obj.UserBook = userBook;
             obj.Date = DateTime.UtcNow;
 
-            return await _context.SaveChangesAsync()>0;
+            await _context.ReadingLogs.AddAsync(obj);
+
+            var book = await _context.Books.FindAsync(obj.BookId);
+
+            var totalPages = await _context.ReadingLogs
+               .Where(r => r.UserId == obj.UserId && r.BookId == obj.BookId)
+               .SumAsync(r => r.EndingPage - r.StartingPage + 1);
+
+            if ((totalPages + obj.PagesRead) == book.TotalPages)
+                userBook.Status = UserBookStatus.Finished;
+            else
+                userBook.Status = UserBookStatus.Reading;
+
+            return await _context.SaveChangesAsync() > 0;
         }
 
         public override async Task<ReadingLog> ReadAsync(int id)
@@ -32,16 +54,6 @@ namespace BusinessLayer.Repositories
                 .Include(rl=> rl.UserBook)
                 .FirstOrDefaultAsync(g => g.Id == id);
         }
-		public override async Task UpdateAsync(ReadingLog obj)
-		{
-			var log = await _context.ReadingLogs.Include(l => l.UserBook).FirstOrDefaultAsync(l => l.Id == obj.Id);
-			if (log == null || log.UserBook.UserId != obj.UserId || log.UserBook.BookId != obj.BookId)
-				return;
-
-			log.StartingPage = obj.StartingPage;
-			log.EndingPage = obj.EndingPage;
-		    await _context.SaveChangesAsync();
-		}
 
         public async Task<(List<ReadingLog> Items, DateTime? NextCursorDate, int? NextCursorId)> ReadNextByUserBookAsync
             (int count, DateTime? cursorDate, int? cursorId, (int userId, int bookId) key)
@@ -76,7 +88,21 @@ namespace BusinessLayer.Repositories
 				return false;
 
 			_context.Remove(log);
-			return await _context.SaveChangesAsync() > 0;
+
+            var userBook = await _context.UsersBook
+                .Include(ub => ub.Book)
+                .FirstOrDefaultAsync(ub => ub.UserId == obj.UserId && ub.BookId == obj.BookId);
+
+            var totalPages = await _context.ReadingLogs
+               .Where(r => r.UserId == obj.UserId && r.BookId == obj.BookId)
+               .SumAsync(r => r.EndingPage - r.StartingPage + 1);
+
+            if ((totalPages - log.PagesRead) == 0)
+                userBook.Status = UserBookStatus.Wishlisted;
+            else
+                userBook.Status = UserBookStatus.Reading;
+
+            return await _context.SaveChangesAsync() > 0;
 		}
     }
 }

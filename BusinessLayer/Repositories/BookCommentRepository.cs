@@ -20,14 +20,15 @@ namespace BusinessLayer.Repositories
 
 		public override async Task<bool> CreateAsync(BookComment obj)
 		{
-			obj.Date = DateTime.UtcNow;
-			obj.UserPageProgress = await _context.ReadingLogs
-				.Where(rl => rl.UserId == obj.UserId && rl.BookId == obj.BookId)
-				.Select(rl => rl.EndingPage)
-				.DefaultIfEmpty(0)
-				.MaxAsync();
+            obj.Date = DateTime.UtcNow;
 
-			if (obj.UserPageProgress! > 1)
+            obj.UserPageProgress = await _context.ReadingLogs
+                .Where(rl => rl.UserId == obj.UserId && rl.BookId == obj.BookId)
+                .Select(rl => rl.EndingPage - rl.StartingPage + 1)
+                .DefaultIfEmpty(0)
+                .SumAsync();
+
+            if (obj.UserPageProgress < 1)
 				return false;
 
 			await _context.BookComments.AddAsync(obj);
@@ -47,7 +48,7 @@ namespace BusinessLayer.Repositories
 		public override async Task<bool> DeleteAsync(BookComment entity)
 		{
 			var comment = await _context.BookComments.FindAsync(entity.Id);
-			if (comment == null || (entity.UserId != 0 && comment.UserId != entity.UserId))
+			if (comment == null || comment.UserId != entity.UserId)
 				return false;
 
 			_context.BookComments.Remove(comment);

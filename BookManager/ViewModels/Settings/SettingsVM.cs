@@ -109,14 +109,14 @@ namespace BookManager.ViewModels.Settings
 
             try
             {
-                var result = await _userClient.DeleteUserAsync(User.PublicUser.Id);
+                var result = await _userClient.DeleteMyselfAsync();
                 if (!result.Success)
                 {
                     await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
                     return;
                 }
 
-                _= Toast.Make($"{User.PublicUser.Username} was deleted", ToastDuration.Short).Show();
+                _= Toast.Make($"{User.PublicUser.Username} deleted", ToastDuration.Short).Show();
                 await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
                 await _userClient.Logout();
             }

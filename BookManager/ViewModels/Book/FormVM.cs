@@ -4,6 +4,8 @@ using BookManager.Views.Book;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -42,12 +44,18 @@ namespace BookManager.ViewModels.Book
         [RelayCommand]
         private async Task Submit()
         {
-            if (EntityType == nameof(AuthorVM))
-                await HandleAuthorAsync();
-            else if (EntityType == nameof(PublisherVM))
-                await HandlePublisherAsync();
-            else if (EntityType == nameof(GenreVM))
-                await HandleGenreAsync();
+            switch (EntityType)
+            {
+                case nameof(AuthorVM):
+                    await HandleAuthorAsync();
+                    break;
+                case nameof(PublisherVM):
+                    await HandlePublisherAsync();
+                    break;
+                case nameof(GenreVM):
+                    await HandleGenreAsync();
+                    break;
+            }
         }
 
         private async Task HandleAuthorAsync()
@@ -71,6 +79,7 @@ namespace BookManager.ViewModels.Book
                     }
 
                     _ = Toast.Make($"{Author.Name} updated").Show();
+                    WeakReferenceMessenger.Default.Send(new ValueChangedMessage<AuthorVM>(Author), Messages.AuthorUpdated);
                 }
                 else
                 {
@@ -83,6 +92,7 @@ namespace BookManager.ViewModels.Book
                     }
 
                     _ = Toast.Make($"{Author.Name} created").Show();
+                    WeakReferenceMessenger.Default.Send(new ValueChangedMessage<AuthorVM>(Author), Messages.AuthorCreated);
                 }
 
                 await Shell.Current.GoToAsync("..", new Dictionary<string, object> 
@@ -118,6 +128,7 @@ namespace BookManager.ViewModels.Book
                     }
 
                     _ = Toast.Make($"{Publisher.Name} updated").Show();
+                    WeakReferenceMessenger.Default.Send(new ValueChangedMessage<PublisherVM>(Publisher), Messages.PublisherUpdated);
                 }
                 else
                 {
@@ -130,6 +141,7 @@ namespace BookManager.ViewModels.Book
                     }
 
                     _ = Toast.Make($"{Publisher.Name} created").Show();
+                    WeakReferenceMessenger.Default.Send(new ValueChangedMessage<PublisherVM>(Publisher), Messages.PublisherCreated);
                 }
 
                 await Shell.Current.GoToAsync("..", new Dictionary<string, object>
@@ -165,6 +177,7 @@ namespace BookManager.ViewModels.Book
                     }
 
                     _ = Toast.Make($"{Genre.Name} updated").Show();
+                    WeakReferenceMessenger.Default.Send(new ValueChangedMessage<GenreVM>(Genre), Messages.GenreUpdated);
                 }
                 else
                 {
@@ -177,6 +190,7 @@ namespace BookManager.ViewModels.Book
                     }
 
                     _ = Toast.Make($"{Genre.Name} created").Show();
+                    WeakReferenceMessenger.Default.Send(new ValueChangedMessage<GenreVM>(Genre), Messages.GenreCreated);
                 }
 
                 await Shell.Current.GoToAsync("..", new Dictionary<string, object> 

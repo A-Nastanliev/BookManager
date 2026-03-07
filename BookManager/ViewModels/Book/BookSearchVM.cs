@@ -99,6 +99,9 @@ namespace BookManager.ViewModels.Book
             if (query.TryGetValue("Updated", out var updatedObj) && updatedObj is bool wasUpdated &&
                 query.TryGetValue($"{nameof(BookVM)}", out var updatedBook) && updatedBook is BookVM book)
             {
+                query.Remove("Updated");
+                query.Remove(nameof(BookVM));
+
                 if (wasUpdated)
                 {
                     var bookToUpdate = CurrentBooks.FirstOrDefault(b => b.Id == book.Id);
@@ -120,6 +123,21 @@ namespace BookManager.ViewModels.Book
                     }
                     Books.Insert(0, book);
                 }
+            }
+
+            if (query.TryGetValue("deletedBookId", out var idObj) && int.TryParse(idObj?.ToString(), out var id))
+            {
+                var deletedBook = CurrentBooks.FirstOrDefault(b => b.Id == id);
+                if (deletedBook != null)
+                    CurrentBooks.Remove(deletedBook);
+
+                deletedBook = Books.FirstOrDefault(b => b.Id == id);
+                if (deletedBook != null)
+                    Books.Remove(deletedBook);
+
+                query.Remove("deletedBookId");
+
+                return;
             }
         }
 

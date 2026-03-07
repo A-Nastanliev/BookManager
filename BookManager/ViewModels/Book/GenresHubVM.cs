@@ -3,6 +3,8 @@ using BookManager.Models.Book;
 using BookManager.Views.Book;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -26,6 +28,31 @@ namespace BookManager.ViewModels.Book
         public GenresHubVM(BookClient bookClient) 
         {
             _bookClient = bookClient;
+
+            WeakReferenceMessenger.Default.Register<ValueChangedMessage<GenreVM>, string>(this, Messages.GenreCreated, (recipient, message) =>
+            {
+                Genres.Insert(0, message.Value);
+
+                if (string.IsNullOrWhiteSpace(EntrySearch) || message.Value.Name.Contains(EntrySearch, StringComparison.OrdinalIgnoreCase))
+                {
+                    CurrentGenres.Insert(0, message.Value);
+                }
+            });
+
+            WeakReferenceMessenger.Default.Register<ValueChangedMessage<GenreVM>, string>(this, Messages.GenreUpdated, (recipient, message) =>
+            {
+                var genre = Genres.FirstOrDefault(g => g.Id == message.Value.Id);
+                genre?.CopyFrom(message.Value);
+            });
+
+            WeakReferenceMessenger.Default.Register<ValueChangedMessage<GenreVM>, string>(this, Messages.GenreDeleted, (recipient, message) =>
+            {
+                var g = Genres.FirstOrDefault(x => x.Id == message.Value.Id);
+                if (g != null) Genres.Remove(g);
+
+                g = CurrentGenres.FirstOrDefault(x => x.Id == message.Value.Id);
+                if (g != null) CurrentGenres.Remove(g);
+            });
         }
 
         [RelayCommand]

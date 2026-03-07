@@ -18,8 +18,8 @@ namespace BookManager.Converters
             if (string.IsNullOrWhiteSpace(value?.ToString()))
                 return null;
 
-            if (int.TryParse(value.ToString(), out int result))
-                return result;
+            if (double.TryParse(value.ToString(), out double result))
+                return (int)result;
 
             return null;
         }

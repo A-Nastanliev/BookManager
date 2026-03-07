@@ -4,29 +4,65 @@
              x:Class="BookManager.Views.Book.BookDetailPage"
              xmlns:vm="clr-namespace:BookManager.ViewModels.Book"
              xmlns:views="clr-namespace:BookManager.Views.Book"
+             xmlns:reading="clr-namespace:BookManager.Views.Reading"
+             xmlns:local="clr-namespace:BookManager"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:tabView="clr-namespace:Syncfusion.Maui.Toolkit.TabView;assembly=Syncfusion.Maui.Toolkit"
              x:DataType="vm:BookDetailVM"
              Title="{Binding Book.Title}">
-    
+
     <ScrollView VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
-    <Grid RowDefinitions="Auto,*">
-        <Grid Row="0" >
-            <Image HeightRequest="450" Source="{Binding Book.CoverSource}" Aspect="AspectFill"/>
-            <VerticalStackLayout  Padding="16" VerticalOptions="End" Background="{StaticResource PrimaryOverlay}">
-                <Label  Text="{Binding Book.Title}"  FontSize="Title" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
-                <Label Text="{Binding Book.Author.Name}" FontSize="Medium"/>
-                <HorizontalStackLayout HorizontalOptions="End" Spacing="8" Margin="8,0"
-                    IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter='Admin'}">
-                    <Button Text="Edit" Command="{Binding EditCommand}"/>
-                    <Button Text="Delete" Background="Red" Command="{Binding DeleteCommand}" />
-                </HorizontalStackLayout>
-            </VerticalStackLayout>
-        </Grid>
-        <tabView:SfTabView  Grid.Row="1">
-            <tabView:SfTabView.Items>
-                <tabView:SfTabItem Header="Details">
-                    <tabView:SfTabItem.Content>
-                            <ScrollView>
+        <Grid RowDefinitions="Auto,*">
+            <Grid.Resources>
+                <Style TargetType="tabView:SfTabItem">
+                    <Setter Property="VisualStateManager.VisualStateGroups">
+                        <VisualStateGroupList>
+                            <VisualStateGroup>
+                                <VisualState x:Name="Normal" >
+                                    <VisualState.Setters>
+                                        <Setter Property="TextColor" Value="{StaticResource Gray400}" />
+                                        <Setter Property="FontSize" Value="Small" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Selected">
+                                    <VisualState.Setters>
+                                        <Setter Property="TextColor" Value="White" />
+                                        <Setter Property="FontSize" Value="Medium" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateGroupList>
+                    </Setter>
+                </Style>
+            </Grid.Resources>
+            <Grid Row="0" >
+                <Image HeightRequest="450" Source="{Binding Book.CoverSource}" Aspect="AspectFill"/>
+                <VerticalStackLayout  Padding="16" VerticalOptions="End" Background="{StaticResource PrimaryOverlay}">
+                    <Label  Text="{Binding Book.Title}"  FontSize="Title" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
+                    <Label Text="{Binding Book.Author.Name}" FontSize="Medium"/>
+                    <HorizontalStackLayout HorizontalOptions="End" Spacing="8" Margin="8,0"
+                        IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter='Admin'}">
+                        <Grid HeightRequest="40" WidthRequest="40" >
+                            <Button CornerRadius="8" Command="{Binding EditCommand}" Background="{StaticResource Gray300}"/>
+                            <Image Source="edit_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                  HeightRequest="24" WidthRequest="24">
+                            </Image>
+                        </Grid>
+                        <Grid HeightRequest="40" WidthRequest="40" >
+                            <Button CornerRadius="8" Command="{Binding DeleteCommand}" Background="Red"/>
+                            <Image Source="delete_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                    HeightRequest="24" WidthRequest="24">
+                            </Image>
+                        </Grid>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Grid>
+            <tabView:SfTabView  Grid.Row="1" EnableSwiping="False" EnableVirtualization="True" 
+                IndicatorBackground="{StaticResource Primary}" SelectedIndex="{Binding SelectedTabIndex}">
+                <tabView:SfTabView.Items >
+                    <tabView:SfTabItem Header="Details"   >
+                        <tabView:SfTabItem.Content>
+                            <ScrollView HorizontalScrollBarVisibility="Never">
                                 <VerticalStackLayout Padding="20" Spacing="14">
                                     <Label Text="Author" FontAttributes="Bold"/>
                                     <Label Text="{Binding Book.Author.Name}" TextColor="{StaticResource Primary}">
@@ -47,29 +83,130 @@
                                         </Label.GestureRecognizers>
                                     </Label>
                                     <Label Text="Description"  FontAttributes="Bold"/>
-                                    <Label Text="{Binding Genre.Description, TargetNullValue='No description'}"
+                                    <Label Text="{Binding Book.Description, TargetNullValue='No description'}"
                                            LineBreakMode="WordWrap"/>
                                 </VerticalStackLayout>
                             </ScrollView>
                         </tabView:SfTabItem.Content>
-                </tabView:SfTabItem>
-                <tabView:SfTabItem Header="Comments">
-                    <tabView:SfTabItem.Content>
-                        <Grid >
-                            <Label Text="No comments" HorizontalOptions="Center" VerticalOptions="Center"/>
-                        </Grid>
-                    </tabView:SfTabItem.Content>
-                </tabView:SfTabItem>
-                <tabView:SfTabItem Header="Logs">
-                    <tabView:SfTabItem.Content>
-                        <Grid>
-                            <Label Text="No logs" HorizontalOptions="Center" VerticalOptions="Center"/>
-                        </Grid>
-                    </tabView:SfTabItem.Content>
-                </tabView:SfTabItem>
-            </tabView:SfTabView.Items>
-        </tabView:SfTabView>
+                    </tabView:SfTabItem>
+                    <tabView:SfTabItem Header="Comments">
+                        <tabView:SfTabItem.Content>
+                            <Grid >
+                                <Label Text="No comments" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Grid>
+                        </tabView:SfTabItem.Content>
+                    </tabView:SfTabItem>
+                    <tabView:SfTabItem Header="Logs">
+                        <tabView:SfTabItem.Content>
+                            <Grid RowDefinitions="Auto, Auto, Auto" RowSpacing="12">
+                                <Grid Grid.Row="0" ColumnDefinitions="*, auto" ColumnSpacing="16" Padding="16" RowDefinitions="Auto, Auto">
+                                    <Grid Grid.Column="1" Grid.RowSpan="2"> 
+                                        <Grid HeightRequest="40" WidthRequest="40" >
+                                            <Grid.IsVisible>
+                                                <MultiBinding Converter="{StaticResource NotEqualsMultiConverter}">
+                                                    <Binding Path="Status" />
+                                                    <Binding Mode="OneTime" Source="{x:Static local:UserBookStatus.Reading}" />
+                                                    <Binding Mode="OneTime" Source="{x:Static local:UserBookStatus.Finished}" />
+                                                </MultiBinding>
+                                            </Grid.IsVisible>
+                                            <Button CornerRadius="20" Command="{Binding ManageUserBookCommand}"/>
+                                            <Image Source="bookmarked_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                                       HeightRequest="24" WidthRequest="24">
+                                                <Image.IsVisible>
+                                                    <Binding Path="Status" Converter="{StaticResource EqualsConverter}" 
+                                                            ConverterParameter="{x:Static local:UserBookStatus.Wishlisted}" />
+                                                </Image.IsVisible>
+                                            </Image>
+                                            <Image Source="bookmark_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                                       HeightRequest="24" WidthRequest="24">
+                                                <Image.IsVisible>
+                                                    <Binding Path="Status" Converter="{StaticResource EqualsConverter}" 
+                                                            ConverterParameter="{x:Static local:UserBookStatus.None}" />
+                                                </Image.IsVisible>
+                                            </Image>
+                                        </Grid>
+                                        <Grid HeightRequest="40" WidthRequest="40" >
+                                            <Grid.IsVisible>
+                                                <MultiBinding Converter="{StaticResource EqualsMultiConverter}">
+                                                    <Binding Path="Status" />
+                                                    <Binding Mode="OneTime" Source="{x:Static local:UserBookStatus.Reading}" />
+                                                    <Binding Mode="OneTime" Source="{x:Static local:UserBookStatus.Finished}" />
+                                                </MultiBinding>
+                                            </Grid.IsVisible>
+                                            <Button CornerRadius="20" Command="{Binding ClearUserBookCommand}"/>
+                                            <Image Source="delete_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                                   HeightRequest="24" WidthRequest="24">
+                                            </Image>
+                                        </Grid>
+                                    </Grid>
+                                    <ProgressBar Grid.Row="1" Grid.Column="0" Progress="{Binding PageProgress, Converter={StaticResource IntToStringConverter}}"
+                                                 ProgressColor="{StaticResource Primary}"/>
+                                    <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="8">
+                                        <Label Text="{Binding ReadPages}" FontSize="Medium"/>
+                                        <Label Text="out of" FontSize="Medium"/>
+                                        <Label Text="{Binding Book.TotalPages}" FontSize="Medium"/>
+                                        <Label Text="pages " FontSize="Medium"/>
+                                    </HorizontalStackLayout>
+                                </Grid>
+                                <Border Style="{StaticResource SectionCard}" Padding="12,12" Margin="8" Grid.Row="1">
+                                    <VerticalStackLayout Spacing="12">
+                                        <Grid ColumnDefinitions="*,auto">
+                                            <Label Text="Add Reading Log" FontSize="Medium" HorizontalOptions="Center" VerticalOptions="Center" Grid.ColumnSpan="2"/>
+                                            <Grid HeightRequest="40" WidthRequest="40" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="End">
+                                                <Button CornerRadius="20" Command="{Binding CreateLogCommand}"/>
+                                                <Image Source="plus_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                                    HeightRequest="24" WidthRequest="24">
+                                                    <Image.Behaviors>
+                                                        <toolkit:IconTintColorBehavior TintColor="White" />
+                                                    </Image.Behaviors>
+                                                </Image>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto, Auto" RowSpacing="0" ColumnSpacing="8">
+                                            <Label Text="Start Page" Grid.Row="0" Grid.Column="0"/>
+                                            <Label Text="End Page" Grid.Row="0" Grid.Column="1"/>
+                                            <Entry Text="{Binding NewLog.StartingPage, Mode=TwoWay,Converter={StaticResource IntToStringConverter}}" 
+                                                Keyboard="Numeric" Grid.Row="1" Grid.Column="0" FontSize="Small"/>
+                                            <Entry Text="{Binding NewLog.EndingPage, Mode=TwoWay,Converter={StaticResource IntToStringConverter}}" 
+                                                Keyboard="Numeric" Grid.Row="1" Grid.Column="1" FontSize="Small"/>
+                                        </Grid>
+                                      
+                                    </VerticalStackLayout>
+                                </Border>
+                                <CollectionView VerticalOptions="Fill" Grid.Row="2"
+                                           ItemsSource="{Binding Logs}"
+                                           RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+                                           RemainingItemsThresholdReachedCommand="{Binding LoadLogsCommand}">
+                                    <CollectionView.IsVisible>
+                                        <Binding Path="SelectedTabIndex" Converter="{StaticResource EqualsConverter}">
+                                            <Binding.ConverterParameter>
+                                                <x:Int32>2</x:Int32>
+                                            </Binding.ConverterParameter>
+                                        </Binding>
+                                    </CollectionView.IsVisible>
+                                    <CollectionView.EmptyView>
+                                        <Label  Text="No logs found"
+                                                HorizontalOptions="Center"
+                                                VerticalOptions="Center"/>
+                                    </CollectionView.EmptyView>
 
-    </Grid>
+                                    <CollectionView.ItemsLayout>
+                                        <GridItemsLayout Orientation="Vertical" Span="1" />
+                                    </CollectionView.ItemsLayout>
+
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <reading:ReadingLogView Margin="12,8" x:DataType="reading:ReadingLogView"                                            
+                                                DeleteCommand="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentPage}}, 
+                                                Path=BindingContext.DeleteReadingLogCommand}"/>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </Grid>
+                        </tabView:SfTabItem.Content>
+                    </tabView:SfTabItem>
+                </tabView:SfTabView.Items>
+            </tabView:SfTabView>
+        </Grid>
     </ScrollView>
 </ContentPage>

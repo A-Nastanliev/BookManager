@@ -8,6 +8,10 @@
 
 		public int StartingPage { get; set; }
 		public int EndingPage { get; set; }
+
+		[NotMapped]
+		public int PagesRead => 1 + EndingPage - StartingPage ;
+
 		public DateTime Date { get; set; }
 
 		public int UserId { get; set; }

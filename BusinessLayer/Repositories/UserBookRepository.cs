@@ -28,14 +28,27 @@ namespace BusinessLayer.Repositories
 
 		public override async Task<bool> CreateAsync(UserBook obj)
 		{
-			obj.Status = UserBookStatus.Whishlisted;
+			obj.Status = UserBookStatus.Wishlisted;
 			obj.CreatedAt = DateTime.UtcNow;
 			await _context.UsersBook.AddAsync(obj);
 			return await _context.SaveChangesAsync() > 0;
 		}
 
-        public async Task<(List<UserBook> Items, DateTime? NextCursorDate, (int userId, int bookId)? NextCursorKey)> ReadNextByStatusAsync
-            (int count, DateTime? cursorDate, (int userId, int bookId)? cursorKey, UserBookStatus status, int userId)
+        public async Task<(UserBookStatus Status, int PagesRead)> GetStatusAndProgressAsync(int userId, int bookId)
+        {
+            var userBook = await _context.UsersBook
+                .Include(ub => ub.ReadingLogs)
+                .FirstOrDefaultAsync(ub => ub.UserId == userId && ub.BookId == bookId);
+
+            if (userBook == null)
+                return (UserBookStatus.None, 0);
+
+            int totalPagesRead = userBook.ReadingLogs.Sum(rl => rl.EndingPage - rl.StartingPage + 1);
+            return (userBook.Status, totalPagesRead);
+        }
+
+        public async Task<(List<UserBook> Items, DateTime? NextCursorDate, int? NextCursorKey)> ReadNextByStatusAsync
+            (int count, DateTime? cursorDate, int? cursorKey, UserBookStatus status, int userId)
         {
             var query = _context.UsersBook
                 .Where(ub => ub.UserId == userId && ub.Status == status);
@@ -44,7 +57,7 @@ namespace BusinessLayer.Repositories
             {
                 query = query.Where(ub =>
                     ub.CreatedAt < cursorDate.Value ||
-                    (ub.CreatedAt == cursorDate.Value && ub.BookId < cursorKey.Value.bookId));
+                    (ub.CreatedAt == cursorDate.Value && ub.BookId < cursorKey.Value));
             }
 
             var items = await query
@@ -60,7 +73,7 @@ namespace BusinessLayer.Repositories
                 .ToListAsync();
 
             var last = items.LastOrDefault();
-            (int userId, int bookId)? nextCursorKey = last == null ? null : (last.UserId, last.BookId);
+            int? nextCursorKey = last?.BookId;
 
             return (items, last?.CreatedAt, nextCursorKey);
         }

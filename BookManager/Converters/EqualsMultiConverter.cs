@@ -11,11 +11,18 @@ namespace BookManager.Converters
 
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values.Length < 2)
+            if (values == null || values.Length < 2)
                 return false;
 
-            bool result = object.Equals(values[0], values[1]);
-            return Invert ? !result : result;
+            var target = values[0];
+
+            for (int i = 1; i < values.Length; i++)
+            {
+                if (object.Equals(target, values[i]))
+                    return Invert ? false : true;
+            }
+
+            return Invert ? true : false;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

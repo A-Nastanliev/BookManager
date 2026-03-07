@@ -31,46 +31,45 @@ namespace ServiceLayer.Controllers
 			_configuration = configuration;
 		}
 
-		[Authorize(Roles = "Admin")]
 		[HttpPost("user-books")]
-		public async Task<IActionResult> CreateUserBook([FromBody] int bookId)
+		public async Task<IActionResult> WhishlistBook([FromBody] int bookId)
 		{
 			bool success = await _userBookRepository.CreateAsync(new UserBook { BookId = bookId, UserId = UserId });
 
 			if (!success)
 				return BadRequest("Failed to create user book");
 
-			return Ok(new { success = true });
+			return Ok();
 		}
 
-		[HttpGet("user-books")]
-		public async Task<IActionResult> GetNextUserBooks([FromQuery] CursorDto cursor, [FromQuery] UserBookStatus userBookStatus)
-		{
-            if (!cursor.CursorKey.HasValue)
-                return NotFound("Cursor key is missing.");
-
-            int bookId = cursor.CursorKey.Value;
-
-            var (books, nextCursorDate, nextCursorKey) = await _userBookRepository.ReadNextByStatusAsync
-				(cursor.Count, cursor.CursorDate, (UserId, bookId), userBookStatus, UserId);
-
-            var baseUrl = _configuration["App:BaseUrl"];
+        [HttpGet("user-books/{bookId}/status")]
+        public async Task<IActionResult> GetUserBookStatus(int bookId)
+        {
+            var (status, pagesRead) = await _userBookRepository.GetStatusAndProgressAsync(UserId, bookId);
 
             return Ok(new
             {
-                UserBooks = books.Select(b => b.ToDto(baseUrl)),
+                Status = status,
+                PagesRead = pagesRead
+            });
+        }
+
+        [HttpGet("user-books")]
+		public async Task<IActionResult> GetNextUserBooks([FromQuery] CursorDto cursor, [FromQuery] UserBookStatus userBookStatus)
+		{
+            var (userBooks, nextCursorDate, nextCursorKey) = await _userBookRepository.ReadNextByStatusAsync
+				(cursor.Count, cursor.CursorDate, cursor.CursorKey, userBookStatus, UserId);
+
+            var baseUrl = _configuration["App:BaseUrl"];
+			var books = userBooks.Select(ub=>ub.Book).ToList();
+            return Ok(new
+            {
+                Books = books.Select(b => b.ToDto(baseUrl)),
                 CursorDate = nextCursorDate,
                 CursorKey = nextCursorKey
             });
         }
 
-		[HttpPut("user-books/{bookId}")]
-		public async Task<IActionResult> UpdateUserBook(int bookId, [FromBody] UserBookStatus status)
-		{
-		   await _userBookRepository.UpdateAsync(new UserBook { UserId = UserId, Status = status, BookId = bookId });
-
-			return NoContent();
-		}
 
 		[HttpDelete("user-books/{bookId}")]
 		public async Task<IActionResult> DeleteUserBook(int bookId)
@@ -116,22 +115,6 @@ namespace ServiceLayer.Controllers
                 CursorId = nextCursorId
             });
         }
-
-		[HttpPut("user-books/{bookId}/logs/{logId}")]
-		public async Task<IActionResult> UpdateReadingLog(int bookId, int logId, [FromBody] ReadingLogDto dto)
-		{
-			var log = new ReadingLog
-			{
-				Id = logId,
-				UserId = UserId,
-				BookId = bookId,
-				StartingPage = dto.StartingPage,
-				EndingPage = dto.EndingPage,
-			};
-			await _readingLogRepository.UpdateAsync(log);
-
-			return NoContent();
-		}
 
 		[HttpDelete("user-books/{bookId}/logs/{logId}")]
 		public async Task<IActionResult> DeleteReadingLog(int bookId, int logId)

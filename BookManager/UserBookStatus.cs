@@ -1,4 +1,4 @@
-﻿namespace DataLayer.Enums
+﻿namespace BookManager
 {
     public enum UserBookStatus : byte
     {
