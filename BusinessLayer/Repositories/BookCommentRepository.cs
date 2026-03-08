@@ -20,16 +20,21 @@ namespace BusinessLayer.Repositories
 
 		public override async Task<bool> CreateAsync(BookComment obj)
 		{
+			if(string.IsNullOrWhiteSpace(obj.Comment) || obj.Comment?.Length <4 || obj.Comment?.Length > 500)
+			{
+				throw new InvalidOperationException("Comments have to be atleast 4 characters long and maximum 500");
+			}
+
+			obj.Comment = obj.Comment.Trim();
             obj.Date = DateTime.UtcNow;
 
             obj.UserPageProgress = await _context.ReadingLogs
                 .Where(rl => rl.UserId == obj.UserId && rl.BookId == obj.BookId)
                 .Select(rl => rl.EndingPage - rl.StartingPage + 1)
-                .DefaultIfEmpty(0)
                 .SumAsync();
 
-            if (obj.UserPageProgress < 1)
-				return false;
+			if (obj.UserPageProgress <= 0)
+				throw new InvalidOperationException("Commenting on books you are not reading isn't allowed");
 
 			await _context.BookComments.AddAsync(obj);
 			return await _context.SaveChangesAsync() > 0;
@@ -37,21 +42,34 @@ namespace BusinessLayer.Repositories
 
 		public override async Task<bool> UpdateAsync(BookComment obj)
 		{
-			var comment = await _context.BookComments.FindAsync(obj.Id);
+            if (string.IsNullOrWhiteSpace(obj.Comment) || obj.Comment?.Length < 4 || obj.Comment?.Length > 500)
+            {
+                throw new InvalidOperationException("Comments have to be atleast 4 characters long and maximum 500");
+            }
+
+            var comment = await _context.BookComments.FindAsync(obj.Id);
 			if (comment == null || comment.UserId != obj.UserId)
 				return false;
 
-			comment.Comment = obj.Comment;
+			comment.Comment = obj.Comment.Trim();
 			return await _context.SaveChangesAsync() > 0;
 		}
 
 		public override async Task<bool> DeleteAsync(BookComment entity)
 		{
 			var comment = await _context.BookComments.FindAsync(entity.Id);
-			if (comment == null || comment.UserId != entity.UserId)
+			if (comment == null)
 				return false;
 
-			_context.BookComments.Remove(comment);
+			var commenter = await _context.Users.FindAsync(comment.UserId);
+			var deleter = await _context.Users.FindAsync(entity.UserId);
+			if (commenter.Role == DataLayer.Enums.UserRole.Admin && commenter.Id != deleter.Id)
+                throw new InvalidOperationException("You cannot delete comments made by other admins.");
+
+			if (commenter.Role == DataLayer.Enums.UserRole.User && commenter.Id != deleter.Id && deleter.Role == DataLayer.Enums.UserRole.User )
+				throw new UnauthorizedAccessException("Normal users cannot delete other's comments");
+
+            _context.BookComments.Remove(comment);
 			return await _context.SaveChangesAsync() > 0;
 		}
 

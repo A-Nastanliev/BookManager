@@ -47,29 +47,29 @@
                 <Label
                 Text="{Binding PublicUser.Username}"
                 FontAttributes="Bold"
-                FontSize="16"
+                FontSize="Medium"
                 VerticalOptions="Center" />
             </HorizontalStackLayout>
 
             <Label
             Text="{Binding Reason}"
-            FontSize="14"
+            FontSize="Medium"
             LineBreakMode="WordWrap" />
             <HorizontalStackLayout Spacing="8">
                 <VerticalStackLayout Spacing="8">
                     <Label
-                    FontSize="12" Text="Start:"
+                    FontSize="Small" Text="Start:"
                     TextColor="White" VerticalOptions="Center"/>
                     <Label
-                     FontSize="12" Text="End:" TextColor="White" VerticalOptions="Center" />
+                     FontSize="Small" Text="End:" TextColor="White" VerticalOptions="Center" />
                 </VerticalStackLayout>
                 <VerticalStackLayout Spacing="8">
                     <Label
-                      Text="{Binding StartDate, Converter={StaticResource TimeConverter}}" FontSize="12"
+                      Text="{Binding StartDate, Converter={StaticResource TimeConverter}}" FontSize="Small"
                       TextColor="White" VerticalOptions="Center" HorizontalOptions="Start" />
                     <Label
                       Text="{Binding EndDate, Converter={StaticResource TimeConverter}, ConverterParameter='Undefined'}"
-                      FontSize="12" VerticalOptions="Center" TextColor="White" HorizontalOptions="Start" />
+                      FontSize="Small" VerticalOptions="Center" TextColor="White" HorizontalOptions="Start" />
                 </VerticalStackLayout>
             </HorizontalStackLayout>
         </VerticalStackLayout>

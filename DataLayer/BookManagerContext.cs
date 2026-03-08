@@ -128,7 +128,7 @@ namespace DataLayer
                 entity.HasOne(r => r.Sender)
                       .WithMany()
                       .HasForeignKey(r => r.SenderId)
-                      .OnDelete(DeleteBehavior.ClientSetNull);
+                      .OnDelete(DeleteBehavior.SetNull);
 
                 entity.HasOne(r => r.ActionedBy)
                       .WithMany()
@@ -193,7 +193,7 @@ namespace DataLayer
                 entity.HasMany(u => u.UserBooks)
                       .WithOne(ub => ub.User)
                       .HasForeignKey(ub => ub.UserId)
-                      .OnDelete(DeleteBehavior.ClientCascade);
+                      .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasMany(u => u.UserRestrictions)
                       .WithOne(ur => ur.User)

@@ -129,5 +129,16 @@ namespace BusinessLayer.Repositories
             );
         }
 
+        public override async Task<bool> DeleteAsync(User entity)
+        {
+            var user = await _context.Users.FindAsync(entity.Id);
+            if(user == null)
+            {
+                throw new KeyNotFoundException();
+            }
+            _context.Remove(user);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
     }
 }

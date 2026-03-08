@@ -15,6 +15,16 @@ namespace BusinessLayer.Repositories
 
         public override async Task<bool> CreateAsync(UserRestriction obj)
         {
+            var pending = await GetPendingRestrictionAsync(obj.UserId);
+            if (pending != null)
+            {
+                string endDateText = pending.EndDate.HasValue
+                    ? pending.EndDate.Value.ToString("HH:mm d MMMM yyyy")
+                    : "undefined";
+
+                throw new InvalidOperationException($"User already has a restriction. End date: {endDateText}");
+            }
+
             obj.StartDate = DateTime.UtcNow;
             await _context.UserRestrictions.AddAsync(obj);
             return await _context.SaveChangesAsync() > 0;

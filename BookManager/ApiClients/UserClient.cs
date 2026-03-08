@@ -225,7 +225,7 @@ namespace BookManager.ApiClients
 
         public async Task<RequestResult> DeleteMyselfAsync()
         {
-            var response = await _httpClient.DeleteAsync($"/api/users/me");
+            var response = await _httpClient.DeleteAsync($"/api/users");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -264,6 +264,27 @@ namespace BookManager.ApiClients
                     _user.Restriction.StartDate = null;
                     _user.Restriction.Reason = null;
                 }
+            }
+
+            return new RequestResult(true, null);
+        }
+
+        public async Task<RequestResult> CreateCommentRestrictionAsync(int userId, DateTime? endDate, string reason)
+        {
+            var payload = new
+            {
+                EndDate = endDate,
+                Reason = reason
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync($"/api/users/{userId}/comment-restriction", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
             }
 
             return new RequestResult(true, null);

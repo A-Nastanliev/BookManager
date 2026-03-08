@@ -271,12 +271,19 @@ namespace ServiceLayer.Controllers
 				Comment = content,
 			};
 
-			bool success = await _bookCommentRepository.CreateAsync(comment);
+			try
+			{
+				bool success = await _bookCommentRepository.CreateAsync(comment);
 
-			if (!success)
-				return BadRequest("Failed to create comment");
+				if (!success)
+					return BadRequest("Failed to create comment");
 
-			return StatusCode(201, new { id = comment.Id });
+				return StatusCode(201, new { id = comment.Id });
+			}
+			catch(InvalidOperationException ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("books/{bookId}/comments")]
@@ -308,20 +315,23 @@ namespace ServiceLayer.Controllers
 		[HttpDelete("comments/{commentId}")]
 		public async Task<IActionResult> DeleteBookComment(int commentId)
 		{
-			bool success;
+			try
+			{
+				bool success = await _bookCommentRepository.DeleteAsync(new BookComment { Id = commentId, UserId = UserId });
 
-			if (UserRole == UserRole.Admin)
-			{
-				success = await _bookCommentRepository.DeleteAsync(new BookComment { Id = commentId });
-			} else
-			{
-				success = await _bookCommentRepository.DeleteAsync(new BookComment { Id = commentId, UserId = UserId });
+				if (!success)
+					return NotFound();
+
+				return NoContent();
 			}
-
-			if (!success)
-				return NotFound();
-
-			return NoContent();
+			catch(InvalidOperationException ex)
+			{
+				return BadRequest(ex.Message);
+			}
+			catch(UnauthorizedAccessException ex)
+			{
+				return Forbid(ex.Message);
+			}
 		}
 	}
 }

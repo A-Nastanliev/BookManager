@@ -11,232 +11,347 @@
              x:DataType="vm:BookDetailVM"
              Title="{Binding Book.Title}">
 
-    <ScrollView VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
-        <Grid RowDefinitions="Auto,*">
-            <Grid.Resources>
-                <Style TargetType="tabView:SfTabItem">
-                    <Setter Property="VisualStateManager.VisualStateGroups">
-                        <VisualStateGroupList>
-                            <VisualStateGroup>
-                                <VisualState x:Name="Normal" >
-                                    <VisualState.Setters>
-                                        <Setter Property="TextColor" Value="{StaticResource Gray400}" />
-                                        <Setter Property="FontSize" Value="Small" />
-                                    </VisualState.Setters>
-                                </VisualState>
-                                <VisualState x:Name="Selected">
-                                    <VisualState.Setters>
-                                        <Setter Property="TextColor" Value="White" />
-                                        <Setter Property="FontSize" Value="Medium" />
-                                    </VisualState.Setters>
-                                </VisualState>
-                            </VisualStateGroup>
-                        </VisualStateGroupList>
-                    </Setter>
-                </Style>
-            </Grid.Resources>
-            <Grid Row="0" >
-                <Image HeightRequest="450" Source="{Binding Book.CoverSource}" Aspect="AspectFill"/>
-                <VerticalStackLayout  Padding="16" VerticalOptions="End" Background="{StaticResource PrimaryOverlay}">
-                    <Label  Text="{Binding Book.Title}"  FontSize="Title" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
-                    <Label Text="{Binding Book.Author.Name}" FontSize="Medium"/>
-                    <HorizontalStackLayout HorizontalOptions="End" Spacing="8" Margin="8,0"
-                        IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter='Admin'}">
-                        <Grid HeightRequest="40" WidthRequest="40" >
-                            <Button CornerRadius="8" Command="{Binding EditCommand}" Background="{StaticResource Gray300}"/>
-                            <Image Source="edit_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
-                                  HeightRequest="24" WidthRequest="24">
-                            </Image>
-                        </Grid>
-                        <Grid HeightRequest="40" WidthRequest="40" >
-                            <Button CornerRadius="8" Command="{Binding DeleteCommand}" Background="Red"/>
-                            <Image Source="delete_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
-                                    HeightRequest="24" WidthRequest="24">
-                            </Image>
-                        </Grid>
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
-            </Grid>
-            <tabView:SfTabView  Grid.Row="1" EnableSwiping="False" EnableVirtualization="True" 
-                IndicatorBackground="{StaticResource Primary}" SelectedIndex="{Binding SelectedTabIndex}">
-                <tabView:SfTabView.Items >
-                    <tabView:SfTabItem Header="Details"   >
-                        <tabView:SfTabItem.Content>
-                            <ScrollView HorizontalScrollBarVisibility="Never">
-                                <VerticalStackLayout Padding="20" Spacing="16">
-                                    <VerticalStackLayout Spacing="8">
-                                        <Label Text="Title" FontAttributes="Bold" FontSize="Medium"/>
-                                        <Label Text="{Binding Book.Title}" LineBreakMode="WordWrap" TextColor="{StaticResource Primary}"/>
-                                    </VerticalStackLayout>
-                                    <VerticalStackLayout Spacing="8"> 
-                                        <Label Text="Author" FontAttributes="Bold" FontSize="Medium"/>
-                                        <Label Text="{Binding Book.Author.Name}" TextColor="{StaticResource Primary}">
-                                            <Label.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding AuthorTappedCommand}" />
-                                            </Label.GestureRecognizers>
-                                        </Label>
-                                    </VerticalStackLayout>
-                                    <VerticalStackLayout Spacing="8">
-                                        <Label Text="Average Rating:" FontSize="Medium" VerticalOptions="Center"/>
-                                        <toolkit:RatingView VerticalOptions="Center" Shape="Star"
-                                                IsReadOnly="True" FillColor="{StaticResource Tertiary}" Rating="{Binding AverageRating, Mode=OneWay}" ShapeBorderColor="{StaticResource PrimaryDark}"
-                                                MaximumRating="10" EmptyShapeColor="White"/>
-                                        <Label Text="{Binding RatingCount, StringFormat='Based on {0} ratings', Mode=TwoWay}"/>
-                                    </VerticalStackLayout>
-                                    <VerticalStackLayout Spacing="8">
-                                        <Label Text="Genre" FontAttributes="Bold" FontSize="Medium"/>
-                                        <Label Text="{Binding Book.Genre.Name, TargetNullValue='Unknown'}" TextColor="{StaticResource Primary}">
-                                            <Label.GestureRecognizers>
-                                                <TapGestureRecognizer  Command="{Binding GenreTappedCommand}" />
-                                            </Label.GestureRecognizers>
-                                        </Label>
-                                    </VerticalStackLayout>
-                                    <VerticalStackLayout Spacing="8">
-                                        <Label Text="Publisher" FontAttributes="Bold" FontSize="Medium"/>
-                                        <Label Text="{Binding Book.Publisher.Name, TargetNullValue='Unknown'}" TextColor="{StaticResource Primary}">
-                                            <Label.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding PublisherTappedCommand}" />
-                                            </Label.GestureRecognizers>
-                                    </Label>
-                                    </VerticalStackLayout>
-                                    <VerticalStackLayout Spacing="8">
-                                        <Label Text="Description" FontAttributes="Bold" FontSize="Medium"/>
-                                        <Label Text="{Binding Book.Description, TargetNullValue='No description'}"
-                                           LineBreakMode="WordWrap"/>
-                                    </VerticalStackLayout>
-                                </VerticalStackLayout>
-                            </ScrollView>
-                        </tabView:SfTabItem.Content>
-                    </tabView:SfTabItem>
-                    <tabView:SfTabItem Header="Comments">
-                        <tabView:SfTabItem.Content>
-                            <Grid >
-                                <Label Text="No comments" HorizontalOptions="Center" VerticalOptions="Center"/>
+    <AbsoluteLayout>
+        <ScrollView VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+            <Grid RowDefinitions="Auto,*">
+                <Grid.Resources>
+                    <Style TargetType="tabView:SfTabItem">
+                        <Setter Property="VisualStateManager.VisualStateGroups">
+                            <VisualStateGroupList>
+                                <VisualStateGroup>
+                                    <VisualState x:Name="Normal" >
+                                        <VisualState.Setters>
+                                            <Setter Property="TextColor" Value="{StaticResource Gray400}" />
+                                            <Setter Property="FontSize" Value="Small" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter Property="TextColor" Value="White" />
+                                            <Setter Property="FontSize" Value="Medium" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateGroupList>
+                        </Setter>
+                    </Style>
+                </Grid.Resources>
+                <Grid Row="0" >
+                    <Image HeightRequest="450" Source="{Binding Book.CoverSource}" Aspect="AspectFill"/>
+                    <VerticalStackLayout  Padding="16" VerticalOptions="End" Background="{StaticResource PrimaryOverlay}">
+                        <Label  Text="{Binding Book.Title}"  FontSize="Title" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
+                        <Label Text="{Binding Book.Author.Name}" FontSize="Medium"/>
+                        <HorizontalStackLayout HorizontalOptions="End" Spacing="8" Margin="8,0"
+                            IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter='Admin'}">
+                            <Grid HeightRequest="40" WidthRequest="40" >
+                                <Button CornerRadius="8" Command="{Binding EditCommand}" Background="{StaticResource Gray300}"/>
+                                <Image Source="edit_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                      HeightRequest="24" WidthRequest="24">
+                                </Image>
                             </Grid>
-                        </tabView:SfTabItem.Content>
-                    </tabView:SfTabItem>
-                    <tabView:SfTabItem Header="Logs">
-                        <tabView:SfTabItem.Content>
-                            <Grid RowDefinitions="Auto,Auto, Auto, Auto" RowSpacing="12">
-                                <Border Style="{StaticResource SectionCard}" Padding="16,8" Margin="8" Grid.Row="0">
-                                    <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="*, auto" ColumnSpacing="10" RowSpacing="10" HorizontalOptions="Fill">
-                                        <Label Text="My rating" FontSize="Medium" VerticalOptions="Center" HorizontalOptions="Start" Margin="4"/>
-                                        <toolkit:RatingView Shape="Star" Grid.Row="1" HorizontalOptions="Fill" VerticalOptions="Fill" Grid.ColumnSpan="2"
-                                             IsReadOnly="False" FillColor="{StaticResource Tertiary}" Rating="{Binding MyRating, Mode=TwoWay}"
-                                             ShapeBorderColor="{StaticResource PrimaryDark}" MaximumRating="10" EmptyShapeColor="White" Margin="0,0,0,10"/>
-                                        <Button Text="Clear" Grid.Row="0" FontSize="Small" Background="Transparent" x:Name="MyRatingClearButton"
-                                                Command="{Binding ClearRatingCommand}"
-                                                TextColor="{StaticResource Primary}" HorizontalOptions="End" Grid.Column="1" VerticalOptions="Center"/>
-                                    </Grid>
-                                </Border>
-                                <Grid Grid.Row="1" ColumnDefinitions="*, auto" ColumnSpacing="16" Padding="16" RowDefinitions="Auto, Auto">
-                                    <Grid Grid.Column="1" Grid.RowSpan="2"> 
-                                        <Grid HeightRequest="40" WidthRequest="40" >
-                                            <Grid.IsVisible>
-                                                <MultiBinding Converter="{StaticResource NotEqualsMultiConverter}">
-                                                    <Binding Path="Status" />
-                                                    <Binding Mode="OneTime" Source="{x:Static local:UserBookStatus.Reading}" />
-                                                    <Binding Mode="OneTime" Source="{x:Static local:UserBookStatus.Finished}" />
-                                                </MultiBinding>
-                                            </Grid.IsVisible>
-                                            <Button CornerRadius="20" Command="{Binding ManageUserBookCommand}"/>
-                                            <Image Source="bookmarked_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
-                                                       HeightRequest="24" WidthRequest="24">
-                                                <Image.IsVisible>
-                                                    <Binding Path="Status" Converter="{StaticResource EqualsConverter}" 
-                                                            ConverterParameter="{x:Static local:UserBookStatus.Wishlisted}" />
-                                                </Image.IsVisible>
-                                            </Image>
-                                            <Image Source="bookmark_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
-                                                       HeightRequest="24" WidthRequest="24">
-                                                <Image.IsVisible>
-                                                    <Binding Path="Status" Converter="{StaticResource EqualsConverter}" 
-                                                            ConverterParameter="{x:Static local:UserBookStatus.None}" />
-                                                </Image.IsVisible>
-                                            </Image>
-                                        </Grid>
-                                        <Grid HeightRequest="40" WidthRequest="40" >
-                                            <Grid.IsVisible>
-                                                <MultiBinding Converter="{StaticResource EqualsMultiConverter}">
-                                                    <Binding Path="Status" />
-                                                    <Binding Mode="OneTime" Source="{x:Static local:UserBookStatus.Reading}" />
-                                                    <Binding Mode="OneTime" Source="{x:Static local:UserBookStatus.Finished}" />
-                                                </MultiBinding>
-                                            </Grid.IsVisible>
-                                            <Button CornerRadius="20" Command="{Binding ClearUserBookCommand}"/>
-                                            <Image Source="delete_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
-                                                   HeightRequest="24" WidthRequest="24">
-                                            </Image>
-                                        </Grid>
-                                    </Grid>
-                                    <ProgressBar Grid.Row="1" Grid.Column="0" Progress="{Binding PageProgress, Converter={StaticResource IntToStringConverter}}"
-                                                 ProgressColor="{StaticResource Primary}"/>
-                                    <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="8">
-                                        <Label Text="{Binding ReadPages}" FontSize="Medium"/>
-                                        <Label Text="out of" FontSize="Medium"/>
-                                        <Label Text="{Binding Book.TotalPages}" FontSize="Medium"/>
-                                        <Label Text="pages " FontSize="Medium"/>
-                                    </HorizontalStackLayout>
-                                </Grid>
-                                <Border Style="{StaticResource SectionCard}" Padding="20,12" Margin="8" Grid.Row="2">
-                                    <VerticalStackLayout Spacing="12">
-                                        <Grid ColumnDefinitions="*,auto">
-                                            <Label Text="Add Reading Log" FontSize="Medium" HorizontalOptions="Center" VerticalOptions="Center" Grid.ColumnSpan="2"/>
-                                            <Grid HeightRequest="40" WidthRequest="40" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="End">
-                                                <Button CornerRadius="20" Command="{Binding CreateLogCommand}"/>
-                                                <Image Source="plus_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
-                                                    HeightRequest="24" WidthRequest="24">
-                                                    <Image.Behaviors>
-                                                        <toolkit:IconTintColorBehavior TintColor="White" />
-                                                    </Image.Behaviors>
-                                                </Image>
-                                            </Grid>
-                                        </Grid>
-                                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto, Auto" RowSpacing="0" ColumnSpacing="8">
-                                            <Label Text="Start Page" Grid.Row="0" Grid.Column="0"/>
-                                            <Label Text="End Page" Grid.Row="0" Grid.Column="1"/>
-                                            <Entry Text="{Binding NewLog.StartingPage, Mode=TwoWay,Converter={StaticResource IntToStringConverter}}" 
-                                                Keyboard="Numeric" Grid.Row="1" Grid.Column="0" FontSize="Small"/>
-                                            <Entry Text="{Binding NewLog.EndingPage, Mode=TwoWay,Converter={StaticResource IntToStringConverter}}" 
-                                                Keyboard="Numeric" Grid.Row="1" Grid.Column="1" FontSize="Small"/>
-                                        </Grid>
-                                      
+                            <Grid HeightRequest="40" WidthRequest="40" >
+                                <Button CornerRadius="8" Command="{Binding DeleteCommand}" Background="Red"/>
+                                <Image Source="delete_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                        HeightRequest="24" WidthRequest="24">
+                                </Image>
+                            </Grid>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Grid>
+                <tabView:SfTabView  Grid.Row="1" EnableSwiping="False" EnableVirtualization="True" 
+                    IndicatorBackground="{StaticResource Primary}" SelectedIndex="{Binding SelectedTabIndex}">
+                    <tabView:SfTabView.Items >
+                        <tabView:SfTabItem Header="Details"   >
+                            <tabView:SfTabItem.Content>
+                                <ScrollView HorizontalScrollBarVisibility="Never">
+                                    <ScrollView.IsVisible>
+                                        <Binding Path="SelectedTabIndex"
+                                            Converter="{StaticResource EqualsConverter}">
+                                            <Binding.ConverterParameter>
+                                                <x:Int32>0</x:Int32>
+                                            </Binding.ConverterParameter>
+                                        </Binding>
+                                    </ScrollView.IsVisible>
+                                    <VerticalStackLayout Padding="20" Spacing="16">
+                                        <VerticalStackLayout Spacing="8">
+                                            <Label Text="Title" FontAttributes="Bold" FontSize="Medium"/>
+                                            <Label Text="{Binding Book.Title}" LineBreakMode="WordWrap" TextColor="{StaticResource Primary}"/>
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Spacing="8">
+                                            <Label Text="Author" FontAttributes="Bold" FontSize="Medium"/>
+                                            <Label Text="{Binding Book.Author.Name}" TextColor="{StaticResource Primary}">
+                                                <Label.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding AuthorTappedCommand}" />
+                                                </Label.GestureRecognizers>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Spacing="8">
+                                            <Label Text="Average Rating:" FontSize="Medium" VerticalOptions="Center"/>
+                                            <toolkit:RatingView VerticalOptions="Center" Shape="Star"
+                                                    IsReadOnly="True" FillColor="{StaticResource Tertiary}" Rating="{Binding AverageRating, Mode=OneWay}" ShapeBorderColor="{StaticResource PrimaryDark}"
+                                                    MaximumRating="10" EmptyShapeColor="White"/>
+                                            <Label Text="{Binding RatingCount, StringFormat='Based on {0} ratings', Mode=TwoWay}"/>
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Spacing="8">
+                                            <Label Text="Genre" FontAttributes="Bold" FontSize="Medium"/>
+                                            <Label Text="{Binding Book.Genre.Name, TargetNullValue='Unknown'}" TextColor="{StaticResource Primary}">
+                                                <Label.GestureRecognizers>
+                                                    <TapGestureRecognizer  Command="{Binding GenreTappedCommand}" />
+                                                </Label.GestureRecognizers>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Spacing="8">
+                                            <Label Text="Publisher" FontAttributes="Bold" FontSize="Medium"/>
+                                            <Label Text="{Binding Book.Publisher.Name, TargetNullValue='Unknown'}" TextColor="{StaticResource Primary}">
+                                                <Label.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding PublisherTappedCommand}" />
+                                                </Label.GestureRecognizers>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Spacing="8">
+                                            <Label Text="Description" FontAttributes="Bold" FontSize="Medium"/>
+                                            <Label Text="{Binding Book.Description, TargetNullValue='No description'}"
+                                               LineBreakMode="WordWrap"/>
+                                        </VerticalStackLayout>
                                     </VerticalStackLayout>
-                                </Border>
-                                <CollectionView VerticalOptions="Fill" Grid.Row="3"
-                                           ItemsSource="{Binding Logs}"
-                                           RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
-                                           RemainingItemsThresholdReachedCommand="{Binding LoadLogsCommand}">
-                                    <CollectionView.IsVisible>
+                                </ScrollView>
+                            </tabView:SfTabItem.Content>
+                        </tabView:SfTabItem>
+                        <tabView:SfTabItem Header="Comments">
+                            <tabView:SfTabItem.Content>
+                                <Grid RowDefinitions="Auto, Auto" >
+                                    <Grid.IsVisible>
+                                        <Binding Path="SelectedTabIndex" Converter="{StaticResource EqualsConverter}">
+                                            <Binding.ConverterParameter>
+                                                <x:Int32>1</x:Int32>
+                                            </Binding.ConverterParameter>
+                                        </Binding>
+                                    </Grid.IsVisible>
+                                    <Border Style="{StaticResource SectionCard}" Padding="16,8" Margin="8" Grid.Row="0">
+                                        <Grid RowDefinitions="Auto, Auto" RowSpacing="8">
+                                            <Editor Text="{Binding NewComment.Comment, Mode=TwoWay}" Placeholder="What did you thin of this book?" 
+                                                    AutoSize="TextChanges" MaxLength="500" Grid.Row="0"/>
+                                            <Button Text="Post" Command="{Binding CreateCommentCommand}" Grid.Row="1"/>
+                                        </Grid>
+                                    </Border>
+                                    <CollectionView VerticalOptions="Fill" Grid.Row="2" ItemsSource="{Binding Comments}" RemainingItemsThreshold="3" MinimumHeightRequest="150"
+                                        VerticalScrollBarVisibility="Never"  RemainingItemsThresholdReachedCommand="{Binding LoadCommentsCommand}">
+                                        <CollectionView.EmptyView>
+                                            <Label  Text="No comments" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                        </CollectionView.EmptyView>
+
+                                        <CollectionView.ItemsLayout>
+                                            <GridItemsLayout Orientation="Vertical" Span="1" />
+                                        </CollectionView.ItemsLayout>
+
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate>
+                                                <reading:CommentView Margin="12,8" x:DataType="reading:CommentView"                                            
+                                                    TapCommand="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentPage}}, 
+                                                    Path=BindingContext.SelectCommentCommand}"/>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+                                </Grid>
+                            </tabView:SfTabItem.Content>
+                        </tabView:SfTabItem>
+                        <tabView:SfTabItem Header="Logs">
+                            <tabView:SfTabItem.Content>
+                                <Grid RowDefinitions="Auto,Auto, Auto, Auto" RowSpacing="12">
+                                    <Grid.IsVisible>
                                         <Binding Path="SelectedTabIndex" Converter="{StaticResource EqualsConverter}">
                                             <Binding.ConverterParameter>
                                                 <x:Int32>2</x:Int32>
                                             </Binding.ConverterParameter>
                                         </Binding>
-                                    </CollectionView.IsVisible>
-                                    <CollectionView.EmptyView>
-                                        <Label  Text="No logs found"
-                                                HorizontalOptions="Center"
-                                                VerticalOptions="Center"/>
-                                    </CollectionView.EmptyView>
+                                    </Grid.IsVisible>
+                                    <Border Style="{StaticResource SectionCard}" Padding="16,8" Margin="8" Grid.Row="0">
+                                        <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="*, auto" ColumnSpacing="10" RowSpacing="10" HorizontalOptions="Fill">
+                                            <Label Text="My rating" FontSize="Medium" VerticalOptions="Center" HorizontalOptions="Start" Margin="4"/>
+                                            <toolkit:RatingView Shape="Star" Grid.Row="1" HorizontalOptions="Fill" VerticalOptions="Fill" Grid.ColumnSpan="2"
+                                                 IsReadOnly="False" FillColor="{StaticResource Tertiary}" Rating="{Binding MyRating, Mode=TwoWay}"
+                                                 ShapeBorderColor="{StaticResource PrimaryDark}" MaximumRating="10" EmptyShapeColor="White" Margin="0,0,0,10"/>
+                                            <Button Text="Clear" Grid.Row="0" FontSize="Small" Background="Transparent" x:Name="MyRatingClearButton"
+                                                    Command="{Binding ClearRatingCommand}"
+                                                    TextColor="{StaticResource Primary}" HorizontalOptions="End" Grid.Column="1" VerticalOptions="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    <Grid Grid.Row="1" ColumnDefinitions="*, auto" ColumnSpacing="16" Padding="16" RowDefinitions="Auto, Auto">
+                                        <Grid Grid.Column="1" Grid.RowSpan="2">
+                                            <Grid HeightRequest="40" WidthRequest="40" >
+                                                <Grid.IsVisible>
+                                                    <MultiBinding Converter="{StaticResource NotEqualsMultiConverter}">
+                                                        <Binding Path="Status" />
+                                                        <Binding Mode="OneTime" Source="{x:Static local:UserBookStatus.Reading}" />
+                                                        <Binding Mode="OneTime" Source="{x:Static local:UserBookStatus.Finished}" />
+                                                    </MultiBinding>
+                                                </Grid.IsVisible>
+                                                <Button CornerRadius="20" Command="{Binding ManageUserBookCommand}"/>
+                                                <Image Source="bookmarked_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                                           HeightRequest="24" WidthRequest="24">
+                                                    <Image.IsVisible>
+                                                        <Binding Path="Status" Converter="{StaticResource EqualsConverter}" 
+                                                                ConverterParameter="{x:Static local:UserBookStatus.Wishlisted}" />
+                                                    </Image.IsVisible>
+                                                </Image>
+                                                <Image Source="bookmark_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                                           HeightRequest="24" WidthRequest="24">
+                                                    <Image.IsVisible>
+                                                        <Binding Path="Status" Converter="{StaticResource EqualsConverter}" 
+                                                                ConverterParameter="{x:Static local:UserBookStatus.None}" />
+                                                    </Image.IsVisible>
+                                                </Image>
+                                            </Grid>
+                                            <Grid HeightRequest="40" WidthRequest="40" >
+                                                <Grid.IsVisible>
+                                                    <MultiBinding Converter="{StaticResource EqualsMultiConverter}">
+                                                        <Binding Path="Status" />
+                                                        <Binding Mode="OneTime" Source="{x:Static local:UserBookStatus.Reading}" />
+                                                        <Binding Mode="OneTime" Source="{x:Static local:UserBookStatus.Finished}" />
+                                                    </MultiBinding>
+                                                </Grid.IsVisible>
+                                                <Button CornerRadius="20" Command="{Binding ClearUserBookCommand}"/>
+                                                <Image Source="delete_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                                       HeightRequest="24" WidthRequest="24">
+                                                </Image>
+                                            </Grid>
+                                        </Grid>
+                                        <ProgressBar Grid.Row="1" Grid.Column="0" Progress="{Binding PageProgress, Converter={StaticResource IntToStringConverter}}"
+                                                     ProgressColor="{StaticResource Primary}"/>
+                                        <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="8">
+                                            <Label Text="{Binding ReadPages}" FontSize="Medium"/>
+                                            <Label Text="out of" FontSize="Medium"/>
+                                            <Label Text="{Binding Book.TotalPages}" FontSize="Medium"/>
+                                            <Label Text="pages " FontSize="Medium"/>
+                                        </HorizontalStackLayout>
+                                    </Grid>
+                                    <Border Style="{StaticResource SectionCard}" Padding="20,12" Margin="8" Grid.Row="2">
+                                        <VerticalStackLayout Spacing="12">
+                                            <Grid ColumnDefinitions="*,auto">
+                                                <Label Text="Add Reading Log" FontSize="Medium" HorizontalOptions="Center" VerticalOptions="Center" Grid.ColumnSpan="2"/>
+                                                <Grid HeightRequest="40" WidthRequest="40" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="End">
+                                                    <Button CornerRadius="20" Command="{Binding CreateLogCommand}"/>
+                                                    <Image Source="plus_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                                        HeightRequest="24" WidthRequest="24">
+                                                        <Image.Behaviors>
+                                                            <toolkit:IconTintColorBehavior TintColor="White" />
+                                                        </Image.Behaviors>
+                                                    </Image>
+                                                </Grid>
+                                            </Grid>
+                                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto, Auto" RowSpacing="0" ColumnSpacing="8">
+                                                <Label Text="Start Page" Grid.Row="0" Grid.Column="0"/>
+                                                <Label Text="End Page" Grid.Row="0" Grid.Column="1"/>
+                                                <Entry Text="{Binding NewLog.StartingPage, Mode=TwoWay,Converter={StaticResource IntToStringConverter}}" 
+                                                    Keyboard="Numeric" Grid.Row="1" Grid.Column="0" FontSize="Small"/>
+                                                <Entry Text="{Binding NewLog.EndingPage, Mode=TwoWay,Converter={StaticResource IntToStringConverter}}" 
+                                                    Keyboard="Numeric" Grid.Row="1" Grid.Column="1" FontSize="Small"/>
+                                            </Grid>
 
-                                    <CollectionView.ItemsLayout>
-                                        <GridItemsLayout Orientation="Vertical" Span="1" />
-                                    </CollectionView.ItemsLayout>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                    <CollectionView VerticalOptions="Fill" Grid.Row="3"
+                                               ItemsSource="{Binding Logs}"
+                                               RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+                                               RemainingItemsThresholdReachedCommand="{Binding LoadLogsCommand}">
+                                        <CollectionView.EmptyView>
+                                            <Label  Text="No logs found"
+                                                    HorizontalOptions="Center"
+                                                    VerticalOptions="Center"/>
+                                        </CollectionView.EmptyView>
 
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate>
-                                            <reading:ReadingLogView Margin="12,8" x:DataType="reading:ReadingLogView"                                            
-                                                DeleteCommand="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentPage}}, 
-                                                Path=BindingContext.DeleteReadingLogCommand}"/>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
+                                        <CollectionView.ItemsLayout>
+                                            <GridItemsLayout Orientation="Vertical" Span="1" />
+                                        </CollectionView.ItemsLayout>
+
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate>
+                                                <reading:ReadingLogView Margin="12,8" x:DataType="reading:ReadingLogView"                                            
+                                                    DeleteCommand="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentPage}}, 
+                                                    Path=BindingContext.DeleteReadingLogCommand}"/>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+                                </Grid>
+                            </tabView:SfTabItem.Content>
+                        </tabView:SfTabItem>
+                    </tabView:SfTabView.Items>
+                </tabView:SfTabView>
+            </Grid>
+        </ScrollView>
+        <Grid
+          x:Name="Overlay" IsVisible="False" BackgroundColor="#771A1A1A" RowDefinitions="*, Auto"
+          AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+            <BoxView BackgroundColor="Transparent">
+                <BoxView.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnOverlayTapped"/>
+                </BoxView.GestureRecognizers>
+            </BoxView>
+            <BoxView  BackgroundColor="#80000000" Grid.RowSpan="2"/>
+            <Grid  x:Name="CommentSheetContent" RowDefinitions="Auto" Grid.Row="1" HorizontalOptions="Fill" 
+              VerticalOptions="End" MaximumHeightRequest="700">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+                </Grid.GestureRecognizers>
+                <Border Style="{StaticResource SectionCard}" StrokeShape="RoundRectangle 20,20,0,0">
+                    <VerticalStackLayout>
+                        <Grid RowSpacing="12" Background="Transparent" RowDefinitions="Auto, Auto, Auto">
+                            <HorizontalStackLayout Spacing="12" VerticalOptions="Center" HorizontalOptions="Start" Grid.Row="0">
+                                <Border WidthRequest="50" HeightRequest="50" StrokeThickness="1" Stroke="LightGray" StrokeShape="RoundRectangle 50" VerticalOptions="Center">
+                                    <Image Source="{Binding SelectedComment.PublicUser.ProfilePictureSource}"  Aspect="AspectFill">
+                                        <Image.Clip>
+                                            <EllipseGeometry Center="25,25" RadiusX="25" RadiusY="25" />
+                                        </Image.Clip>
+                                    </Image>
+                                </Border>
+
+                                <Label Text="{Binding SelectedComment.PublicUser.Username}" FontAttributes="Bold" FontSize="Medium" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+
+                            <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never" MaximumHeightRequest="240"> 
+                                <Label Text="{Binding SelectedComment.Comment}" FontSize="Medium" LineBreakMode="WordWrap"/>
+                            </ScrollView>
+
+                            <Grid RowDefinitions="Auto, Auto" RowSpacing="4" ColumnSpacing="8" ColumnDefinitions="*, Auto" Grid.Row="2">
+                                <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="8" HorizontalOptions="Start">
+                                    <Label FontSize="Small" Text="Sent:" VerticalOptions="Center"/>
+                                    <Label FontSize="Small" VerticalOptions="Center" 
+                                       Text="{Binding SelectedComment.DateTime, Converter={StaticResource TimeConverter}}"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Spacing="8" HorizontalOptions="Start">
+                                    <Label FontSize="Small" Text="Pages read:" VerticalOptions="Center"/>
+                                    <Label FontSize="Small" VerticalOptions="Center"
+                                           Text="{Binding SelectedComment.UserPageProgress}"/>
+                                </HorizontalStackLayout>
+                                <Grid HeightRequest="40" WidthRequest="40" IsVisible="{Binding CanDeleteComment}" Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" >
+                                    <Button CornerRadius="8" Command="{Binding DeleteCommentCommand}" Background="Red"/>
+                                    <Image Source="delete_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                        HeightRequest="24" WidthRequest="24">
+                                    </Image>
+                                </Grid>
                             </Grid>
-                        </tabView:SfTabItem.Content>
-                    </tabView:SfTabItem>
-                </tabView:SfTabView.Items>
-            </tabView:SfTabView>
+                        </Grid>
+                        <Grid IsVisible="{Binding CanPunishUser}" ColumnDefinitions="Auto,*, auto" RowDefinitions="Auto, *, Auto" ColumnSpacing="8">
+                            <Label Text="Restrict user for:" Grid.Column="0" VerticalOptions="Center"/>
+                            <Picker Title="Restriction duration"  ItemsSource="{Binding RestrictionOptions}" ItemDisplayBinding="{Binding Key}" VerticalOptions="Center"
+                                Grid.Column="1" SelectedItem="{Binding SelectedRestrictionOption, Mode=TwoWay}" Grid.ColumnSpan="2" />
+                            <ScrollView  Grid.Row="1" Grid.ColumnSpan="3" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never" MaximumHeightRequest="200">
+                                <Editor Text="{Binding RestrictionReason, Mode=TwoWay}" MaxLength="500" AutoSize="TextChanges"/>
+                            </ScrollView>
+                            <Button Text="Restrict" FontAttributes="Bold" Command="{Binding RestrictUserCommand}" Grid.Row="3" HorizontalOptions="Fill" Grid.ColumnSpan="2"/>
+                            <Grid HeightRequest="40" WidthRequest="130" Grid.Row="3"  Grid.Column="3" >
+                                <Button CornerRadius="8" Command="{Binding DeleteUserFromCommentCommand}" Background="Red"/>
+                                <HorizontalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8">
+                                    <Label Text="Delete User" FontAttributes="Bold" FontSize="Small"/>
+                                    <Image Source="delete_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" 
+                                        HeightRequest="24" WidthRequest="24">
+                                    </Image>
+                                </HorizontalStackLayout>
+                            </Grid>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
         </Grid>
-    </ScrollView>
+    </AbsoluteLayout>
 </ContentPage>

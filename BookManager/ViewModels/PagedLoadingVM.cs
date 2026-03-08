@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BookManager.ViewModels
 {
-    public abstract partial class PagedLoadingVM : ObservableObject
+    public partial class PagedLoadingVM : ObservableObject
     {
         [ObservableProperty]
         bool loading;
@@ -13,20 +13,20 @@ namespace BookManager.ViewModels
         [ObservableProperty]
         bool isRefreshing;
 
-        protected DateTime? CursorDate { get; set; }
-        protected int BatchSize { get; set; } = 16;
-        protected int? CursorId { get; set; }
+        public DateTime? CursorDate { get; set; }
+        public int BatchSize { get; set; } = 16;
+        public int? CursorId { get; set; }
         protected bool CanLoadMore { get; set; } = true;
 
         protected CancellationTokenSource? _searchCts;
 
-        protected bool CanStartLoading()
+        public bool CanStartLoading()
             => !Loading && CanLoadMore;
 
-        protected void BeginLoading()
+        public void BeginLoading()
             => Loading = true;
 
-        protected void EndLoading(int itemsLoaded, DateTime? cursorDate, int? cursorId)
+        public void EndLoading(int itemsLoaded, DateTime? cursorDate, int? cursorId)
         {
             Loading = false;
 
@@ -38,8 +38,8 @@ namespace BookManager.ViewModels
 
         }
 
-        public abstract Task Load();
+        public virtual Task Load() => Task.CompletedTask;
 
-        public abstract Task Refresh();
+        public virtual Task Refresh() => Task.CompletedTask;
     }
 }

@@ -13,7 +13,11 @@
               AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
             <segmentedControl:SfSegmentedControl 
                 Grid.Row="0" SelectedIndex="{Binding SelectedSegment, Mode=TwoWay}">
-            <segmentedControl:SfSegmentedControl.ItemsSource>
+                <segmentedControl:SfSegmentedControl.SelectionIndicatorSettings>
+                    <segmentedControl:SelectionIndicatorSettings
+                        Background="{StaticResource Primary}"  Stroke="{StaticResource Primary}" />
+                </segmentedControl:SfSegmentedControl.SelectionIndicatorSettings>
+                <segmentedControl:SfSegmentedControl.ItemsSource>
                     <x:Array Type="{x:Type x:String}">
                         <x:String>Active</x:String>
                         <x:String>Undefined</x:String>
@@ -40,7 +44,6 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-            <Button Text="End" Command="{Binding EndCommentRestrictionCommand}" HorizontalOptions="Center" Grid.Row="2" IsVisible="{Binding CanEndRestriction}" Margin="0,0,0,0"/>
         </Grid>
         <Grid
             x:Name="Overlay" IsVisible="False" BackgroundColor="#771A1A1A" RowDefinitions="*, Auto"
@@ -69,7 +72,9 @@
                             </Border>
                             <Label Text="{Binding SelectedRestriction.PublicUser.Username}" FontAttributes="Bold" FontSize="Medium" VerticalOptions="Center" />
                         </HorizontalStackLayout>
-                        <Label Text="{Binding SelectedRestriction.Reason}" FontSize="Medium" LineBreakMode="WordWrap" />
+                        <ScrollView MaximumHeightRequest="250"> 
+                            <Label Text="{Binding SelectedRestriction.Reason}" FontSize="Medium" LineBreakMode="WordWrap" />
+                        </ScrollView>
                         <HorizontalStackLayout Spacing="8">
                             <VerticalStackLayout Spacing="8">
                                 <Label FontSize="Small" Text="Start:" TextColor="White" VerticalOptions="Center"/>

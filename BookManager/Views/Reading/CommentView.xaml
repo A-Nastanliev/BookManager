@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookManager.Views.Reading.CommentView"
+             xmlns:vm="clr-namespace:BookManager.Models.Reading"
+             x:DataType="vm:CommentVM"
+             x:Name="Root">
+    
+    <ContentView.IsVisible>
+        <Binding Path="Id"
+        Converter="{StaticResource NotEqualsConverter}">
+            <Binding.ConverterParameter>
+                <x:Int32>0</x:Int32>
+            </Binding.ConverterParameter>
+        </Binding>
+    </ContentView.IsVisible>
+
+    <Border Style="{StaticResource SectionCard}">
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer
+           Command="{Binding TapCommand, Source={x:Reference Root}}"
+           CommandParameter="{Binding BindingContext, Source={x:Reference Root}}"/>
+        </Border.GestureRecognizers>
+        <Grid RowSpacing="8" Background="Transparent" RowDefinitions="Auto, Auto, Auto">
+
+            <HorizontalStackLayout Spacing="12" VerticalOptions="Center" HorizontalOptions="Start" Grid.Row="0">
+                <Border WidthRequest="40" HeightRequest="40" StrokeThickness="1" Stroke="LightGray" StrokeShape="RoundRectangle 40" VerticalOptions="Center">
+                    <Image Source="{Binding PublicUser.ProfilePictureSource}"  Aspect="AspectFill">
+                        <Image.Clip>
+                            <EllipseGeometry Center="20,20" RadiusX="20" RadiusY="20" />
+                        </Image.Clip>
+                    </Image>
+                </Border>
+
+                <Label Text="{Binding PublicUser.Username}" FontAttributes="Bold" FontSize="Small" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <Label Text="{Binding Comment}" FontSize="Small" LineBreakMode="WordWrap" Grid.Row="1" />
+
+            <Grid RowDefinitions="Auto, Auto" RowSpacing="8" ColumnSpacing="8" ColumnDefinitions="Auto, *" Grid.Row="2">
+                <Label FontSize="Micro" Grid.Row="0" Grid.Column="0" Text="Sent:"/>
+                <Label FontSize="Micro" Grid.Row="1" Grid.Column="0" Text="Pages read:"/>
+                <Label FontSize="Micro" Grid.Row="0" Grid.Column="1"  Text="{Binding DateTime, Converter={StaticResource TimeConverter}}"/>
+                <Label FontSize="Micro" Grid.Row="1" Grid.Column="1" Text="{Binding UserPageProgress}"/>
+            </Grid>
+        </Grid>
+    </Border>
+</ContentView>

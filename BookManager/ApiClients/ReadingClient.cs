@@ -211,5 +211,73 @@ namespace BookManager.ApiClients
 
             return new RequestResult(true, null);
         }
+
+        public async Task<RequestResult> CreateBookCommentAsync(int bookId, CommentVM comment)
+        {
+            var response = await _httpClient.PostAsJsonAsync($"/api/reading/books/{bookId}/comments", comment.Comment);
+
+            if (!response.IsSuccessStatusCode)
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            using var doc = JsonDocument.Parse(json);
+
+            comment.Id = doc.RootElement.GetProperty("id").GetInt32();
+            comment.DateTime = DateTime.UtcNow;
+
+            return new RequestResult(true, null);
+        }
+
+        public async Task<(List<CommentVM> Comments, DateTime? CursorDate, int? CursorId)>
+            GetNextBookCommentsAsync(int bookId, int count, DateTime? cursorDate = null, int? cursorId = null)
+        {
+            var query = $"?count={count}";
+
+            if (cursorDate.HasValue)
+                query += $"&cursorDate={Uri.EscapeDataString(cursorDate.Value.ToString("o"))}";
+
+            if (cursorId.HasValue)
+                query += $"&cursorKey={cursorId.Value}";
+
+            var response = await _httpClient.GetAsync($"/api/reading/books/{bookId}/comments{query}");
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(await ApiErrorParser.ParseAsync(response));
+
+            var comments = new List<CommentVM>();
+
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            foreach (var commentJson in root.GetProperty("bookComments").EnumerateArray())
+            {
+                var comment = new CommentVM();
+                comment.FromJson(commentJson);
+                comments.Add(comment);
+            }
+
+            DateTime? nextCursorDate = null;
+            int? nextCursorId = null;
+
+            if (root.TryGetProperty("cursorDate", out var cd) && cd.ValueKind != JsonValueKind.Null)
+                nextCursorDate = cd.GetDateTime();
+
+            if (root.TryGetProperty("cursorId", out var ci) && ci.ValueKind != JsonValueKind.Null)
+                nextCursorId = ci.GetInt32();
+
+            return (comments, nextCursorDate, nextCursorId);
+        }
+
+        public async Task<RequestResult> DeleteBookCommentAsync(int commentId)
+        {
+            var response = await _httpClient.DeleteAsync($"/api/reading/comments/{commentId}");
+
+            if (!response.IsSuccessStatusCode)
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+
+            return new RequestResult(true, null);
+        }
     }
 }

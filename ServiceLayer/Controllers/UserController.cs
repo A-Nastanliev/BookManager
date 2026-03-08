@@ -179,26 +179,37 @@ namespace ServiceLayer.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
-		public async Task<IActionResult> DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id)
 		{
-			if(id == UserId)
-			{
-				return BadRequest("Administrators cannot delete themselves");
-			}
+            try
+            {
+                if (id == UserId)
+                {
+                    return BadRequest("Administrators cannot delete themselves");
+                }
 
-            var user = await _userRepository.ReadAsync(id);
-            if (user == null)
-                return NotFound();
+                var user = await _userRepository.ReadAsync(id);
+                if (user == null)
+                    return NotFound();
 
-            _imageStorageService.DeleteImage(user.ProfilePicture);
+                _imageStorageService.DeleteImage(user.ProfilePicture);
 
-            var success = await _userRepository.DeleteAsync(new User { Id = id });
-			if (!success) return NotFound();
+                var success = await _userRepository.DeleteAsync(new User { Id = id });
+                if (!success) return NotFound(new { error = "User not found" });
 
-			return NoContent();
+                return NoContent();
+            }
+            catch(KeyNotFoundException ex)
+            {
+                return NotFound(new { error = "User not found" });
+            }
+            catch (Exception ex) 
+            {
+                return BadRequest(ex);
+            }
 		}
 
-        [HttpDelete("me")]
+        [HttpDelete()]
         public async Task<IActionResult> DeleteMyself()
         {
             var user = await _userRepository.ReadAsync(UserId);
@@ -224,11 +235,18 @@ namespace ServiceLayer.Controllers
 				EndDate = req.EndDate
 			};
 
-			var success = await _restrictionRepository.CreateAsync(restriction);
-			if (!success)
-				return BadRequest("Could not create comment restriction.");
+            try
+            {
+                var success = await _restrictionRepository.CreateAsync(restriction);
+                if (!success)
+                    return BadRequest("Could not create comment restriction.");
 
-			return StatusCode(201);
+                return StatusCode(201);
+            }
+            catch (InvalidOperationException ex) 
+            {
+                return BadRequest(ex.Message);
+            }
 		}
 
         [HttpGet("comment-restrictions/me")]

@@ -1,8 +1,10 @@
 ﻿using BookManager.ApiClients;
 using BookManager.Models.Book;
 using BookManager.Models.Reading;
+using BookManager.Models.User;
 using BookManager.Views.Book;
 using CommunityToolkit.Maui.Alerts;
+using System.Text.RegularExpressions;
 using CommunityToolkit.Maui.Converters;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,7 +14,7 @@ using System.Collections.ObjectModel;
 
 namespace BookManager.ViewModels.Book
 {
-    public partial class BookDetailVM : PagedLoadingVM, IQueryAttributable
+    public partial class BookDetailVM : ObservableObject,IQueryAttributable
     {
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(PageProgress))]
@@ -24,8 +26,47 @@ namespace BookManager.ViewModels.Book
         [ObservableProperty]
         ReadingLogVM newLog = new();
 
+        readonly PagedLoadingVM logPagedVM = new();
+
         [ObservableProperty]
         UserBookStatus status;
+
+        [ObservableProperty]
+        ObservableCollection<CommentVM> comments = new();
+
+        [ObservableProperty]
+        CommentVM selectedComment = new();
+
+        [ObservableProperty]
+        CommentVM newComment;
+
+        readonly PagedLoadingVM commentPagedVM = new();
+
+        [ObservableProperty]
+        bool canPunishUser;
+
+        public ObservableCollection<KeyValuePair<string, TimeSpan?>> RestrictionOptions { get; } = new ObservableCollection<KeyValuePair<string, TimeSpan?>>
+            {
+                new("Restrict for 1 hour", TimeSpan.FromHours(1)),
+                new("Restrict for 2 hours", TimeSpan.FromHours(2)),
+                new("Restrict for 8 hours", TimeSpan.FromHours(8)),
+                new("Restrict for 1 day", TimeSpan.FromDays(1)),
+                new("Restrict for 2 days", TimeSpan.FromDays(2)),
+                new("Restrict for 1 week", TimeSpan.FromDays(7)),
+                new("Undefined", null)
+            };
+
+        [ObservableProperty]
+        KeyValuePair<string, TimeSpan?> selectedRestrictionOption;
+
+        [ObservableProperty]
+        string restrictionReason;
+
+        [ObservableProperty]
+        bool canDeleteComment;
+
+        public Func<Task> OnSelectComment;
+        public Func<Task> OnDeselectComment;
 
         [ObservableProperty]
         int selectedTabIndex;
@@ -50,16 +91,19 @@ namespace BookManager.ViewModels.Book
         readonly ReadingClient _readingClient;
         readonly BookClient _bookClient;
         readonly UserClient _userClient;
+        readonly UserVM _userVM;
 
-        public BookDetailVM(ReadingClient readingClient, BookClient bookClient, UserClient userClient)
+        public BookDetailVM(ReadingClient readingClient, BookClient bookClient, UserClient userClient, UserVM user)
         {
             _readingClient = readingClient;
             _bookClient = bookClient;
             _userClient = userClient;
+            _userVM = user;
+            NewComment = new CommentVM(user.PublicUser);
         }
 
         [RelayCommand]
-        public override async Task Load()
+        public async Task Load()
         {
             try 
             {
@@ -167,26 +211,27 @@ namespace BookManager.ViewModels.Book
         [RelayCommand]
         public async Task LoadLogs()
         {
-            if (!CanStartLoading())
+            if (!logPagedVM.CanStartLoading())
                 return;
 
 
-            BeginLoading();
+            logPagedVM.BeginLoading();
 
             try
             {
-                var (logs, cursorDate, cursorKey) = await _readingClient.GetNextReadingLogsAsync(Book.Id, BatchSize, CursorDate, CursorId);
+                var (logs, cursorDate, cursorKey) = await _readingClient.GetNextReadingLogsAsync
+                    (Book.Id, logPagedVM.BatchSize , logPagedVM.CursorDate, logPagedVM.CursorId);
                 if (logs.Any())
                 {
                     foreach(var l in logs)
                     {
                         Logs.Add(l);
                     }               
-                    EndLoading(logs.Count, cursorDate, cursorKey);
+                    logPagedVM.EndLoading(logs.Count, cursorDate, cursorKey);
                     return;
                 }
 
-                EndLoading(0, null, null);
+                logPagedVM.EndLoading(0, null, null);
             }
             catch (Exception ex)
             {
@@ -194,9 +239,199 @@ namespace BookManager.ViewModels.Book
             }
         }
 
-        public override Task Refresh()
+        [RelayCommand]
+        public async Task LoadComments()
         {
-            throw new NotImplementedException();
+           if (!commentPagedVM.CanStartLoading())
+                return;
+
+
+            commentPagedVM.BeginLoading();
+
+            try
+            {
+                var (comments, cursorDate, cursorKey) = await _readingClient.GetNextBookCommentsAsync
+                    (Book.Id, commentPagedVM.BatchSize, commentPagedVM.CursorDate, commentPagedVM.CursorId);
+                if (comments.Any())
+                {
+                    foreach (var c in comments)
+                    {
+                        Comments.Add(c);
+                    }
+                    commentPagedVM.EndLoading(comments.Count, cursorDate, cursorKey);
+                    return;
+                }
+
+                commentPagedVM.EndLoading(0, null, null);
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            }
+        }
+
+        [RelayCommand]
+        private async Task CreateComment()
+        {
+            if ((_userVM.Restriction.EndDate > DateTime.UtcNow || _userVM.Restriction.EndDate == null )&& _userVM.Restriction.Id >0)
+            {
+                string endTime = "";
+                if(_userVM.Restriction.EndDate > DateTime.Now)
+                {
+                    endTime = "on " + _userVM.Restriction.EndDate.Value.ToLocalTime().ToString("HH:mm d MMMM yyyy");
+                }
+                else
+                {
+                    endTime = "when an administrator lift it up";
+                }
+
+                await Shell.Current.DisplayAlertAsync("You have restriction", 
+                    $"Your restriction end's {endTime}", "OK");
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(NewComment.Comment))
+            {
+                NewComment.Comment = NewComment.Comment.Trim();
+                NewComment.Comment = Regex.Replace(NewComment.Comment, @"^[ \t]+$[\r\n]*", "", RegexOptions.Multiline);
+                NewComment.Comment = Regex.Replace(NewComment.Comment, @"(\r?\n){2,}", "\n");
+                NewComment.Comment = Regex.Replace(NewComment.Comment, @" {2,}", " ");
+            }
+
+            if (NewComment.Comment?.Length < 4 || NewComment.Comment?.Length > 500 || string.IsNullOrWhiteSpace(NewComment.Comment))
+            {
+                await Shell.Current.DisplayAlertAsync("Invalid input", "Comments have to be between 4 and 500 characters ", "OK");
+                return;
+            }
+
+            try
+            {
+                var result = await _readingClient.CreateBookCommentAsync(Book.Id, NewComment );
+                if (!result.Success)
+                {
+                    await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                    return;
+                }
+                NewComment.UserPageProgress = ReadPages;
+                Comments.Insert(0, NewComment);
+                NewComment = new CommentVM(_userVM.PublicUser);
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            }
+        }
+
+        [RelayCommand]
+        public async Task DeleteComment()
+        {
+            bool confirm = await Shell.Current.DisplayAlertAsync($"Delete comment by {SelectedComment.PublicUser.Username}",
+                "Are you sure you want to delete this comment?", "Yes", "No");
+
+            if (!confirm)
+                return;
+            try
+            {
+                var result = await _readingClient.DeleteBookCommentAsync(SelectedComment.Id);
+
+                if (!result.Success)
+                {
+                    await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                    return;
+                }
+
+                await OnDeselectComment?.Invoke();
+                Comments.Remove(SelectedComment);
+                SelectedComment = null;
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            }
+
+        }
+
+        [RelayCommand]
+        public async Task SelectComment(CommentVM commentVM)
+        {           
+            SelectedComment = commentVM;
+            CanPunishUser = _userVM.Role == UserRole.Admin && commentVM.PublicUser.Id != _userVM.PublicUser.Id;
+            CanDeleteComment = commentVM.UserId == _userVM.PublicUser.Id || _userVM.Role == UserRole.Admin;
+            await OnSelectComment?.Invoke();
+        }
+
+        [RelayCommand]
+        public async Task DeleteUserFromComment()
+        {
+            bool confirm = await Shell.Current.DisplayAlertAsync($"Delete {SelectedComment.PublicUser.Username}",
+              "Are you sure you want to delete this user?", "Yes", "No");
+
+            if (!confirm)
+                return;
+
+            confirm = await Shell.Current.DisplayAlertAsync($"Confirm delete again {SelectedComment.PublicUser.Username}",
+                "Are you sure you want to delete this user?", "Yes", "No");
+
+            if (!confirm)
+                return;
+
+            try
+            {
+                int userId = SelectedComment.PublicUser.Id;
+                var result = await _userClient.DeleteUserAsync(userId);
+
+                if (!result.Success)
+                {
+                    await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                    return;
+                }
+
+                await OnDeselectComment?.Invoke();
+                SelectedComment = null;
+
+                var toRemove = Comments.Where(c => c.PublicUser.Id == userId).ToList();
+                foreach (var c in toRemove)
+                {
+                    Comments.Remove(c);
+                }
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            }
+        }
+
+        [RelayCommand]
+        public async Task RestrictUser()
+        {
+            try
+            {
+                TimeSpan? duration = SelectedRestrictionOption.Value;
+                DateTime? endDate = duration.HasValue ? DateTime.UtcNow.Add(duration.Value) : null;
+
+                if (!string.IsNullOrWhiteSpace(RestrictionReason))
+                {
+                    RestrictionReason = RestrictionReason.Trim();
+                    RestrictionReason = Regex.Replace(RestrictionReason, @"^[ \t]+$[\r\n]*", "", RegexOptions.Multiline);
+                    RestrictionReason = Regex.Replace(RestrictionReason, @"(\r?\n){2,}", "\n");
+                    RestrictionReason = Regex.Replace(RestrictionReason, @" {2,}", " ");
+                }
+                var result = await _userClient.CreateCommentRestrictionAsync(SelectedComment.UserId, endDate, RestrictionReason);
+
+                if (!result.Success)
+                {
+                    await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                    return;
+                }
+
+                RestrictionReason = null;
+                _ = Toast.Make($"{SelectedComment.PublicUser.Username} restricted").Show();
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            }
+
         }
 
         [RelayCommand]
@@ -421,6 +656,7 @@ namespace BookManager.ViewModels.Book
                 Book.CopyFrom(book);
                 await Load();
                 await LoadLogs();
+                await LoadComments();
                 query.Remove($"{nameof(Book)}");
             }
         }

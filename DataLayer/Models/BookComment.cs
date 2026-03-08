@@ -13,7 +13,7 @@
 			[ForeignKey(nameof(UserId))]
 			public User User { get; set; }
 
-			[Length(1, 500)]
+			[Length(4, 500)]
 			[Required]
 			public string Comment { get; set; }
 
