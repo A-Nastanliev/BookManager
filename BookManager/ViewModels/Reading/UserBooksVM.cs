@@ -31,6 +31,18 @@ namespace BookManager.ViewModels.Reading
         {
             _readingClient = readingClient;
 
+            UserClient.OnLogout += () =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    CursorDate = null;
+                    CursorId = null;
+                    CanLoadMore = true;
+                    Books.Clear();
+                });
+                return Task.CompletedTask;
+            };
+
             WeakReferenceMessenger.Default.Register<ValueChangedMessage<(BookVM , UserBookStatus)>, string>(this, Messages.UserBookStatusChanged,
                 (receptient, message) =>
             {

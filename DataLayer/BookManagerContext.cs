@@ -114,10 +114,6 @@ namespace DataLayer
                       .HasMaxLength(200)
                       .IsRequired();
 
-                entity.Property(r => r.RequestDescription)
-                      .HasMaxLength(500)
-                      .IsRequired();
-
                 entity.Property(r => r.DateSent)
                       .IsRequired();
 

@@ -61,10 +61,10 @@ namespace BusinessLayer.Repositories
             }
 
             var items = await query
+				.Where(br=>br.Status == BookRequestStatus.Pending)
                 .OrderByDescending(br => br.DateSent)
                 .ThenByDescending(br => br.Id)
                 .Take(count)
-                .Include(br => br.Sender)
                 .Include(br => br.ActionedBy)
                 .ToListAsync();
 
@@ -76,9 +76,16 @@ namespace BusinessLayer.Repositories
 
         public override async Task<bool> CreateAsync(BookRequest obj)
 		{
-			obj.DateSent = DateTime.UtcNow;
+			var existingBooksOrRequests = await _context.Books.AnyAsync(b=>b.ISBN == obj.ISBN);
+			if (existingBooksOrRequests) throw new InvalidOperationException($"Book with ISBN: {obj.ISBN} already exists");
+
+		    existingBooksOrRequests = await _context.BookRequests.AnyAsync(b=>b.ISBN == obj.ISBN && b.Status == BookRequestStatus.Pending);
+			if (existingBooksOrRequests) throw new InvalidOperationException($"Another user has requested book with ISBN: {obj.ISBN}");
+
+            obj.DateSent = DateTime.UtcNow;
 			obj.DateActioned = null;
 			obj.ActionedById = null;
+			obj.Status = BookRequestStatus.Pending;
 			await _context.BookRequests.AddAsync(obj);
 			return await _context.SaveChangesAsync() > 0;
 		}
@@ -86,23 +93,15 @@ namespace BusinessLayer.Repositories
 		public async Task<bool> UpdateByAdminAsync(BookRequest obj)
 		{
 			var bookRequest = await _context.BookRequests.FindAsync(obj.Id);
-			if (bookRequest == null || bookRequest.Status == BookRequestStatus.Pending)
+			if (bookRequest == null || bookRequest.Status != BookRequestStatus.Pending)
 				return false;
 
-			bookRequest.DateActioned = DateTime.UtcNow;
+            var existingBook = await _context.Books.AnyAsync(b => b.ISBN == obj.ISBN);
+            if (existingBook) throw new InvalidOperationException($"Book with ISBN: {obj.ISBN} already exists");
+
+            bookRequest.DateActioned = DateTime.UtcNow;
 			bookRequest.ActionedById = obj.ActionedById;
-			return await _context.SaveChangesAsync() > 0;
-		}
-
-		public async Task<bool> UpdateByUserAsync(BookRequest obj)
-		{
-			var bookRequest = await _context.BookRequests.FindAsync(obj.Id);
-			if (bookRequest == null || bookRequest.Status == BookRequestStatus.Pending || bookRequest.SenderId != obj.SenderId)
-				return false;
-
-			bookRequest.ISBN = obj.ISBN;
-			bookRequest.RequestDescription = obj.RequestDescription;
-			bookRequest.Title = obj.Title;
+			bookRequest.Status = obj.Status;
 			return await _context.SaveChangesAsync() > 0;
 		}
 
@@ -114,21 +113,6 @@ namespace BusinessLayer.Repositories
 				return false;
 
 			_context.Remove(bookRequest);
-			return await _context.SaveChangesAsync() > 0;
-		}
-
-		public async Task<bool> DeleteByUserAsync(int id, int userId)
-		{
-			var request = await _context.BookRequests
-				.FirstOrDefaultAsync(br =>
-					br.Id == id &&
-					br.SenderId == userId &&
-					br.Status == BookRequestStatus.Pending);
-
-			if (request == null)
-				return false;
-
-			_context.BookRequests.Remove(request);
 			return await _context.SaveChangesAsync() > 0;
 		}
     }

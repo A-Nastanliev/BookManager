@@ -18,7 +18,7 @@ namespace ServiceLayer.Mappers
 
 		public static BookRequestDto ToDto(this BookRequest bookRequest, string baseUrl)
 		{
-			return new BookRequestDto(bookRequest.SenderId, bookRequest.ISBN, bookRequest.Title, bookRequest.RequestDescription, bookRequest.Id,
+			return new BookRequestDto(bookRequest.SenderId,bookRequest.Title, bookRequest.ISBN, bookRequest.Id,
 				bookRequest.ActionedById, bookRequest.DateSent, bookRequest.DateActioned, bookRequest.Status, 
 				bookRequest.Sender?.ToDto(baseUrl), bookRequest.ActionedBy?.ToDto(baseUrl));
 		}

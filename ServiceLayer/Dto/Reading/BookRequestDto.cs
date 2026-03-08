@@ -13,17 +13,9 @@ namespace ServiceLayer.Dto.Reading
 		public int? SenderId { get; set; }
 		public UserDto Sender { get; set; }
 
-		[Required]
-		[Length(13, 13)]
 		public string ISBN { get; set; }
 
-		[Required]
-		[MaxLength(200)]
 		public string Title { get; set; }
-
-		[Required]
-		[Length(10, 500)]
-		public string RequestDescription { get; set; }
 
 		public BookRequestStatus Status { get; set; }
 		public DateTime DateSent { get; set; }
@@ -34,21 +26,24 @@ namespace ServiceLayer.Dto.Reading
 
 		public BookRequestDto() { }
 
-		public BookRequestDto(int? senderId, string isbn, string title, string requestDescription)
+		public BookRequestDto(int? senderId, string title, string isbn)
 		{
 			SenderId = senderId;
 			Title = title;
 			ISBN = isbn;
-			RequestDescription = requestDescription;
 		}
-		public BookRequestDto(int? senderId, string title, string isbn, string requestDescription,
+		public BookRequestDto(int? senderId, string title, string isbn,
 							  int id, int? actionedById, DateTime dateSent, DateTime? dateActioned,
 							  BookRequestStatus status, UserDto sender, UserDto actionedBy)
-			: this(senderId, isbn, title, requestDescription)
+			: this(senderId, title, isbn)
 		{
-			Id = id; SenderId = senderId; ActionedById = actionedById;
-			DateSent = dateSent; DateActioned = dateActioned; Status = status;
-			Sender = sender; ActionedBy = actionedBy;
+			Id = id; SenderId = senderId; 
+			ActionedById = actionedById;
+			DateSent = dateSent; 
+			DateActioned = dateActioned; 
+			Status = status;
+			Sender = sender; 
+			ActionedBy = actionedBy;
 		}
 	}
 }

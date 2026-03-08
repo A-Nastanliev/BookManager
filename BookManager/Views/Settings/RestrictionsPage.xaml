@@ -6,7 +6,7 @@
              xmlns:vm="clr-namespace:BookManager.ViewModels.Settings"
              xmlns:views="clr-namespace:BookManager.Views.Settings"
              x:DataType="vm:RestrictionsVM"
-             Title="RestrictionsPage">
+             Title="Restrictions">
 
     <AbsoluteLayout>
         <Grid Padding="16" RowSpacing="12" RowDefinitions="Auto, *, Auto" 

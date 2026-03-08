@@ -16,7 +16,7 @@ namespace BookManager.ApiClients
         private readonly ITokenStore _tokenStore;
 
         private readonly UserVM _user;
-        public event Func<Task>? OnLogout;
+        public static event Func<Task>? OnLogout;
 
         public UserClient(HttpClient httpClient, UserVM currentUser, ITokenStore tokenStore)
         {
@@ -39,18 +39,15 @@ namespace BookManager.ApiClients
             _tokenStore?.Clear();
             if (OnLogout != null)
             {
-                foreach (var handler in OnLogout.GetInvocationList())
+                foreach (Func<Task> handler in OnLogout.GetInvocationList())
                 {
-                    if (handler is Func<Task> asyncHandler)
+                    try
                     {
-                        try
-                        {
-                            await asyncHandler();
-                        }
-                        catch (Exception ex)
-                        {
-                            await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
-                        }
+                        await handler();
+                    }
+                    catch (Exception ex)
+                    {
+                        await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
                     }
                 }
             }

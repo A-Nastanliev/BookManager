@@ -17,10 +17,6 @@
         [MaxLength(200)]
         public string Title { get; set; }
 
-        [Required]
-        [Length(10, 500)]
-        public string RequestDescription { get; set; }
-
         public BookRequestStatus Status { get; set; }
         public DateTime DateSent { get; set; }
         public DateTime? DateActioned { get; set; }
@@ -31,21 +27,19 @@
 
         public BookRequest() { }
 
-		public BookRequest(int? senderId, string isbn, string title, string requestDescription)
+		public BookRequest(int? senderId, string isbn, string title)
 		{
 			SenderId = senderId;
 			ISBN = isbn;
 			Title = title;
-			RequestDescription = requestDescription;
 		}
 
-		public BookRequest(int id, int? senderId, string isbn, string title, string requestDescription)
+		public BookRequest(int id, int? senderId, string isbn, string title)
 		{
 			Id = id;
 			SenderId = senderId;
 			ISBN = isbn;
 			Title = title;
-			RequestDescription = requestDescription;
 		}
 
 		public BookRequest(int id, BookRequestStatus status)

@@ -140,14 +140,21 @@ namespace ServiceLayer.Controllers
 		[HttpPost("book-requests")]
 		public async Task<IActionResult> CreateBookRequest([FromBody] BookRequestDto dto)
 		{
-			var request = new BookRequest(dto.SenderId, dto.ISBN, dto.Title, dto.RequestDescription);
+			try
+			{
+				var request = new BookRequest(dto.SenderId, dto.ISBN, dto.Title);
 
-			bool success = await _bookRequestRepository.CreateAsync(request);
+				bool success = await _bookRequestRepository.CreateAsync(request);
 
-			if (!success)
-				return BadRequest("Failed to create book request");
+				if (!success)
+					return BadRequest("Failed to create book request");
 
-			return StatusCode(201, new { id = request.Id });
+				return StatusCode(201, new { id = request.Id });
+			}
+			catch(InvalidOperationException ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("book-requests/mine")]
@@ -158,60 +165,35 @@ namespace ServiceLayer.Controllers
             return Ok(new { BookRequests = BookRequests.Select(br => br.ToDto(baseUrl)), CursorDate, CursorId });
         }
 
-		[HttpGet("book-requests")]
+		[HttpGet("book-requests/{status}")]
 		[Authorize(Roles = "Admin")]
-		public async Task<IActionResult> ReadNextBookRequests([FromQuery] CursorDto cursor)
+		public async Task<IActionResult> ReadNextBookRequests([FromQuery] CursorDto cursor, BookRequestStatus status)
 		{
-            var (BookRequests, CursorDate, CursorId) = await _bookRequestRepository.ReadNextAsync(cursor.Count, cursor.CursorDate, cursor.CursorKey);
+            var (BookRequests, CursorDate, CursorId) = await _bookRequestRepository.ReadNextByStatusAsync
+				(cursor.Count, cursor.CursorDate, cursor.CursorKey, status);
             var baseUrl = _configuration["App:BaseUrl"];
             return Ok(new { BookRequests = BookRequests.Select(br => br.ToDto(baseUrl)), CursorDate, CursorId });
         }
 
         [HttpPut("book-requests/{id}/action")]
 		[Authorize(Roles = "Admin")]
-		public async Task<IActionResult> UpdateBookRequest([FromQuery] BookRequestDto dto)
+		public async Task<IActionResult> UpdateBookRequest([FromBody] BookRequestDto dto)
 		{
-			BookRequest bookRequest = new BookRequest(dto.Id, dto.Status);
-			bool success = await _bookRequestRepository.UpdateByAdminAsync(bookRequest);
-			if (!success)
-				return NotFound();
+			try
+			{
+				BookRequest bookRequest = new BookRequest(dto.Id, dto.Status);
+				bookRequest.ActionedById = UserId;
+				bool success = await _bookRequestRepository.UpdateByAdminAsync(bookRequest);
+				if (!success)
+					return NotFound();
 
-			return NoContent();
-		}
-
-		[HttpPut("book-requests/{id}")]
-		public async Task<IActionResult> UpdateMyBookRequest([FromQuery] BookRequestDto dto)
-		{
-			BookRequest bookRequest = new BookRequest(dto.Id, UserId, dto.ISBN, dto.Title, dto.RequestDescription);
-			bool success = await _bookRequestRepository.UpdateByAdminAsync(bookRequest);
-			if (!success)
-				return NotFound();
-
-			return NoContent();
-		}
-
-		[Authorize(Roles = "Admin")]
-		[HttpDelete("book-requests/{id}")]
-		public async Task<IActionResult> DeleteBookRequest(int id)
-		{
-			bool success = await _bookRequestRepository.DeleteAsync(new BookRequest { Id = id });
-
-			if (!success)
-				return NotFound();
-
-			return NoContent();
-		}
-
-		[HttpDelete("book-requests/{id}/mine")]
-		public async Task<IActionResult> DeleteMyBookRequest(int id)
-		{
-			bool success = await _bookRequestRepository.DeleteByUserAsync(id, UserId);
-
-			if (!success)
-				return NotFound();
-
-			return NoContent();
-		}
+				return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
 		[HttpPost("books/{bookId}/rating")]
 		public async Task<IActionResult> CreateBookRating(int bookId, [FromBody] byte rating)

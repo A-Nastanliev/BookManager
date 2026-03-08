@@ -23,7 +23,10 @@
                 memStream.Seek(0, SeekOrigin.Begin);
                 var json = await new StreamReader(memStream).ReadToEndAsync();
 
-                File.AppendAllText("responses.log", json + Environment.NewLine);
+                using var fs = new FileStream("responses.log", FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+
+                using var writer = new StreamWriter(fs);
+                await writer.WriteLineAsync(json);
             }
 
             memStream.Seek(0, SeekOrigin.Begin);

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookManager.Views.Book.MyBookRequestsPage"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:views="clr-namespace:BookManager.Views.Book"
+             xmlns:vm="clr-namespace:BookManager.ViewModels.Book"
+             x:DataType="vm:MyBookRequestsVM"
+             Title="My Pending Book Requests">
+
+    <AbsoluteLayout>
+        <RefreshView IsRefreshing="{Binding IsRefreshing}" Margin="6,0"
+                 Command="{Binding RefreshCommand}" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+            <CollectionView VerticalOptions="Fill" 
+                      ItemsSource="{Binding Requests}"
+                      RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+                      RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
+
+                <CollectionView.EmptyView>
+                    <Label  Text="No book requests found"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"/>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical"
+                        Span="1" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <views:RequestView x:DataType="views:RequestView" Margin="8" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+        <VerticalStackLayout AbsoluteLayout.LayoutBounds="0.95,0.97,AutoSize,AutoSize" AbsoluteLayout.LayoutFlags="PositionProportional"
+          HorizontalOptions="End" VerticalOptions="End" Margin="0" Spacing="20" >
+            <Grid HeightRequest="72" WidthRequest="72" >
+                <Button x:Name="PlusButton"  Clicked="PlusButton_Clicked" CornerRadius="36"/>
+                <Image x:Name="Icon" Source="plus_icon.png" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" HeightRequest="48" WidthRequest="48">
+                    <Image.Behaviors>
+                        <toolkit:IconTintColorBehavior TintColor="White" />
+                    </Image.Behaviors>
+                </Image>
+            </Grid>
+        </VerticalStackLayout>
+        <Grid
+            x:Name="Overlay" IsVisible="False" BackgroundColor="#771A1A1A" RowDefinitions="*, Auto"
+            AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+            <BoxView BackgroundColor="Transparent">
+                <BoxView.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnOverlayTapped"/>
+                </BoxView.GestureRecognizers>
+            </BoxView>
+            <BoxView  BackgroundColor="#80000000" Grid.RowSpan="2"/>
+            <Grid  x:Name="BottomSheetContent" Grid.Row="1" HorizontalOptions="Fill" 
+                VerticalOptions="End" >
+                <Border Style="{StaticResource SectionCard}" StrokeShape="RoundRectangle 20,20,0,0">
+                    <Grid MaximumHeightRequest="500" RowDefinitions="Auto,Auto, Auto" ColumnDefinitions="Auto, *" ColumnSpacing="8" RowSpacing="8"> 
+                        <Label Text="Title:" FontSize="Medium" Grid.Row="0" Grid.Column="0" VerticalTextAlignment="Center"/>
+                        <Entry Text="{Binding NewRequest.Title}" Grid.Row="0" Grid.Column="1" Placeholder="e.g., Atomic Habits" MaxLength="100"/>
+                        <Label Text="ISBN:" FontSize="Medium" Grid.Row="1" Grid.Column="0" VerticalTextAlignment="Center"/>
+                        <Entry Text="{Binding NewRequest.Isbn}" MaxLength="13" Grid.Row="1" Grid.Column="1" Keyboard="Numeric"/>
+                        <Button Text="Make Request" Command="{Binding MakeRequestCommand}" Grid.Row="2" Grid.ColumnSpan="2"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </AbsoluteLayout>
+</ContentPage>

@@ -117,8 +117,8 @@ namespace BookManager.ViewModels.Settings
                 }
 
                 _= Toast.Make($"{User.PublicUser.Username} deleted", ToastDuration.Short).Show();
-                await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
                 await _userClient.Logout();
+                await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
             }
             catch (Exception ex)
             {

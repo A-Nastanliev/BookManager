@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookManager.Views.Book.BookRequestsPage"
+             xmlns:segmentedControl="clr-namespace:Syncfusion.Maui.Toolkit.SegmentedControl;assembly=Syncfusion.Maui.Toolkit"
+             xmlns:vm="clr-namespace:BookManager.ViewModels.Book"
+             xmlns:views="clr-namespace:BookManager.Views.Book"
+             xmlns:local="clr-namespace:BookManager"
+             x:DataType="vm:BookRequestsVM"
+             Title="Book Requests">
+    
+    <AbsoluteLayout>
+        <Grid Padding="0" RowSpacing="12" RowDefinitions="Auto, *, Auto" 
+            AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+            <segmentedControl:SfSegmentedControl Margin="0,16,0,0"
+              Grid.Row="0" SelectedIndex="{Binding SelectedSegment, Mode=TwoWay}">
+                <segmentedControl:SfSegmentedControl.SelectionIndicatorSettings>
+                    <segmentedControl:SelectionIndicatorSettings
+                      Background="{StaticResource Primary}"  Stroke="{StaticResource Primary}" />
+                </segmentedControl:SfSegmentedControl.SelectionIndicatorSettings>
+                <segmentedControl:SfSegmentedControl.ItemsSource>
+                    <x:Array Type="{x:Type x:String}">
+                        <x:String>Pending</x:String>
+                        <x:String>Declined</x:String>
+                        <x:String>Accepted</x:String>
+                    </x:Array>
+                </segmentedControl:SfSegmentedControl.ItemsSource>
+            </segmentedControl:SfSegmentedControl>
+            <RefreshView IsRefreshing="{Binding IsRefreshing}" Margin="6,0"
+                 Command="{Binding RefreshCommand}"  Grid.Row="1" Grid.RowSpan="2">
+                <CollectionView VerticalOptions="Fill"
+                  ItemsSource="{Binding Requests}"
+                  RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+                  RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
+
+                    <CollectionView.EmptyView>
+                        <Label  Text="No requests found"
+                      HorizontalOptions="Center"
+                      VerticalOptions="Center"/>
+                    </CollectionView.EmptyView>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <views:RequestView
+                          x:DataType="views:RequestView" Margin="8"                                              
+                          TapCommand="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectRequestCommand}"/>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
+        </Grid>
+        <Grid
+          x:Name="Overlay" IsVisible="False" BackgroundColor="#771A1A1A" RowDefinitions="*, Auto"
+          AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+            <BoxView BackgroundColor="Transparent">
+                <BoxView.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnOverlayTapped"/>
+                </BoxView.GestureRecognizers>
+            </BoxView>
+            <BoxView  BackgroundColor="#80000000" Grid.RowSpan="2"/>
+            <Grid  x:Name="BottomSheetContent" RowDefinitions="Auto" Grid.Row="1" HorizontalOptions="Fill" 
+              VerticalOptions="End" MaximumHeightRequest="500">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+                </Grid.GestureRecognizers>
+                <Border Style="{StaticResource SectionCard}" StrokeShape="RoundRectangle 20,20,0,0">
+                    <VerticalStackLayout Spacing="8" Background="Transparent" >
+                        <HorizontalStackLayout Spacing="12" VerticalOptions="Center" HorizontalOptions="Start">
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="1" Stroke="LightGray"  StrokeShape="RoundRectangle 50" VerticalOptions="Center">
+                                <Image Source="{Binding SelectedRequest.Sender.ProfilePictureSource}" Aspect="AspectFill">
+                                    <Image.Clip>
+                                        <EllipseGeometry Center="25,25" RadiusX="25" RadiusY="25" />
+                                    </Image.Clip>
+                                </Image>
+                            </Border>
+                            <Label Text="{Binding SelectedRequest.Sender.Username}" FontAttributes="Bold" FontSize="Medium" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="8">
+                            <VerticalStackLayout Spacing="8">
+                                <Label FontSize="Small" Text="Title:" TextColor="White" VerticalOptions="Center"/>
+                                <Label FontSize="Small" Text="ISBN:" TextColor="White" VerticalOptions="Center"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="{Binding SelectedRequest.Title}" FontSize="Small" LineBreakMode="WordWrap" VerticalOptions="Center" />
+                                <Label Text="{Binding SelectedRequest.Isbn}" FontSize="Small"  LineBreakMode="WordWrap"  VerticalOptions="Center" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="8">
+                            <VerticalStackLayout Spacing="8">
+                                <Label FontSize="Micro" Text="Sent:" TextColor="White" VerticalOptions="Center" />
+                                <Label FontSize="Micro" Text="Handled:" TextColor="White" VerticalOptions="Center" 
+                                       IsVisible="{Binding SelectedRequest.DateActioned, Converter={StaticResource NotEqualsConverter}, ConverterParameter={x:Null}}"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Spacing="8">
+                                <Label
+                                    Text="{Binding SelectedRequest.DateSent, Converter={StaticResource TimeConverter}}" FontSize="Micro"
+                                    TextColor="White" VerticalOptions="Center" HorizontalOptions="Start" />
+                                <Label  IsVisible="{Binding DateActioned, Converter={StaticResource NotEqualsConverter}, ConverterParameter={x:Null}}"
+                                    Text="{Binding SelectedRequest.DateActioned, Converter={StaticResource TimeConverter}}"
+                                    FontSize="Micro" VerticalOptions="Center" TextColor="White" HorizontalOptions="Start" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="6" HorizontalOptions="Start" VerticalOptions="Center" 
+                                    IsVisible="{Binding SelectedRequest.DateActioned, Converter={StaticResource NotEqualsConverter}, ConverterParameter={x:Null}}">
+                            <Label Text="By" FontSize="Micro" VerticalOptions="Center" />
+                            <Border WidthRequest="25" HeightRequest="25" StrokeThickness="1" 
+                                    Stroke="LightGray" StrokeShape="RoundRectangle 25" VerticalOptions="Center">
+                                <Image Source="{Binding SelectedRequest.ActionedBy.ProfilePictureSource}" Aspect="AspectFill" VerticalOptions="Center">
+                                    <Image.Clip>
+                                        <EllipseGeometry  Center="12.5,12.5" RadiusX="12.5" RadiusY="12.5" />
+                                    </Image.Clip>
+                                </Image>
+                            </Border>
+                            <Label Text="{Binding SelectedRequest.ActionedBy.Username}" FontSize="Small" VerticalOptions="Center"
+                                FontAttributes="Bold" LineBreakMode="TailTruncation" MaxLines="1" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="20" HorizontalOptions="Center"
+                            IsVisible="{Binding SelectedRequest.Status, Converter={StaticResource EqualsConverter}, ConverterParameter={x:Static local:BookRequestStatus.Pending}}">
+                            <Button Text="Accept" Command="{Binding AcceptRequestCommand}"/>
+                            <Button Text="Decline" Command="{Binding DeclineRequestCommand}" BackgroundColor="Red"/>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+        </Grid>
+    </AbsoluteLayout>
+</ContentPage>

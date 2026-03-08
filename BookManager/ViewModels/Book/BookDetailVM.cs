@@ -100,6 +100,7 @@ namespace BookManager.ViewModels.Book
             _userClient = userClient;
             _userVM = user;
             NewComment = new CommentVM(user.PublicUser);
+            SelectedRestrictionOption = RestrictionOptions.First();
         }
 
         [RelayCommand]
@@ -312,6 +313,7 @@ namespace BookManager.ViewModels.Book
                     await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
                     return;
                 }
+                NewComment.UserId = _userVM.PublicUser.Id;
                 NewComment.UserPageProgress = ReadPages;
                 Comments.Insert(0, NewComment);
                 NewComment = new CommentVM(_userVM.PublicUser);

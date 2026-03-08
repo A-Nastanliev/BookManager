@@ -47,6 +47,14 @@
                 IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter=Admin}"
                 ContentTemplate="{DataTemplate book:PublishingHubPage}"
                 Route="CatalogManagementPage"/>
+            <ShellContent Title="Requests"  
+               IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter=User}"
+               ContentTemplate="{DataTemplate book:MyBookRequestsPage}"
+               Route="MyBookRequestsPage"/>
+            <ShellContent Title="Requests"  
+               IsVisible="{Binding Role, Source={StaticResource User}, Converter={StaticResource RoleVisibilityConverter}, ConverterParameter=Admin}"
+               ContentTemplate="{DataTemplate book:BookRequestsPage}"
+               Route="BookRequestsPage"/>
         </Tab>
         <Tab Title="Reading" Icon="book_icon.png">
             <ShellContent Title="Wishlist" ContentTemplate="{DataTemplate reading:WishlistedBooksPage}" 

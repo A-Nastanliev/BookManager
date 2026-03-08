@@ -42,7 +42,7 @@ namespace BookManager
             builder.Services.AddSingleton<ITokenStore, TokenStore>();
             builder.Services.AddTransient<AuthMessageHandler>();
 
-            void AddApiClient<T>() where T : class
+           void AddApiClient<T>() where T : class
             {
                 builder.Services
                     .AddHttpClient<T>(client =>
@@ -69,6 +69,9 @@ namespace BookManager
             builder.Services.AddTransient<BookAttributeVM>();
             builder.Services.AddTransient<BookDetailVM>();
 
+            builder.Services.AddSingleton<MyBookRequestsVM>();
+            builder.Services.AddSingleton<BookRequestsVM>();
+
             builder.Services.AddTransient<UserBooksVM>();
 
             builder.Services.AddSingleton<SettingsVM>();
@@ -84,6 +87,9 @@ namespace BookManager
             builder.Services.AddTransient<FormPage>();
             builder.Services.AddTransient<BookAttributePage>();
             builder.Services.AddTransient<BookDetailPage>();
+
+            builder.Services.AddSingleton<MyBookRequestsPage>();
+            builder.Services.AddSingleton<BookRequestsPage>();
 
             builder.Services.AddSingleton<WishlistedBooksPage>();
             builder.Services.AddSingleton<CurrentlyReadingBooksPage>();

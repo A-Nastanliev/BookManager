@@ -1,5 +1,6 @@
 ﻿using BookManager.Models.Book;
 using BookManager.Models.Reading;
+using BookManager.Models.User;
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Json;
@@ -11,10 +12,11 @@ namespace BookManager.ApiClients
     public class ReadingClient
     {
         readonly HttpClient _httpClient;
-
-        public ReadingClient(HttpClient httpClient)
+        readonly UserVM _userVM;
+        public ReadingClient(HttpClient httpClient, UserVM user)
         {
             _httpClient = httpClient;
+            _userVM = user;
         }
 
         public async Task<RequestResult> WishlistBookAsync(int bookId)
@@ -279,5 +281,128 @@ namespace BookManager.ApiClients
 
             return new RequestResult(true, null);
         }
+
+        public async Task<RequestResult> CreateBookRequestAsync(BookRequestVM request)
+        {
+            var dto = new
+            {
+                senderId = request.Sender.Id,
+                isbn = request.Isbn,
+                title = request.Title,
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("/api/reading/book-requests", dto);
+
+            if (!response.IsSuccessStatusCode)
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            using var doc = JsonDocument.Parse(json);
+            request.Id = doc.RootElement.GetProperty("id").GetInt32();
+            return new RequestResult(true, null);
+        }
+
+        public async Task<(List<BookRequestVM> Requests, DateTime? CursorDate, int? CursorId)>
+            GetMyNextBookRequestsAsync(int count, DateTime? cursorDate = null, int? cursorId = null)
+        {
+            var query = $"?count={count}";
+
+            if (cursorDate.HasValue)
+                query += $"&cursorDate={Uri.EscapeDataString(cursorDate.Value.ToString("o"))}";
+
+            if (cursorId.HasValue)
+                query += $"&cursorKey={cursorId.Value}";
+
+            var response = await _httpClient.GetAsync($"/api/reading/book-requests/mine{query}");
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(await ApiErrorParser.ParseAsync(response));
+
+            var requests = new List<BookRequestVM>();
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            foreach (var reqJson in root.GetProperty("bookRequests").EnumerateArray())
+            {
+                var request = new BookRequestVM(_userVM.PublicUser);
+                request.FromJson(reqJson);
+                requests.Add(request);
+            }
+
+            DateTime? nextCursorDate = null;
+            int? nextCursorId = null;
+
+            if (root.TryGetProperty("cursorDate", out var cd) && cd.ValueKind != JsonValueKind.Null)
+                nextCursorDate = cd.GetDateTime();
+
+            if (root.TryGetProperty("cursorId", out var ci) && ci.ValueKind != JsonValueKind.Null)
+                nextCursorId = ci.GetInt32();
+
+            return (requests, nextCursorDate, nextCursorId);
+        }
+
+        public async Task<(List<BookRequestVM> Requests, DateTime? CursorDate, int? CursorId)>
+            GetNextBookRequestsAsync(BookRequestStatus status, int count, DateTime? cursorDate = null, int? cursorId = null)
+        {
+            var query = $"?count={count}";
+
+            if (cursorDate.HasValue)
+                query += $"&cursorDate={Uri.EscapeDataString(cursorDate.Value.ToString("o"))}";
+
+            if (cursorId.HasValue)
+                query += $"&cursorKey={cursorId.Value}";
+
+            var response = await _httpClient.GetAsync($"/api/reading/book-requests/{status}{query}");
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(await ApiErrorParser.ParseAsync(response));
+
+            var requests = new List<BookRequestVM>();
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            foreach (var reqJson in root.GetProperty("bookRequests").EnumerateArray())
+            {
+                var request = new BookRequestVM();
+                request.FromJson(reqJson);
+                requests.Add(request);
+            }
+
+            DateTime? nextCursorDate = null;
+            int? nextCursorId = null;
+
+            if (root.TryGetProperty("cursorDate", out var cd) && cd.ValueKind != JsonValueKind.Null)
+                nextCursorDate = cd.GetDateTime();
+
+            if (root.TryGetProperty("cursorId", out var ci) && ci.ValueKind != JsonValueKind.Null)
+                nextCursorId = ci.GetInt32();
+
+            return (requests, nextCursorDate, nextCursorId);
+        }
+
+        public async Task<RequestResult> UpdateBookRequestAsync(int id, BookRequestStatus status)
+        {
+            var dto = new
+            {
+                id = id,
+                status = status
+            };
+
+            var response = await _httpClient.PutAsJsonAsync($"/api/reading/book-requests/{id}/action", dto);
+
+            if (!response.IsSuccessStatusCode)
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+
+            return new RequestResult(true, null);
+        }
+
+
     }
 }
