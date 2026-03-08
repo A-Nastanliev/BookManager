@@ -22,17 +22,14 @@ namespace BookManager.ViewModels.Reading
         UserBookStatus status;
 
         [ObservableProperty]
-        string title;
+        string emptyViewText;
 
-        static readonly Queue<UserBookStatus> _statusQueue = new(new[] { UserBookStatus.Wishlisted, UserBookStatus.Reading, UserBookStatus.Finished });
 
         readonly ReadingClient _readingClient;
 
         public UserBooksVM(ReadingClient readingClient) 
         {
             _readingClient = readingClient;
-            if (_statusQueue.Count > 0)
-                Status = _statusQueue.Dequeue();
 
             WeakReferenceMessenger.Default.Register<ValueChangedMessage<(BookVM , UserBookStatus)>, string>(this, Messages.UserBookStatusChanged,
                 (receptient, message) =>
@@ -127,22 +124,6 @@ namespace BookManager.ViewModels.Reading
         public async Task Select(BookVM book)
         {
             await Shell.Current.GoToAsync(nameof(BookDetailPage), new Dictionary<string, object> { [nameof(BookDetailVM.Book)] = book });
-        }
-
-        partial void OnStatusChanged(UserBookStatus value)
-        {
-            switch (status)
-            {
-                case UserBookStatus.Wishlisted:
-                    Title = "My Wishlist";
-                    break;
-                case UserBookStatus.Reading:
-                    Title = "Currently Reading";
-                    break;
-                case UserBookStatus.Finished:
-                    Title = "Finished Books";
-                    break;
-            }
         }
 
     }

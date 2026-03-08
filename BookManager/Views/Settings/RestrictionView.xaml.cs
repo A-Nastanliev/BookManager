@@ -16,20 +16,6 @@ public partial class RestrictionView : ContentView
         set => SetValue(TapCommandProperty, value);
     }
 
-    public static readonly BindableProperty SelectedIdProperty =
-          BindableProperty.Create(
-              nameof(SelectedId),
-              typeof(int),
-              typeof(RestrictionView),
-              0);
-
-    public int SelectedId
-    {
-        get => (int)GetValue(SelectedIdProperty);
-        set => SetValue(SelectedIdProperty, value);
-    }
-
-
     public RestrictionView()
 	{
 		InitializeComponent();

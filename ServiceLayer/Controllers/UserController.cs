@@ -231,6 +231,17 @@ namespace ServiceLayer.Controllers
 			return StatusCode(201);
 		}
 
+        [HttpGet("comment-restrictions/me")]
+        public async Task<IActionResult> GetCommentRestrictions()
+        {
+            var restriction = await _restrictionRepository.GetPendingRestrictionAsync(UserId);
+
+            return Ok(new
+            {
+                Restriction = restriction?.ToDto(""),
+            });
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpGet("comment-restrictions")]
         public async Task<IActionResult> GetCommentRestrictions([FromQuery] CursorDto cursor, [FromQuery] RestrictionFilter filter)

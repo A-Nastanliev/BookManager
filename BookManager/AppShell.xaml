@@ -49,12 +49,12 @@
                 Route="CatalogManagementPage"/>
         </Tab>
         <Tab Title="Reading" Icon="book_icon.png">
-            <ShellContent Title="Wishlist" ContentTemplate="{DataTemplate reading:UserBooksPage}" 
+            <ShellContent Title="Wishlist" ContentTemplate="{DataTemplate reading:WishlistedBooksPage}" 
                 Route="WishlistedBooksPage" />
             <ShellContent
-                Title="Reading" ContentTemplate="{DataTemplate reading:UserBooksPage}"
-                Route="ReadingdBooksPage" />
-            <ShellContent Title="Finsihed" ContentTemplate="{DataTemplate reading:UserBooksPage}"
+                Title="Reading" ContentTemplate="{DataTemplate reading:CurrentlyReadingBooksPage}"
+                Route="CurrentlyReadingdBooksPage" />
+            <ShellContent Title="Finsihed" ContentTemplate="{DataTemplate reading:FinishedBooksPage}"
                 Route="FinishedBooksPage" />
         </Tab>
         <Tab Title="Settings" Icon="settings_icon.png">

@@ -7,39 +7,86 @@
              xmlns:views="clr-namespace:BookManager.Views.Settings"
              x:DataType="vm:RestrictionsVM"
              Title="RestrictionsPage">
-    
-    <Grid Padding="16" RowSpacing="12" RowDefinitions="Auto, *, Auto">
-        <segmentedControl:SfSegmentedControl 
-           Grid.Row="0" SelectedIndex="{Binding SelectedSegment, Mode=TwoWay}">
+
+    <AbsoluteLayout>
+        <Grid Padding="16" RowSpacing="12" RowDefinitions="Auto, *, Auto" 
+              AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+            <segmentedControl:SfSegmentedControl 
+                Grid.Row="0" SelectedIndex="{Binding SelectedSegment, Mode=TwoWay}">
             <segmentedControl:SfSegmentedControl.ItemsSource>
-                <x:Array Type="{x:Type x:String}">
-                    <x:String>Active</x:String>
-                    <x:String>Undefined</x:String>
-                    <x:String>Inactive</x:String>
-                </x:Array>
-            </segmentedControl:SfSegmentedControl.ItemsSource>
-        </segmentedControl:SfSegmentedControl>
-        <CollectionView VerticalOptions="Fill" Grid.Row="1" Margin="0,0,0,10" Grid.RowSpan="2"
-           ItemsSource="{Binding Restrictions}"
-           RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
-           RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
+                    <x:Array Type="{x:Type x:String}">
+                        <x:String>Active</x:String>
+                        <x:String>Undefined</x:String>
+                        <x:String>Inactive</x:String>
+                    </x:Array>
+                </segmentedControl:SfSegmentedControl.ItemsSource>
+            </segmentedControl:SfSegmentedControl>
+            <CollectionView VerticalOptions="Fill" Grid.Row="1" Margin="0,0,0,10" Grid.RowSpan="2"
+                ItemsSource="{Binding Restrictions}"
+                RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+                RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
 
-            <CollectionView.EmptyView>
-                <Label  Text="No restrictions found"
-                HorizontalOptions="Center"
-                VerticalOptions="Center"/>
-            </CollectionView.EmptyView>
+                <CollectionView.EmptyView>
+                    <Label  Text="No restrictions found"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"/>
+                </CollectionView.EmptyView>
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <views:RestrictionView 
-                       x:DataType="views:RestrictionView" Margin="6, 10" 
-                       SelectedId="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectedId}"                                               
-                       TapCommand="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectRestrictionCommand}"/>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-
-        </CollectionView>
-        <Button Text="End" Command="{Binding EndCommentRestrictionCommand}" HorizontalOptions="Center" Grid.Row="2" IsVisible="{Binding CanEndRestriction}" Margin="0,0,0,30"/>
-    </Grid>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <views:RestrictionView 
+                            x:DataType="views:RestrictionView" Margin="6, 10"                                              
+                            TapCommand="{Binding Source={RelativeSource FindAncestor, AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectRestrictionCommand}"/>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <Button Text="End" Command="{Binding EndCommentRestrictionCommand}" HorizontalOptions="Center" Grid.Row="2" IsVisible="{Binding CanEndRestriction}" Margin="0,0,0,0"/>
+        </Grid>
+        <Grid
+            x:Name="Overlay" IsVisible="False" BackgroundColor="#771A1A1A" RowDefinitions="*, Auto"
+            AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+            <BoxView BackgroundColor="Transparent">
+                <BoxView.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnOverlayTapped"/>
+                </BoxView.GestureRecognizers>
+            </BoxView>
+            <BoxView  BackgroundColor="#80000000" Grid.RowSpan="2"/>
+            <Grid  x:Name="BottomSheetContent" RowDefinitions="Auto" Grid.Row="1" HorizontalOptions="Fill" 
+                VerticalOptions="End" MaximumHeightRequest="500">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+                </Grid.GestureRecognizers>
+                <Border Style="{StaticResource SectionCard}" StrokeShape="RoundRectangle 20,20,0,0">
+                    <VerticalStackLayout Spacing="8" Background="Transparent" >
+                        <HorizontalStackLayout Spacing="12" VerticalOptions="Center" HorizontalOptions="Start">
+                            <Border WidthRequest="50"  HeightRequest="50" StrokeThickness="1" Stroke="LightGray" StrokeShape="RoundRectangle 50"
+                                    VerticalOptions="Center">
+                                <Image Source="{Binding SelectedRestriction.PublicUser.ProfilePictureSource}" Aspect="AspectFill">
+                                    <Image.Clip>
+                                        <EllipseGeometry Center="25,25" RadiusX="25" RadiusY="25" />
+                                    </Image.Clip>
+                                </Image>
+                            </Border>
+                            <Label Text="{Binding SelectedRestriction.PublicUser.Username}" FontAttributes="Bold" FontSize="Medium" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <Label Text="{Binding SelectedRestriction.Reason}" FontSize="Medium" LineBreakMode="WordWrap" />
+                        <HorizontalStackLayout Spacing="8">
+                            <VerticalStackLayout Spacing="8">
+                                <Label FontSize="Small" Text="Start:" TextColor="White" VerticalOptions="Center"/>
+                                <Label FontSize="Small" Text="End:" TextColor="White" VerticalOptions="Center" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="{Binding SelectedRestriction.StartDate, Converter={StaticResource TimeConverter}}" FontSize="Small"
+                                    TextColor="White" VerticalOptions="Center" HorizontalOptions="Start" />
+                                <Label
+                                    Text="{Binding SelectedRestriction.EndDate, Converter={StaticResource TimeConverter}, ConverterParameter='Undefined'}"
+                                    FontSize="Small" VerticalOptions="Center" TextColor="White" HorizontalOptions="Start" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+                        <Button Text="End" Command="{Binding EndCommentRestrictionCommand}" HorizontalOptions="Center" IsVisible="{Binding CanEndRestriction}"/>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+        </Grid>
+    </AbsoluteLayout>
 </ContentPage>

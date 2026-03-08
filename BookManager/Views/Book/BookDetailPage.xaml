@@ -63,28 +63,47 @@
                     <tabView:SfTabItem Header="Details"   >
                         <tabView:SfTabItem.Content>
                             <ScrollView HorizontalScrollBarVisibility="Never">
-                                <VerticalStackLayout Padding="20" Spacing="14">
-                                    <Label Text="Author" FontAttributes="Bold"/>
-                                    <Label Text="{Binding Book.Author.Name}" TextColor="{StaticResource Primary}">
-                                        <Label.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding AuthorTappedCommand}" />
-                                        </Label.GestureRecognizers>
+                                <VerticalStackLayout Padding="20" Spacing="16">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="Title" FontAttributes="Bold" FontSize="Medium"/>
+                                        <Label Text="{Binding Book.Title}" LineBreakMode="WordWrap" TextColor="{StaticResource Primary}"/>
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Spacing="8"> 
+                                        <Label Text="Author" FontAttributes="Bold" FontSize="Medium"/>
+                                        <Label Text="{Binding Book.Author.Name}" TextColor="{StaticResource Primary}">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding AuthorTappedCommand}" />
+                                            </Label.GestureRecognizers>
+                                        </Label>
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="Average Rating:" FontSize="Medium" VerticalOptions="Center"/>
+                                        <toolkit:RatingView VerticalOptions="Center" Shape="Star"
+                                                IsReadOnly="True" FillColor="{StaticResource Tertiary}" Rating="{Binding AverageRating, Mode=OneWay}" ShapeBorderColor="{StaticResource PrimaryDark}"
+                                                MaximumRating="10" EmptyShapeColor="White"/>
+                                        <Label Text="{Binding RatingCount, StringFormat='Based on {0} ratings', Mode=TwoWay}"/>
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="Genre" FontAttributes="Bold" FontSize="Medium"/>
+                                        <Label Text="{Binding Book.Genre.Name, TargetNullValue='Unknown'}" TextColor="{StaticResource Primary}">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer  Command="{Binding GenreTappedCommand}" />
+                                            </Label.GestureRecognizers>
+                                        </Label>
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="Publisher" FontAttributes="Bold" FontSize="Medium"/>
+                                        <Label Text="{Binding Book.Publisher.Name, TargetNullValue='Unknown'}" TextColor="{StaticResource Primary}">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding PublisherTappedCommand}" />
+                                            </Label.GestureRecognizers>
                                     </Label>
-                                    <Label Text="Genre" FontAttributes="Bold"/>
-                                    <Label Text="{Binding Book.Genre.Name, TargetNullValue='Unknown'}" TextColor="{StaticResource Primary}">
-                                        <Label.GestureRecognizers>
-                                            <TapGestureRecognizer  Command="{Binding GenreTappedCommand}" />
-                                        </Label.GestureRecognizers>
-                                    </Label>
-                                    <Label Text="Publisher" FontAttributes="Bold"/>
-                                    <Label Text="{Binding Book.Publisher.Name, TargetNullValue='Unknown'}" TextColor="{StaticResource Primary}">
-                                        <Label.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding PublisherTappedCommand}" />
-                                        </Label.GestureRecognizers>
-                                    </Label>
-                                    <Label Text="Description"  FontAttributes="Bold"/>
-                                    <Label Text="{Binding Book.Description, TargetNullValue='No description'}"
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="Description" FontAttributes="Bold" FontSize="Medium"/>
+                                        <Label Text="{Binding Book.Description, TargetNullValue='No description'}"
                                            LineBreakMode="WordWrap"/>
+                                    </VerticalStackLayout>
                                 </VerticalStackLayout>
                             </ScrollView>
                         </tabView:SfTabItem.Content>
@@ -98,8 +117,19 @@
                     </tabView:SfTabItem>
                     <tabView:SfTabItem Header="Logs">
                         <tabView:SfTabItem.Content>
-                            <Grid RowDefinitions="Auto, Auto, Auto" RowSpacing="12">
-                                <Grid Grid.Row="0" ColumnDefinitions="*, auto" ColumnSpacing="16" Padding="16" RowDefinitions="Auto, Auto">
+                            <Grid RowDefinitions="Auto,Auto, Auto, Auto" RowSpacing="12">
+                                <Border Style="{StaticResource SectionCard}" Padding="16,8" Margin="8" Grid.Row="0">
+                                    <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="*, auto" ColumnSpacing="10" RowSpacing="10" HorizontalOptions="Fill">
+                                        <Label Text="My rating" FontSize="Medium" VerticalOptions="Center" HorizontalOptions="Start" Margin="4"/>
+                                        <toolkit:RatingView Shape="Star" Grid.Row="1" HorizontalOptions="Fill" VerticalOptions="Fill" Grid.ColumnSpan="2"
+                                             IsReadOnly="False" FillColor="{StaticResource Tertiary}" Rating="{Binding MyRating, Mode=TwoWay}"
+                                             ShapeBorderColor="{StaticResource PrimaryDark}" MaximumRating="10" EmptyShapeColor="White" Margin="0,0,0,10"/>
+                                        <Button Text="Clear" Grid.Row="0" FontSize="Small" Background="Transparent" x:Name="MyRatingClearButton"
+                                                Command="{Binding ClearRatingCommand}"
+                                                TextColor="{StaticResource Primary}" HorizontalOptions="End" Grid.Column="1" VerticalOptions="Center"/>
+                                    </Grid>
+                                </Border>
+                                <Grid Grid.Row="1" ColumnDefinitions="*, auto" ColumnSpacing="16" Padding="16" RowDefinitions="Auto, Auto">
                                     <Grid Grid.Column="1" Grid.RowSpan="2"> 
                                         <Grid HeightRequest="40" WidthRequest="40" >
                                             <Grid.IsVisible>
@@ -148,7 +178,7 @@
                                         <Label Text="pages " FontSize="Medium"/>
                                     </HorizontalStackLayout>
                                 </Grid>
-                                <Border Style="{StaticResource SectionCard}" Padding="12,12" Margin="8" Grid.Row="1">
+                                <Border Style="{StaticResource SectionCard}" Padding="20,12" Margin="8" Grid.Row="2">
                                     <VerticalStackLayout Spacing="12">
                                         <Grid ColumnDefinitions="*,auto">
                                             <Label Text="Add Reading Log" FontSize="Medium" HorizontalOptions="Center" VerticalOptions="Center" Grid.ColumnSpan="2"/>
@@ -173,7 +203,7 @@
                                       
                                     </VerticalStackLayout>
                                 </Border>
-                                <CollectionView VerticalOptions="Fill" Grid.Row="2"
+                                <CollectionView VerticalOptions="Fill" Grid.Row="3"
                                            ItemsSource="{Binding Logs}"
                                            RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
                                            RemainingItemsThresholdReachedCommand="{Binding LoadLogsCommand}">

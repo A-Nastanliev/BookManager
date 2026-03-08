@@ -17,31 +17,6 @@
     </ContentView.IsVisible>
 
     <Border Style="{StaticResource SectionCard}">
-        <Border.Triggers>
-
-            <DataTrigger TargetType="Border" Value="True">
-                <DataTrigger.Binding>
-                    <MultiBinding Converter="{StaticResource EqualsMultiConverter}">
-                        <Binding Path="Id" />
-                        <Binding Path="SelectedId" Source="{x:Reference Root}" />
-                    </MultiBinding>
-                </DataTrigger.Binding>
-                <Setter Property="Background">
-                    <SolidColorBrush Color="{StaticResource Primary}" />
-                </Setter>
-            </DataTrigger>
-            <DataTrigger TargetType="Border" Value="False">
-                <DataTrigger.Binding>
-                    <MultiBinding Converter="{StaticResource EqualsMultiConverter}">
-                        <Binding Path="Id" />
-                        <Binding Path="SelectedId" Source="{x:Reference Root}" />
-                    </MultiBinding>
-                </DataTrigger.Binding>
-                <Setter Property="Background">
-                    <SolidColorBrush Color="{StaticResource Gray800}" />
-                </Setter>
-            </DataTrigger>
-        </Border.Triggers>
         <Border.GestureRecognizers>
             <TapGestureRecognizer
               Command="{Binding TapCommand, Source={x:Reference Root}}"

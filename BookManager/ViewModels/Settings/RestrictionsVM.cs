@@ -15,9 +15,6 @@ namespace BookManager.ViewModels.Settings
         int selectedSegment;
 
         [ObservableProperty]
-        int selectedId;
-
-        [ObservableProperty]
         ObservableCollection<RestrictionVM> restrictions = new();
 
         [ObservableProperty]
@@ -28,6 +25,10 @@ namespace BookManager.ViewModels.Settings
 
         [ObservableProperty]
         UserVM user;
+
+        public Func<Task> OpenBottomSheet;
+
+        public Func<Task> CloseBottomSheet;
 
         UserClient _userClient;
 
@@ -96,8 +97,8 @@ namespace BookManager.ViewModels.Settings
                 if (result.Success)
                 {
                     CanEndRestriction = false;
+                    await CloseBottomSheet?.Invoke();
                     Restrictions.Remove(SelectedRestriction);
-                    SelectedId = 0;
                 }
                 else
                 {
@@ -117,7 +118,6 @@ namespace BookManager.ViewModels.Settings
             Loading = false;
             CursorId = null;
             CursorDate = null;
-            SelectedId = 0;
             CanEndRestriction = false;
             LoadCommand.Execute(null);
         }
@@ -133,24 +133,17 @@ namespace BookManager.ViewModels.Settings
         }
 
         [RelayCommand]
-        public void SelectRestriction(RestrictionVM restriction)
+        public async Task SelectRestriction(RestrictionVM restriction)
         {
-            if ( (RestrictionFilter)SelectedSegment ==  RestrictionFilter.Finished)
-            {
-                return;
-            }
-
-            if (SelectedRestriction?.Id == restriction.Id)
+            if (SelectedRestriction == restriction)
             {
                 SelectedRestriction = null;
-                CanEndRestriction = false;
-                SelectedId = 0;
             }
             else
             {
                 SelectedRestriction = restriction;
-                SelectedId = restriction.Id;
-                CanEndRestriction = true;
+                CanEndRestriction = (restriction.EndDate > DateTime.UtcNow || restriction.EndDate == null);
+                await OpenBottomSheet?.Invoke();
             }
         }
     }

@@ -85,7 +85,9 @@ namespace BookManager
             builder.Services.AddTransient<BookAttributePage>();
             builder.Services.AddTransient<BookDetailPage>();
 
-            builder.Services.AddTransient<UserBooksPage>();
+            builder.Services.AddSingleton<WishlistedBooksPage>();
+            builder.Services.AddSingleton<CurrentlyReadingBooksPage>();
+            builder.Services.AddSingleton<FinishedBooksPage>();
 
             builder.Services.AddSingleton<SettingsPage>();
             builder.Services.AddTransient<RestrictionsPage>(); 

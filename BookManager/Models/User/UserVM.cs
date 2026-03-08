@@ -27,7 +27,7 @@ namespace BookManager.Models.User
         public UserVM() 
         {
             publicUser = new PublicUserVM();
-            restriction = new RestrictionVM();
+            restriction = new RestrictionVM(PublicUser);
         }
 
         public void FromJson(JsonElement json)

@@ -23,11 +23,6 @@ namespace ServiceLayer.Mappers
 				bookRequest.Sender?.ToDto(baseUrl), bookRequest.ActionedBy?.ToDto(baseUrl));
 		}
 
-		public static BookRatingDto ToDto(this BookRating bookRating, string baseUrl)
-		{
-			return new BookRatingDto(bookRating.BookId, bookRating?.Book.ToDto(baseUrl), bookRating.UserId, bookRating?.User.ToDto(baseUrl), bookRating.Rating);
-		}
-
 		public static BookCommentDto ToDto(this BookComment bookComment, string baseUrl)
 		{
 			return new BookCommentDto(bookComment.Id, bookComment.BookId, null, bookComment.UserId, bookComment.User.ToPublicDto(baseUrl),

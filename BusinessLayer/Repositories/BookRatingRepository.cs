@@ -6,12 +6,12 @@
 
 		public override async Task<BookRating> ReadAsync((int userId, int bookId) id)
 		{
-			return await _context.BookRatings.FindAsync(id);
+			return await _context.BookRatings.FindAsync(id.userId, id.bookId);
 		}
 
 		public override async Task UpdateAsync(BookRating obj)
 		{
-			var bookRating = await _context.BookRatings.FindAsync((obj.UserId, obj.BookId));
+			var bookRating = await _context.BookRatings.FindAsync(obj.UserId, obj.BookId);
 			if (bookRating == null)
 				return;
 
@@ -21,7 +21,7 @@
 
 		public override async Task<bool> DeleteAsync(BookRating entity)
 		{
-			var bookRating = await _context.BookRatings.FindAsync((entity.UserId, entity.BookId));
+			var bookRating = await _context.BookRatings.FindAsync(entity.UserId, entity.BookId);
 			if (bookRating == null)
 				return false;
 

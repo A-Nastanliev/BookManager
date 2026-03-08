@@ -3,6 +3,7 @@ using BookManager.Models.Book;
 using BookManager.Models.Reading;
 using BookManager.Views.Book;
 using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Converters;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -33,15 +34,28 @@ namespace BookManager.ViewModels.Book
         [NotifyPropertyChangedFor(nameof(PageProgress))]
         int readPages;
 
+        [ObservableProperty]
+        byte? myRating;
+
+        [ObservableProperty]
+        int ratingCount;
+
+        [ObservableProperty]
+        double averageRating;
+
+        bool _canManageRating;
+
         public double PageProgress => (Book?.TotalPages ?? 0) > 0 ? (double)ReadPages / (Book.TotalPages ?? 1) : 0;
 
         readonly ReadingClient _readingClient;
         readonly BookClient _bookClient;
+        readonly UserClient _userClient;
 
-        public BookDetailVM(ReadingClient readingClient, BookClient bookClient)
+        public BookDetailVM(ReadingClient readingClient, BookClient bookClient, UserClient userClient)
         {
             _readingClient = readingClient;
             _bookClient = bookClient;
+            _userClient = userClient;
         }
 
         [RelayCommand]
@@ -49,12 +63,105 @@ namespace BookManager.ViewModels.Book
         {
             try 
             {
-                (Status, ReadPages) = await _readingClient.GetUserBookStatusAsync(Book.Id);
+                (Status, ReadPages, MyRating, RatingCount, AverageRating) = await _readingClient.GetUserBookDetailsAsync(Book.Id);
+                await _userClient.GetMyPendingRestrictionsAsync();
+                _canManageRating = true;
             }
             catch (Exception ex)
             {
                 await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
             }
+        }
+
+        [RelayCommand]
+        public async Task ClearRating()
+        {
+            if(MyRating != null && MyRating != 0)
+            {
+
+                try
+                {
+                    var result = await _readingClient.DeleteBookRatingAsync(Book.Id);
+                    if (!result.Success)
+                    {
+                        await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                        return;
+                    }
+                }
+                catch (Exception ex) 
+                {
+                    await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+                }
+
+                double totalRating = AverageRating * RatingCount;
+                totalRating -= (double)MyRating;
+                RatingCount -= 1;
+                if (RatingCount == 0)
+                {
+                    AverageRating = 0;
+                }
+                else
+                {
+                    AverageRating = totalRating / RatingCount;
+                }
+                MyRating = 0;
+            }
+        }
+
+        partial void OnMyRatingChanged(byte? oldValue, byte? newValue)
+        {
+            if (_canManageRating)
+            {
+                if (newValue != 0 && newValue != null && (oldValue == 0 || oldValue == null))
+                    CreateRatingCommand.Execute(null);
+                else if (newValue != 0 && newValue != null && oldValue != 0 && oldValue != null)
+                    UpdateRatingCommand.Execute(oldValue);
+            }
+        }
+
+        [RelayCommand]
+        private async Task CreateRating()
+        {
+            try
+            {
+                var result = await _readingClient.CreateBookRatingAsync(Book.Id, MyRating.Value);
+                if (!result.Success)
+                {
+                    await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            }
+
+            double totalRating = AverageRating * RatingCount;
+            totalRating += (double)MyRating;
+            RatingCount += 1;
+            AverageRating = totalRating / RatingCount;
+        }
+
+        [RelayCommand]
+        private async Task UpdateRating(byte oldRating)
+        {
+            try
+            {
+                var result = await _readingClient.UpdateBookRatingAsync(Book.Id, MyRating.Value);
+                if (!result.Success)
+                {
+                    await Shell.Current.DisplayAlertAsync("Error", result.Error, "OK");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            }
+
+            double totalRating = AverageRating * RatingCount;
+            totalRating += (double)MyRating - (double)oldRating;
+            AverageRating = totalRating / RatingCount;
         }
 
         [RelayCommand]

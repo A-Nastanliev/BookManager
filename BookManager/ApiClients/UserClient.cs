@@ -235,6 +235,40 @@ namespace BookManager.ApiClients
             return new RequestResult(true, null);
         }
 
+        public async Task<RequestResult> GetMyPendingRestrictionsAsync()
+        {
+            var url = "/api/users/comment-restrictions/me";
+
+            var response = await _httpClient.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            if (root.TryGetProperty("restriction", out var restrictionJson))
+            {
+                if (restrictionJson.ValueKind != JsonValueKind.Null)
+                {
+                    _user.Restriction.FromJson(restrictionJson);
+                }
+                else
+                {
+                    _user.Restriction.Id = 0;
+                    _user.Restriction.EndDate = null;
+                    _user.Restriction.StartDate = null;
+                    _user.Restriction.Reason = null;
+                }
+            }
+
+            return new RequestResult(true, null);
+        }
+
         public async Task<(List<RestrictionVM>, RequestResult, DateTime? cursorDate, int? cursorKey)>
             GetCommentRestrictionsAsync( int count, RestrictionFilter filter, DateTime? cursorDate, int? cursorKey)
         {

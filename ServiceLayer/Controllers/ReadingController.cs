@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Dto;
 using ServiceLayer.Dto.Reading;
 using ServiceLayer.Mappers;
+using System.Runtime.Intrinsics.X86;
 
 namespace ServiceLayer.Controllers
 {
@@ -42,16 +43,20 @@ namespace ServiceLayer.Controllers
 			return Ok();
 		}
 
-        [HttpGet("user-books/{bookId}/status")]
-        public async Task<IActionResult> GetUserBookStatus(int bookId)
+        [HttpGet("user-books/{bookId}/details")]
+        public async Task<IActionResult> GetUserBookDetails(int bookId)
         {
             var (status, pagesRead) = await _userBookRepository.GetStatusAndProgressAsync(UserId, bookId);
+			var rating = await _bookRatingRepository.ReadAsync((UserId, bookId));
+            var(count, avg) = await _bookRatingRepository.ReadSummaryByBookAsync(bookId);
 
-            return Ok(new
-            {
-                Status = status,
-                PagesRead = pagesRead
-            });
+			return Ok(new
+			{
+				Status = status,
+				PagesRead = pagesRead,
+				MyRating = rating?.Rating,
+				RatingSummary = new BookRatingSummaryDto(count, avg)
+			});
         }
 
         [HttpGet("user-books")]
@@ -209,16 +214,16 @@ namespace ServiceLayer.Controllers
 		}
 
 		[HttpPost("books/{bookId}/rating")]
-		public async Task<IActionResult> CreateBookRating(int bookId, [FromBody] BookRatingDto dto)
+		public async Task<IActionResult> CreateBookRating(int bookId, [FromBody] byte rating)
 		{
-			var rating = new BookRating
+			var bookRating = new BookRating
 			{
 				UserId = UserId,
 				BookId = bookId,
-				Rating = dto.Rating
+				Rating = rating
 			};
 
-			bool success = await _bookRatingRepository.CreateAsync(rating);
+			bool success = await _bookRatingRepository.CreateAsync(bookRating);
 
 			if (!success)
 				return BadRequest("Failed to create rating");
@@ -226,37 +231,17 @@ namespace ServiceLayer.Controllers
 			return StatusCode(201);
 		}
 
-		[HttpGet("books/{bookId}/rating")]
-		public async Task<IActionResult> GetMyBookRating(int bookId)
-		{
-			var rating = await _bookRatingRepository.ReadAsync((UserId, bookId));
-
-			if (rating == null)
-				return NotFound();
-
-            var baseUrl = _configuration["App:BaseUrl"];
-            return Ok(rating.ToDto(baseUrl));
-		}
-
-		[HttpGet("books/{bookId}/ratings/summary")]
-		public async Task<IActionResult> GetBookRatingSummary(int bookId)
-		{
-			var (count, avg) = await _bookRatingRepository.ReadSummaryByBookAsync(bookId);
-
-			return Ok(new BookRatingSummaryDto(count, avg));
-		}
-
 		[HttpPut("books/{bookId}/rating")]
-		public async Task<IActionResult> UpdateBookRating(int bookId, [FromBody] BookRatingDto dto)
+		public async Task<IActionResult> UpdateBookRating(int bookId, [FromBody] byte rating)
 		{
-			var rating = new BookRating
+			var bookRating = new BookRating
 			{
 				UserId = UserId,
 				BookId = bookId,
-				Rating = dto.Rating
+				Rating = rating
 			};
 
-			await _bookRatingRepository.UpdateAsync(rating);
+			await _bookRatingRepository.UpdateAsync(bookRating);
 
 			return NoContent();
 		}

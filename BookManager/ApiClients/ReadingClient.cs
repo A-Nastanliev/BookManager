@@ -27,9 +27,9 @@ namespace BookManager.ApiClients
             return new RequestResult(true, null);
         }
 
-        public async Task<(UserBookStatus Status, int PagesRead)> GetUserBookStatusAsync(int bookId)
+        public async Task<(UserBookStatus Status, int PagesRead, byte? myRating, int ratingsCount, double avgRating)> GetUserBookDetailsAsync(int bookId)
         {
-            var response = await _httpClient.GetAsync($"/api/reading/user-books/{bookId}/status");
+            var response = await _httpClient.GetAsync($"/api/reading/user-books/{bookId}/details");
 
             if (!response.IsSuccessStatusCode)
                 throw new Exception(await ApiErrorParser.ParseAsync(response));
@@ -41,7 +41,19 @@ namespace BookManager.ApiClients
             var status = (UserBookStatus)root.GetProperty("status").GetByte();
             var pagesRead = root.GetProperty("pagesRead").GetInt32();
 
-            return (status, pagesRead);
+            byte? myRating = null;
+            if (root.TryGetProperty("myRating", out var myRatingJson) && myRatingJson.ValueKind != JsonValueKind.Null)
+                myRating = myRatingJson.GetByte();
+
+            int ratingCount = 0;
+            double ratingAverage = 0;
+            if (root.TryGetProperty("ratingSummary", out var summaryJson) && summaryJson.ValueKind != JsonValueKind.Null)
+            {
+                ratingCount = summaryJson.GetProperty("count").GetInt32();
+                ratingAverage = summaryJson.GetProperty("average").GetDouble();
+            }
+
+            return (status, pagesRead, myRating, ratingCount, ratingAverage);
         }
 
 
@@ -163,6 +175,36 @@ namespace BookManager.ApiClients
         public async Task<RequestResult> DeleteReadingLogAsync(int bookId, int logId)
         {
             var response = await _httpClient.DeleteAsync($"/api/reading/user-books/{bookId}/logs/{logId}");
+
+            if (!response.IsSuccessStatusCode)
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+
+            return new RequestResult(true, null);
+        }
+
+        public async Task<RequestResult> CreateBookRatingAsync(int bookId, byte rating)
+        {
+            var response = await _httpClient.PostAsJsonAsync($"/api/reading/books/{bookId}/rating", rating);
+
+            if (!response.IsSuccessStatusCode)
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+
+            return new RequestResult(true, null);
+        }
+
+        public async Task<RequestResult> UpdateBookRatingAsync(int bookId, byte rating)
+        {
+            var response = await _httpClient.PutAsJsonAsync($"/api/reading/books/{bookId}/rating", rating);
+
+            if (!response.IsSuccessStatusCode)
+                return new RequestResult(false, await ApiErrorParser.ParseAsync(response));
+
+            return new RequestResult(true, null);
+        }
+
+        public async Task<RequestResult> DeleteBookRatingAsync(int bookId)
+        {
+            var response = await _httpClient.DeleteAsync($"/api/reading/books/{bookId}/rating");
 
             if (!response.IsSuccessStatusCode)
                 return new RequestResult(false, await ApiErrorParser.ParseAsync(response));

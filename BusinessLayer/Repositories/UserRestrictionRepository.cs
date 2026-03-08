@@ -80,5 +80,10 @@ namespace BusinessLayer.Repositories
                 lastItem?.Id
             );
         }
+
+        public async Task<UserRestriction> GetPendingRestrictionAsync(int userId)
+        {
+            return await _context.UserRestrictions.FirstOrDefaultAsync(ur => (ur.EndDate > DateTime.UtcNow || ur.EndDate == null) && ur.UserId == userId);
+        }
     }
 }
