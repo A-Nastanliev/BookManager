@@ -29,6 +29,18 @@ namespace BookManager.ViewModels.Book
         {
             _bookClient = bookClient;
 
+            UserClient.OnLogout += () =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    CursorDate = null;
+                    CursorId = null;
+                    CanLoadMore = true;
+                    Genres.Clear();
+                });
+                return Task.CompletedTask;
+            };
+
             WeakReferenceMessenger.Default.Register<ValueChangedMessage<GenreVM>, string>(this, Messages.GenreCreated, (recipient, message) =>
             {
                 Genres.Insert(0, message.Value);

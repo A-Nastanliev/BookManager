@@ -37,9 +37,9 @@ namespace BookManager.Models.User
             Id = json.GetProperty("id").GetInt32();
             StartDate = json.GetProperty("startDate").GetDateTime();
             EndDate = json.TryGetProperty("endDate", out var end) && end.ValueKind != JsonValueKind.Null ? end.GetDateTime() : null;
-            Reason = json.GetProperty("reason").GetString()!;
+            Reason = json.TryGetProperty("reason", out var reasonJson) && reasonJson.ValueKind != JsonValueKind.Null ? reasonJson.GetString() : null;
 
-            if (json.TryGetProperty("user", out var publicUserJson))
+            if (json.TryGetProperty("user", out var publicUserJson) && publicUserJson.ValueKind == JsonValueKind.Object)
             {
                 PublicUser ??= new PublicUserVM();
                 PublicUser.FromJson(publicUserJson);

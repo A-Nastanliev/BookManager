@@ -277,7 +277,7 @@ namespace BookManager.ViewModels.Book
             if ((_userVM.Restriction.EndDate > DateTime.UtcNow || _userVM.Restriction.EndDate == null )&& _userVM.Restriction.Id >0)
             {
                 string endTime = "";
-                if(_userVM.Restriction.EndDate > DateTime.Now)
+                if(_userVM.Restriction.EndDate > DateTime.UtcNow)
                 {
                     endTime = "on " + _userVM.Restriction.EndDate.Value.ToLocalTime().ToString("HH:mm d MMMM yyyy");
                 }

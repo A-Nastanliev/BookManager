@@ -37,11 +37,17 @@
 
             <Label Text="{Binding Comment}" FontSize="Small" LineBreakMode="WordWrap" Grid.Row="1" />
 
-            <Grid RowDefinitions="Auto, Auto" RowSpacing="8" ColumnSpacing="8" ColumnDefinitions="Auto, *" Grid.Row="2">
-                <Label FontSize="Micro" Grid.Row="0" Grid.Column="0" Text="Sent:"/>
-                <Label FontSize="Micro" Grid.Row="1" Grid.Column="0" Text="Pages read:"/>
-                <Label FontSize="Micro" Grid.Row="0" Grid.Column="1"  Text="{Binding DateTime, Converter={StaticResource TimeConverter}}"/>
-                <Label FontSize="Micro" Grid.Row="1" Grid.Column="1" Text="{Binding UserPageProgress}"/>
+            <Grid RowDefinitions="Auto, Auto" RowSpacing="4" ColumnSpacing="8" Grid.Row="2">
+                <HorizontalStackLayout Grid.Row="0" Spacing="8" HorizontalOptions="Start">
+                    <Label FontSize="Small" Text="Sent:" VerticalOptions="Center"/>
+                    <Label FontSize="Small" VerticalOptions="Center" 
+                            Text="{Binding DateTime, Converter={StaticResource TimeConverter}}"/>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Grid.Row="1" Spacing="8" HorizontalOptions="Start">
+                    <Label FontSize="Small" Text="Pages read:" VerticalOptions="Center"/>
+                    <Label FontSize="Small" VerticalOptions="Center"
+                   Text="{Binding UserPageProgress}"/>
+                </HorizontalStackLayout>
             </Grid>
         </Grid>
     </Border>

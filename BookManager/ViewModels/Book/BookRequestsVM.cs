@@ -34,6 +34,18 @@ namespace BookManager.ViewModels.Book
         {
             _readingClient = readingClient;
             User = userVM;
+
+            UserClient.OnLogout += () =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    CursorDate = null;
+                    CursorId = null;
+                    CanLoadMore = true;
+                    Requests.Clear();
+                });
+                return Task.CompletedTask;
+            };
         }
 
         [RelayCommand]

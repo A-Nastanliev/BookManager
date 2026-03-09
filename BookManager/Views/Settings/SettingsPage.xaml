@@ -39,19 +39,25 @@
             <view:RestrictionView  BindingContext="{Binding Restriction, Source={StaticResource User}}"/>
 
             <Border Style="{StaticResource SectionCard}">
-                <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto">
-                    <Label Text="{Binding User.PublicUser.Username}" Grid.Row="0" Margin="3,0,0,0"/>
-                    <Entry Text="{Binding NewUsername}" Grid.Row="1" Placeholder="New Username" MaxLength="30"/>
-                    <Label Text="{Binding User.EmailAddress}" Grid.Row="2" Grid.ColumnSpan="2" Margin="3,20,0,0" FontSize="Small"/>
-                    <Entry Text="{Binding NewEmail}" Placeholder="New Email" Keyboard="Email" FontSize="Small" Grid.ColumnSpan="2" Grid.Row="3"/>
-                    <Button Text="Save Changes" Command="{Binding UpdateUsernameEmailCommand}" Grid.Row="4" HorizontalOptions="End" 
-                        FontSize="Small" Margin="0,20,0,0"/>
-                </Grid>
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Account Information" FontSize="Large" FontAttributes="Bold"/>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Username" FontAttributes="Bold" FontSize="Small"/>
+                        <Label Text="{Binding User.PublicUser.Username}" Opacity="0.7"/>
+                        <Entry Text="{Binding NewUsername}" Placeholder="Enter new username" MaxLength="30"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Email" FontAttributes="Bold" FontSize="Small"/>
+                        <Label Text="{Binding User.EmailAddress}"  Opacity="0.7"/>
+                        <Entry Text="{Binding NewEmail}" Placeholder="Enter new email" Keyboard="Email"/>
+                    </VerticalStackLayout>
+                    <Button Text="Save Changes" Command="{Binding UpdateUsernameEmailCommand}" HorizontalOptions="End" Margin="0"/>
+                </VerticalStackLayout>
             </Border>
 
             <Border Style="{StaticResource SectionCard}">
                 <Grid RowDefinitions="Auto, Auto, Auto, Auto" ColumnDefinitions="*, Auto" ColumnSpacing="20" RowSpacing="10">
-                    <Label Text="Change password" Grid.Row="0" FontSize="Medium" Grid.ColumnSpan="2"/>
+                    <Label Text="Change password" Grid.Row="0" FontSize="Medium" Grid.ColumnSpan="2" FontAttributes="Bold"/>
                     <Entry Text="{Binding OldPassword}" FontSize="Small"
                     x:Name="OldPasswordEntry" Placeholder="Old Password" IsPassword="True" Grid.Row="1" Grid.Column="0"/>
                     <passToggle:VisibilityButton Grid.Column="1" Grid.Row="1" TargetEntry="{x:Reference OldPasswordEntry}"/>

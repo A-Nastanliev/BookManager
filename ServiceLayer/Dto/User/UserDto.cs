@@ -10,7 +10,6 @@ namespace ServiceLayer.Dto.User
         public int Id { get; set; }
         [EmailAddress]
         public string EmailAddress { get; set; }
-        [Required]
         public string Username { get; set; }
         public string ProfilePicture { get; set;  }
         public UserRole Role { get; set; }       

@@ -28,6 +28,19 @@ namespace BookManager.ViewModels.Book
         public BookSearchVM(BookClient bookClient)
         {
             _bookClient = bookClient;
+
+            UserClient.OnLogout += () =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    CursorDate = null;
+                    CursorId = null;
+                    CanLoadMore = true;
+                    Books.Clear();
+                    CurrentBooks.Clear();
+                });
+                return Task.CompletedTask;
+            };
         }
 
         [RelayCommand]

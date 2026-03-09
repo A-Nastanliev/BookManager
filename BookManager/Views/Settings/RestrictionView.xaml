@@ -52,7 +52,7 @@
             </HorizontalStackLayout>
 
             <Label
-            Text="{Binding Reason}"
+            Text="{Binding Reason}" IsVisible="{Binding Reason, Converter={StaticResource NotEqualsConverter}, ConverterParameter={x:Null}}"
             FontSize="Medium"
             LineBreakMode="WordWrap" />
             <HorizontalStackLayout Spacing="8">

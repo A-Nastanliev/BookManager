@@ -184,6 +184,11 @@ namespace BookManager.ViewModels.Settings
             OldPassword = null;
 
             ProfileImageSource = User.PublicUser.ProfilePictureSource;
+
+            if (User?.Restriction?.EndDate < DateTime.UtcNow) 
+            {
+                User.Restriction = new RestrictionVM();
+            }
         }
 
         public async Task OnDisappearingAsync()

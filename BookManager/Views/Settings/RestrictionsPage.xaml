@@ -72,8 +72,8 @@
                             </Border>
                             <Label Text="{Binding SelectedRestriction.PublicUser.Username}" FontAttributes="Bold" FontSize="Medium" VerticalOptions="Center" />
                         </HorizontalStackLayout>
-                        <ScrollView MaximumHeightRequest="250"> 
-                            <Label Text="{Binding SelectedRestriction.Reason}" FontSize="Medium" LineBreakMode="WordWrap" />
+                        <ScrollView MaximumHeightRequest="250" IsVisible="{Binding SelectedRestriction.Reason, Converter={StaticResource NotEqualsConverter}, ConverterParameter={x:Null}}"> 
+                            <Label Text="{Binding SelectedRestriction.Reason}" FontSize="Medium" LineBreakMode="WordWrap"/>
                         </ScrollView>
                         <HorizontalStackLayout Spacing="8">
                             <VerticalStackLayout Spacing="8">
